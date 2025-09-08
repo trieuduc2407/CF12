@@ -1,0 +1,43 @@
+.wrapper {
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.left-box, .menu, .right-box {
+    background-color: white;
+    border-radius: 4%;
+}
+
+.left-box{
+    width: 20%;
+    padding-top: 1rem;
+}
+
+.left-box .title {
+    padding-left: 1rem;
+    font-size: 20px;
+}
+
+.left-box .menu-bar {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+.left-box .menu-bar .menu-item {
+    margin: 1rem 0;
+    font-size: 18px;
+}
+
+.menu {
+    width: 48%;
+}
+
+.menu .desktop-searchbar input {
+    width: fit-content;
+}
+
+.right-box{
+    width: 28%;
+}
