@@ -1,5 +1,5 @@
 import React from 'react'
-import Header from '../../components/Header/Header'
+import Header from '../components/Header'
 import { Search } from 'lucide-react'
 
 const Menu = () => {

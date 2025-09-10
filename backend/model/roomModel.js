@@ -1,0 +1,16 @@
+import mongoose from "mongoose";
+
+const roomSchema = new mongoose.Schema(
+    {
+        tableId: { type: String, unique: true, required: true },
+        qrUrl: { type: String, required: true },
+        status: { type: String, enum: ["available", "occupied", "closed"], default: "available" },
+        activeCartId: { type: mongoose.Schema.Types.ObjectId, ref: "Cart" },
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
+    }
+);
+
+const roomModel = mongoose.models.room || mongoose.model("room", roomSchema);
+
+export default roomModel;
