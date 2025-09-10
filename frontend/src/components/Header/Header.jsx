@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { Store, Clock, PhoneCall, Dot } from 'lucide-react'
-// import "./Header.css"
 
 const Header = () => {
     const [active, setActive] = useState({
@@ -26,9 +25,9 @@ const Header = () => {
 
     return (
         <div className="flex flex-col bg-white md:flex-row md:p-4">
-            <div className="relative overflow-hidden lg:w-lg lg:h-72 ">
+            <div className="relative flex-1 shrink overflow-hidden">
                 <img
-                    className="max-w-lg object-cover"
+                    className="object-cover md:max-w-lg"
                     src="./cover_img.png"
                     alt=""
                 />
@@ -38,8 +37,8 @@ const Header = () => {
                     alt=""
                 />
             </div>
-            <div className="mx-8 my-10 flex-1">
-                <h2 className="text-3xl text-black">
+            <div className="mx-8 mt-5 flex-1">
+                <h2 className="text-3xl text-black md:max-lg:text-2xl">
                     Cà phê mười hai 21 Bông Lau 6
                 </h2>
                 <div className={'mt-2.5 flex' + active.status}>
@@ -48,17 +47,21 @@ const Header = () => {
                 </div>
                 <div className="mt-2.5 flex text-gray-500">
                     <Store />
-                    <p className="pl-2.5">
+                    <p className="pl-2.5 text-lg md:text-lg">
                         Số 21 phố Bông Lau 6, KĐT Phú Lộc I, Tp. Lạng Sơn
                     </p>
                 </div>
                 <div className="mt-2.5 flex text-gray-500">
                     <Clock />
-                    <p className="pl-2.5">Giờ mở cửa: 07:00 - 22:45</p>
+                    <p className="pl-2.5 text-lg md:text-lg">
+                        Giờ mở cửa: 07:00 - 22:45
+                    </p>
                 </div>
                 <div className="mt-2.5 flex text-gray-500">
                     <PhoneCall />
-                    <p className="pl-2.5">Số điện thoại cửa hàng: 0398810012</p>
+                    <p className="pl-2.5 text-lg md:text-lg">
+                        Số điện thoại cửa hàng: 0398810012
+                    </p>
                 </div>
             </div>
         </div>
