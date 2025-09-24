@@ -1,0 +1,38 @@
+export const addIngredientForm = [
+    {
+        name: 'name',
+        label: 'Tên nguyên liệu',
+        placeholder: 'Nhập tên nguyên liệu',
+        component: 'input',
+        type: 'text',
+        required: true,
+    },
+    {
+        name: 'quantity',
+        label: 'Số lượng',
+        placeholder: 'Nhập số lượng',
+        component: 'input',
+        type: 'number',
+        required: true,
+    },
+    {
+        name: 'unit',
+        label: 'Đơn vị',
+        placeholder: 'Chọn đơn vị (gam, ml, quả)',
+        component: 'select',
+        options: [
+            { value: 'gam', label: 'Gam' },
+            { value: 'ml', label: 'Mililit' },
+            { value: 'fruit', label: 'Quả' },
+        ],
+        required: true,
+    },
+    {
+        name: 'threshold',
+        label: 'Ngưỡng cảnh báo',
+        placeholder: 'Nhập ngưỡng cảnh báo',
+        component: 'input',
+        type: 'number',
+        required: true,
+    }
+]

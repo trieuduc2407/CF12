@@ -1,55 +1,66 @@
-import { useState } from 'react'
+import React from 'react'
 import {
-    User,
     LayoutDashboard,
-    Warehouse,
     Coffee,
+    ReceiptText,
+    Users,
+    Warehouse,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
-export default function Navbar({ isPinned }) {
-    const [isOpen, setIsOpen] = useState(false)
-    // const [isPinned, setIsPinned] = useState(false)
+const adminNavbarItems = [
+    {
+        name: 'dashboard',
+        title: 'Tổng quan',
+        icon: <LayoutDashboard />,
+        path: '/admin/dashboard',
+    },
+    {
+        name: 'products',
+        title: 'Sản phẩm',
+        icon: <Coffee />,
+        path: '/admin/products',
+    },
+    {
+        name: 'orders',
+        title: 'Đơn hàng',
+        icon: <ReceiptText />,
+        path: '/admin/orders',
+    },
+    {
+        name: 'users',
+        title: 'Nhân viên',
+        icon: <Users />,
+        path: '/admin/staffs',
+    },
+    {
+        name: 'storage',
+        title: 'Nguyên liệu',
+        icon: <Warehouse />,
+        path: '/admin/storage',
+    },
+]
 
-    const menuItems = [
-        { icon: <LayoutDashboard size={36} />, label: 'Trang chủ' },
-        { icon: <Warehouse size={36} />, label: 'Kho' },
-        { icon: <Coffee size={36} />, label: 'Đồ uống' },
-        { icon: <User size={36} />, label: 'Hồ sơ' },
-    ]
+const Navbar = () => {
+    const navigate = useNavigate()
 
     return (
-        <div
-            onMouseEnter={() => !isPinned && setIsOpen(true)}
-            onMouseLeave={() => !isPinned && setIsOpen(false)}
-            className={`bg-base-200 fixed left-0 top-0 flex h-screen flex-col shadow-md transition-all duration-300 ${
-                isOpen || isPinned ? 'w-56' : 'w-20'
-            }`}
-        >
-            {/* Header with toggle pin */}
-            <div className="flex items-center justify-between p-2">
-                <span className="truncate font-bold">
-                    {isOpen || isPinned ? 'MyApp' : 'M'}
-                </span>
-                {/* <button
-                    className="btn btn-ghost btn-xs"
-                    onClick={() => setIsPinned(!isPinned)}
+        <nav className="mt-8">
+            {adminNavbarItems.map((item) => (
+                <button
+                    key={item.name}
+                    onClick={() => {
+                        navigate(item.path)
+                        document.getElementById('navbar-drawer').click()
+                    }}
+                    className="my-5 flex cursor-pointer items-center gap-4"
                 >
-                    {isPinned ? <PinOff size={16} /> : <Pin size={16} />}
-                </button> */}
-            </div>
-
-            <ul className="menu flex-1 p-2">
-                {menuItems.map((item, idx) => (
-                    <li key={idx}>
-                        <a className="flex items-center gap-3">
-                            {item.icon}
-                            {(isOpen || isPinned) && (
-                                <span className="text-2xl">{item.label}</span>
-                            )}
-                        </a>
-                    </li>
-                ))}
-            </ul>
-        </div>
+                    {item.icon}
+                    <span>{item.title}</span>
+                </button>
+            ))}
+        </nav>
     )
 }
+
+export default Navbar
