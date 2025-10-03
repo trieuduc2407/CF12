@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const orderSchema = new mongoose.Schema(
     {
@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema(
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         items: [
             {
-                drinkId: { type: mongoose.Schema.Types.ObjectId, ref: "Drink" },
+                productId: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
                 name: String,
                 options: mongoose.Schema.Types.Mixed,
                 quantity: Number,
@@ -22,8 +22,8 @@ const orderSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
         paidAt: { type: Date },
     }
-);
+)
 
-const orderModel = mongoose.models.order || mongoose.model("order", orderSchema);
+const orderModel = mongoose.models.order || mongoose.model("order", orderSchema)
 
-export default orderModel;
+export default orderModel

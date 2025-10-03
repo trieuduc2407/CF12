@@ -25,7 +25,12 @@ const unitMap = {
     fruit: 'quả',
 }
 
-const listLabel = ['Tên', 'Số lượng', 'Đơn vị', 'Ngưỡng cảnh báo']
+const listLabel = [
+    { name: 'name', label: 'Tên' },
+    { name: 'quantity', label: 'Số lượng' },
+    { name: 'unit', label: 'Đơn vị' },
+    { name: 'threshold', label: 'Ngưỡng cảnh báo' },
+]
 
 const Storage = () => {
     const [formData, setFormData] = useState(initialState)

@@ -1,11 +1,4 @@
 export const addProductForm = [
-    // {
-    //     name: 'image',
-    //     label: 'Hình ảnh',
-    //     component: 'input',
-    //     type: 'file',
-    //     required: true,
-    // },
     {
         name: 'name',
         label: 'Tên sản phẩm',
@@ -81,7 +74,6 @@ export const addProductForm = [
     {
         name: 'ingredients',
         label: 'Nguyên liệu',
-        // component: 'dynamicField',
         type: 'dynamicField',
         fields: [
             {
@@ -99,10 +91,10 @@ export const addProductForm = [
             }
         ]
     },
-    {
-        name: 'available',
-        label: 'Có sẵn',
-        component: 'switch',
-        required: true,
-    }
+    // {
+    //     name: 'available',
+    //     label: 'Có sẵn',
+    //     component: 'switch',
+    //     required: true,
+    // }
 ]

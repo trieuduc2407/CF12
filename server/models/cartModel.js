@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const cartSchema = new mongoose.Schema(
     {
         roomId: { type: mongoose.Schema.Types.ObjectId, ref: "Room", required: true },
         items: [
             {
-                drinkId: { type: mongoose.Schema.Types.ObjectId, ref: "Drink", required: true },
+                productId: { type: mongoose.Schema.Types.ObjectId, ref: "product", required: true },
                 name: String,
                 options: mongoose.Schema.Types.Mixed,
                 quantity: { type: Number, required: true },
@@ -17,8 +17,8 @@ const cartSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
         updatedAt: { type: Date, default: Date.now },
     }
-);
+)
 
-const cartModel = mongoose.models.cart || mongoose.model("cart", cartSchema);
+const cartModel = mongoose.models.cart || mongoose.model("cart", cartSchema)
 
-export default cartModel;
+export default cartModel

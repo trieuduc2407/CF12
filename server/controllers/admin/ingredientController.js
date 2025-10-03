@@ -1,4 +1,4 @@
-import { storageModel } from "../../model/storageModel.js"
+import { storageModel } from "../../models/storageModel.js"
 
 const addIngredient = async (req, res) => {
     const { name, quantity, unit, threshold } = req.body

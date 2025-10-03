@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import { staffModel } from "../../model/staffModel.js"
+import { staffModel } from "../../models/staffModel.js"
 
 const me = async (req, res) => {
     try {
@@ -21,7 +21,8 @@ const me = async (req, res) => {
             success: true,
             data: {
                 name: staff.name,
-                role: staff.role
+                role: staff.role,
+                id: staff._id
             }
         })
     } catch (error) {
@@ -66,6 +67,7 @@ const loginStaff = async (req, res) => {
             message: "Đăng nhập thành công",
             data: {
                 username: checkStaff.username,
+                name: checkStaff.name,
                 role: checkStaff.role,
             }
         })
@@ -93,4 +95,38 @@ const logoutStaff = async (req, res) => {
     }
 }
 
-export { loginStaff, logoutStaff, me }
+const changePassword = async (req, res) => {
+    const { id } = req.params
+    const { password, newPassword } = req.body
+    try {
+        const staff = await staffModel.findById(id)
+        if (!staff) {
+            return res.json({
+                success: false,
+                message: "Nhân viên không tồn tại"
+            })
+        }
+        const checkPassword = await bcrypt.compare(password, staff.passwordHash)
+        if (!checkPassword) {
+            return res.json({
+                success: false,
+                message: "Mật khẩu không đúng"
+            })
+        }
+        const newPasswordHash = await bcrypt.hash(newPassword, 10)
+        staff.passwordHash = newPasswordHash
+        await staff.save()
+        res.clearCookie('token').json({
+            success: true,
+            message: "Đổi mật khẩu thành công"
+        })
+    } catch (error) {
+        console.log(error)
+        res.json({
+            success: false,
+            message: "Server error"
+        })
+    }
+}
+
+export { loginStaff, logoutStaff, me, changePassword }

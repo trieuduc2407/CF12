@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js"
 import { router as adminAuthRoutes } from "./routes/admin/adminAuthRoutes.js"
 import { router as adminStorageRoutes } from "./routes/admin/adminStorageRoutes.js"
 import { router as adminStaffRoutes } from "./routes/admin/adminStaffRoutes.js"
+import { router as adminProductRoutes } from "./routes/admin/adminProductRoutes.js"
 
 const app = express()
 const PORT = 4000
@@ -23,6 +24,7 @@ connectDB()
 app.use('/api/admin/auth', adminAuthRoutes)
 app.use('/api/admin/storage', adminStorageRoutes)
 app.use('/api/admin/staff', adminStaffRoutes)
+app.use('/api/admin/products', adminProductRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)

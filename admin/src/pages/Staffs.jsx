@@ -3,6 +3,7 @@ import { addStaffForm, updateStaffForm } from '../config/form'
 import CommonForm from '../components/CommonForm'
 import { useDispatch, useSelector } from 'react-redux'
 import {
+    addStaff,
     deleteStaff,
     fetchAllStaff,
     getStaff,
@@ -18,7 +19,16 @@ const initialState = {
     role: '',
 }
 
-const listLabel = ['Tên', 'Chức vụ']
+const labelMap = {
+    admin: 'Quản trị viên',
+    staff: 'Quản lý',
+    employee: 'Nhân viên',
+}
+
+const listLabel = [
+    { name: 'name', label: 'Tên' },
+    { name: 'role', label: 'Chức vụ' },
+]
 
 const Staffs = () => {
     const [formData, setFormData] = useState(initialState)
@@ -36,7 +46,7 @@ const Staffs = () => {
         dispatch(getStaff(id)).then((data) => {
             if (data?.payload?.success) {
                 setFormData(data.payload.data)
-                setCurrentUpdateId(data.payload.data._id)
+                setCurrentUpdateId(data.payload.data.id)
                 document.getElementById('my-drawer').checked = true
             }
         })
@@ -45,7 +55,24 @@ const Staffs = () => {
     const handleUpdate = () => {
         dispatch(updateStaff({ id: currentUpdateId, formData })).then(
             (data) => {
+                if (
+                    data?.payload?.success === false &&
+                    data?.payload?.message === 'Không có quyền truy cập'
+                ) {
+                    document.getElementById('my-drawer').checked = false
+                    setShowToast({
+                        isShow: true,
+                        type: 'error',
+                        text: 'Bạn không có quyền cập nhật vai trò này',
+                    })
+                    setTimeout(
+                        () => setShowToast({ isShow: false, text: '' }),
+                        2000
+                    )
+                }
+
                 if (data?.payload?.success) {
+                    dispatch(fetchAllStaff())
                     document.getElementById('my-drawer').checked = false
                     setShowToast({
                         isShow: true,
@@ -65,7 +92,7 @@ const Staffs = () => {
         dispatch(deleteStaff(id)).then((data) => {
             if (
                 data?.payload?.success === false &&
-                data?.payload?.success === 'Không đủ quyền xóa nhân viên này'
+                data?.payload?.message === 'Không đủ quyền xóa nhân viên này'
             ) {
                 document.getElementById('my-drawer').checked = false
                 setShowToast({
@@ -80,6 +107,7 @@ const Staffs = () => {
             }
 
             if (data?.payload?.success) {
+                dispatch(fetchAllStaff())
                 document.getElementById('my-drawer').checked = false
                 setShowToast({
                     isShow: true,
@@ -96,7 +124,53 @@ const Staffs = () => {
 
     const onSubmit = (event) => {
         event.preventDefault()
-        console.log(formData)
+        dispatch(addStaff(formData)).then((data) => {
+            if (
+                data?.payload?.success === false &&
+                data?.payload?.message ===
+                    'Bạn không có quyền tạo nhân viên với vai trò này'
+            ) {
+                document.getElementById('my-drawer').checked = false
+                setShowToast({
+                    isShow: true,
+                    type: 'error',
+                    text: data.payload.message,
+                })
+                setTimeout(
+                    () => setShowToast({ isShow: false, text: '' }),
+                    2000
+                )
+            }
+            if (
+                data?.payload?.success === false &&
+                data?.payload?.message === 'Username đã tồn tại'
+            ) {
+                document.getElementById('my-drawer').checked = false
+                setShowToast({
+                    isShow: true,
+                    type: 'error',
+                    text: data.payload.message,
+                })
+                setTimeout(
+                    () => setShowToast({ isShow: false, text: '' }),
+                    2000
+                )
+            }
+            if (data?.payload?.success) {
+                dispatch(fetchAllStaff())
+                setFormData(initialState)
+                document.getElementById('my-drawer').checked = false
+                setShowToast({
+                    isShow: true,
+                    type: 'success',
+                    text: data?.payload?.message,
+                })
+                setTimeout(
+                    () => setShowToast({ isShow: false, text: '' }),
+                    2000
+                )
+            }
+        })
     }
 
     useEffect(() => {
@@ -134,6 +208,7 @@ const Staffs = () => {
                     <ListLayout
                         listLabel={listLabel}
                         listItem={staffs}
+                        labelMap={labelMap}
                         handleUpdate={getStaffData}
                         handleDelete={handleDelete}
                     />

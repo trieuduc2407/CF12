@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt"
-import { staffModel } from "../../model/staffModel.js"
+import { staffModel } from "../../models/staffModel.js"
 
 const addStaff = async (req, res) => {
     const { name, username, password, role } = req.body
@@ -51,7 +51,8 @@ const getStaff = async (req, res) => {
             success: true,
             data: {
                 name: staff.name,
-                role: staff.role
+                role: staff.role,
+                id: staff._id
             }
         })
     } catch (error) {
@@ -65,7 +66,7 @@ const getStaff = async (req, res) => {
 
 const fetchAllStaff = async (req, res) => {
     try {
-        const staffs = await staffModel.find()
+        const staffs = await staffModel.find({}, { name: 1, role: 1 })
         res.json({
             success: true,
             data: staffs
@@ -88,6 +89,12 @@ const updateStaff = async (req, res) => {
             return res.json({
                 success: false,
                 message: "Nhân viên không tồn tại"
+            })
+        }
+        if (req.user.role === 'staff' && role !== 'employee') {
+            return res.json({
+                success: false,
+                message: "Bạn không có quyền cập nhật vai trò này"
             })
         }
         const updateStaff = await staffModel.findByIdAndUpdate(id, { role }, { new: true })
@@ -142,38 +149,6 @@ const deleteStaff = async (req, res) => {
     }
 }
 
-const changePassword = async (req, res) => {
-    const { id } = req.params
-    const { password, newPassword } = req.body
-    try {
-        const staff = await staffModel.findById(id)
-        if (!staff) {
-            return res.json({
-                success: false,
-                message: "Nhân viên không tồn tại"
-            })
-        }
-        const checkPassword = await bcrypt.compare(password, staff.passwordHash)
-        if (!checkPassword) {
-            return res.json({
-                success: false,
-                message: "Mật khẩu không đúng"
-            })
-        }
-        const newPasswordHash = await bcrypt.hash(newPassword, 10)
-        staff.passwordHash = newPasswordHash
-        await staff.save()
-        res.json({
-            success: true,
-            message: "Đổi mật khẩu thành công"
-        })
-    } catch (error) {
-        console.log(error)
-        res.json({
-            success: false,
-            message: "Server error"
-        })
-    }
-}
 
-export { addStaff, getStaff, fetchAllStaff, updateStaff, deleteStaff, changePassword }
+
+export { addStaff, getStaff, fetchAllStaff, updateStaff, deleteStaff }

@@ -7,7 +7,6 @@ const CommonForm = ({
     onSubmit,
     buttonText,
     isButtonDisabled,
-    
 }) => {
     // render a single input/select/switch. parentName optionally indicates
     // this field belongs to a parent object or array. index (number) means array.
@@ -79,9 +78,10 @@ const CommonForm = ({
                         id={controlItem.name}
                         type={controlItem.type}
                         placeholder={controlItem.placeholder}
-                        className="rounded-lg border border-gray-300 p-2 focus-visible:border-gray-500 focus-visible:outline-none"
+                        className={`${controlItem?.disabled ? 'cursor-not-allowed disabled:bg-gray-50' : ''} rounded-lg border border-gray-300 p-2 focus-visible:border-gray-500 focus-visible:outline-none`}
                         value={display}
                         onChange={(e) => setValue(e.target.value)}
+                        {...(controlItem?.disabled ? { disabled: true } : null)}
                     />
                 )
                 break

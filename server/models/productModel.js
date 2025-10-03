@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
 
-const drinkSchema = new mongoose.Schema(
+const productSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         category: { type: String, enum: ['coffee', 'mixed', 'milktea', 'yogurt'], required: true },
@@ -15,7 +15,7 @@ const drinkSchema = new mongoose.Schema(
             {
                 type: {
                     type: String,
-                    enum: ["hot", "ice"],
+                    enum: ["hot", "ice", 'hot_ice'],
                     required: true,
                 },
                 isDefault: { type: Boolean, default: false },
@@ -35,6 +35,6 @@ const drinkSchema = new mongoose.Schema(
     }
 )
 
-const drinkModel = mongoose.models.drink || mongoose.model("drink", drinkSchema)
+const productModel = mongoose.models.product || mongoose.model("product", productSchema)
 
-export default drinkModel
+export { productModel }

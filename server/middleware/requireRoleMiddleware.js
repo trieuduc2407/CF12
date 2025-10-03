@@ -1,4 +1,4 @@
-const requireRole = (...roles) => (req, res, next) => {
+const requireRoleMiddleware = (...roles) => (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
         return res.json({
             success: false,
@@ -8,4 +8,4 @@ const requireRole = (...roles) => (req, res, next) => {
     next()
 }
 
-export { requireRole }
+export { requireRoleMiddleware }
