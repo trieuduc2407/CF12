@@ -1,6 +1,7 @@
+import { ShoppingBag } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ShoppingBag } from 'lucide-react'
+
 import Header from '../components/Header'
 
 const Home = () => {

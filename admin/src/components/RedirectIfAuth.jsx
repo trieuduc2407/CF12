@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
+
 import { checkAuth } from '../helper/checkAuth'
 
 const RedirectIfAuth = ({ children }) => {

@@ -1,5 +1,5 @@
-import React from 'react'
 import { EllipsisVertical } from 'lucide-react'
+import React from 'react'
 
 const ListLayout = ({
     listLabel,
@@ -55,7 +55,10 @@ const ListLayout = ({
                                           className="btn btn-success"
                                           onClick={() => {
                                               handleUpdate(item._id)
-                                              console.log('Updating item:', item._id)
+                                              console.log(
+                                                  'Updating item:',
+                                                  item._id
+                                              )
                                               document.activeElement.blur()
                                           }}
                                       >

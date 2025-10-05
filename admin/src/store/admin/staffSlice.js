@@ -7,7 +7,8 @@ const initialState = {
 }
 
 export const addStaff = createAsyncThunk('/staff/addStaff', async (formData) => {
-    const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/add',
+    const response = await axios.post(
+        import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/add',
         formData,
         {
             headers: { 'Content-Type': 'application/json' },
@@ -17,19 +18,22 @@ export const addStaff = createAsyncThunk('/staff/addStaff', async (formData) => 
 })
 
 export const getStaff = createAsyncThunk('/staff/getStaff', async (id) => {
-    const response = await axios.get(import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/get/${id}`,
+    const response = await axios.get(
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/get/${id}`,
         { withCredentials: true })
     return response?.data
 })
 
 export const fetchAllStaff = createAsyncThunk('/staff/fetchAllStaff', async () => {
-    const response = await axios.get(import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all',
+    const response = await axios.get(
+        import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all',
         { withCredentials: true })
     return response?.data
 })
 
 export const updateStaff = createAsyncThunk('/staff/updateStaff', async ({ id, formData }) => {
-    const response = await axios.put(import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/update/${id}`,
+    const response = await axios.put(
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/update/${id}`,
         formData,
         {
             headers: { 'Content-Type': 'application/json' },
@@ -39,7 +43,8 @@ export const updateStaff = createAsyncThunk('/staff/updateStaff', async ({ id, f
 })
 
 export const deleteStaff = createAsyncThunk('/staff/deleteStaff', async (id) => {
-    const response = await axios.delete(import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/delete/${id}`,
+    const response = await axios.delete(
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/delete/${id}`,
         { withCredentials: true }
     )
     return response?.data

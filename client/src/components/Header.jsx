@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Store, Clock, PhoneCall, Dot } from 'lucide-react'
+import { Clock, Dot, PhoneCall, Store } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 
 const Header = () => {
     const [active, setActive] = useState({

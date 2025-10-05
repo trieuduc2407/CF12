@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react'
-import { addProductForm } from '../config/form'
+import { ChevronLeft, RotateCcw } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import Card from '../components/Card'
 import CommonForm from '../components/CommonForm'
 import ImageUpload from '../components/ImageUpload'
-import { useSelector, useDispatch } from 'react-redux'
-import { fetchAllIngredients } from '../store/admin/storageSlice'
+import { addProductForm } from '../config/form'
 import {
     addProduct,
     deleteProduct,
     fetchAllProducts,
     getProduct,
+    updateProduct,
 } from '../store/admin/productSlice'
-import Card from '../components/Card'
-import { ChevronLeft, RotateCcw } from 'lucide-react'
+import { fetchAllIngredients } from '../store/admin/storageSlice'
 
 const initialState = {
     name: '',
@@ -27,6 +29,7 @@ const Products = () => {
     const [currentUpdateId, setCurrentUpdateId] = useState('')
     const [image, setImage] = useState(null)
     const [preview, setPreview] = useState(image || '')
+    const [imageUpdated, setImageUpdated] = useState(false)
     const [showToast, setShowToast] = useState({
         isShow: false,
         type: '',
@@ -56,6 +59,7 @@ const Products = () => {
                         ? data.payload.data.temperature[0].type
                         : ''
                 }
+
                 setFormData({
                     ...data.payload.data,
                     temperature: tempType,
@@ -63,6 +67,7 @@ const Products = () => {
                 })
                 setPreview(data.payload.data.imageUrl)
                 setCurrentUpdateId(data.payload.data._id)
+                setImageUpdated(false)
                 document.getElementById('my-drawer').checked = true
             }
         })
@@ -85,9 +90,27 @@ const Products = () => {
         payload.append('sizes', JSON.stringify(formData.sizes))
         payload.append('temperature', JSON.stringify(tempArr))
         payload.append('ingredients', JSON.stringify(formData.ingredients))
-        payload.append('image', image)
-        console.log('id', id)
-        console.log('payload', [...payload.entries()])
+        if (imageUpdated) {
+            payload.append('imageUpdated', 'true')
+            payload.append('image', image)
+        }
+
+        dispatch(updateProduct({ id, formData: payload })).then((data) => {
+            if (data?.payload?.success) {
+                dispatch(fetchAllProducts())
+                setCurrentUpdateId('')
+                document.getElementById('my-drawer').checked = false
+                setShowToast({
+                    isShow: true,
+                    type: 'success',
+                    text: 'Cập nhật sản phẩm thành công!',
+                })
+                setTimeout(
+                    () => setShowToast({ isShow: false, text: '' }),
+                    2000
+                )
+            }
+        })
     }
 
     const handleDelete = (id) => {
@@ -136,7 +159,6 @@ const Products = () => {
         const payload = new FormData()
         const tempValue = formData.temperature
         let tempArr = []
-
         if (Array.isArray(tempValue)) {
             tempArr = tempValue
         } else if (typeof tempValue === 'string' && tempValue) {
@@ -200,7 +222,7 @@ const Products = () => {
                                       <Card
                                           product={product}
                                           key={product._id}
-                                          handleUpdate={getProductData}
+                                          getProductData={getProductData}
                                           handleDelete={handleDelete}
                                       />
                                   )
@@ -243,7 +265,10 @@ const Products = () => {
                             </button>
                         </div>
                         <ImageUpload
-                            onChange={(file) => setImage(file)}
+                            onChange={(file) => {
+                                setImage(file)
+                                setImageUpdated(true)
+                            }}
                             preview={preview}
                             setPreview={setPreview}
                         />
@@ -254,7 +279,10 @@ const Products = () => {
                                 setFormData={setFormData}
                                 onSubmit={
                                     currentUpdateId
-                                        ? handleUpdate(currentUpdateId)
+                                        ? (event) => {
+                                              event.preventDefault()
+                                              handleUpdate(currentUpdateId)
+                                          }
                                         : onSubmit
                                 }
                                 buttonText={

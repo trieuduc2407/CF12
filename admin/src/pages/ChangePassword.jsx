@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+
 import CommonForm from '../components/CommonForm'
 import { changePasswordForm } from '../config/form'
-import { useDispatch, useSelector } from 'react-redux'
 import { changePassword, getMe } from '../store/auth/authSlice'
-import { useNavigate } from 'react-router-dom'
 
 const initialState = {
     currentPassword: '',
@@ -29,7 +30,7 @@ const ChangePassword = () => {
             password: formData.currentPassword,
             newPassword: formData.newPassword,
         }
-        console.log(staff.id, submitData)
+
         dispatch(changePassword({ id: staff.id, formData: submitData })).then(
             (data) => {
                 if (
@@ -47,6 +48,7 @@ const ChangePassword = () => {
                         2000
                     )
                 }
+
                 if (data?.payload?.success) {
                     setFormData(initialState)
                     setShowToast({

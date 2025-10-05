@@ -10,6 +10,7 @@ const me = async (req, res) => {
                 message: "Chưa đăng nhập"
             })
         }
+
         const staff = await staffModel.findById(req.user.id)
         if (!staff) {
             return res.json({
@@ -17,6 +18,7 @@ const me = async (req, res) => {
                 message: "Không tìm thấy nhân viên"
             })
         }
+
         res.json({
             success: true,
             data: {
@@ -43,6 +45,7 @@ const loginStaff = async (req, res) => {
                 message: "Sai tên đăng nhập"
             })
         }
+
         const checkPassword = await bcrypt.compare(password, checkStaff.passwordHash)
         if (!checkPassword) {
             return res.json({
@@ -50,6 +53,7 @@ const loginStaff = async (req, res) => {
                 message: "Sai mật khẩu"
             })
         }
+
         const token = jwt.sign(
             {
                 id: checkStaff._id,
@@ -59,6 +63,7 @@ const loginStaff = async (req, res) => {
             {
                 expiresIn: "1d"
             })
+
         res.cookie('token', token, {
             httpOnly: true,
             secure: false
@@ -106,6 +111,7 @@ const changePassword = async (req, res) => {
                 message: "Nhân viên không tồn tại"
             })
         }
+
         const checkPassword = await bcrypt.compare(password, staff.passwordHash)
         if (!checkPassword) {
             return res.json({
@@ -113,6 +119,7 @@ const changePassword = async (req, res) => {
                 message: "Mật khẩu không đúng"
             })
         }
+
         const newPasswordHash = await bcrypt.hash(newPassword, 10)
         staff.passwordHash = newPasswordHash
         await staff.save()

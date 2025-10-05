@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const roomSchema = new mongoose.Schema(
     {
@@ -9,8 +9,8 @@ const roomSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
         updatedAt: { type: Date, default: Date.now },
     }
-);
+)
 
-const roomModel = mongoose.models.room || mongoose.model("room", roomSchema);
+const roomModel = mongoose.models.room || mongoose.model("room", roomSchema)
 
-export default roomModel;
+export { roomModel }

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const feedbackSchema = new mongoose.Schema({
     orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true },
@@ -7,8 +7,8 @@ const feedbackSchema = new mongoose.Schema({
     comment: { type: String },
     createdAt: { type: Date, default: Date.now },
 }
-);
+)
 
-const feedbackModel = mongoose.models.feedback || mongoose.model("feedback", feedbackSchema);
+const feedbackModel = mongoose.models.feedback || mongoose.model("feedback", feedbackSchema)
 
-export default feedbackModel;
+export { feedbackModel }

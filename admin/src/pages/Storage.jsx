@@ -1,7 +1,10 @@
+import { ChevronLeft, RotateCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { addIngredientForm } from '../config/form'
-import CommonForm from '../components/CommonForm'
 import { useDispatch, useSelector } from 'react-redux'
+
+import CommonForm from '../components/CommonForm'
+import ListLayout from '../components/ListLayout'
+import { addIngredientForm } from '../config/form'
 import {
     addIngredient,
     deleteIngredient,
@@ -9,8 +12,6 @@ import {
     getIngredient,
     updateIngredient,
 } from '../store/admin/storageSlice'
-import ListLayout from '../components/ListLayout'
-import { ChevronLeft, RotateCcw } from 'lucide-react'
 
 const initialState = {
     name: '',
@@ -130,6 +131,7 @@ const Storage = () => {
                     2000
                 )
             }
+
             if (data?.payload?.success) {
                 dispatch(fetchAllIngredients())
                 setFormData(initialState)

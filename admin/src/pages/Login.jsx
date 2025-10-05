@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+
 import CommonForm from '../components/CommonForm'
 import { loginForm } from '../config/form'
-import { useDispatch } from 'react-redux'
 import { loginStaff } from '../store/auth/authSlice'
-import { useNavigate } from 'react-router-dom'
 
 const initialState = {
     username: '',
@@ -20,6 +21,7 @@ const Login = () => {
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
+
     const onSubmit = (event) => {
         event.preventDefault()
         dispatch(loginStaff(formData)).then((data) => {
@@ -35,6 +37,7 @@ const Login = () => {
                     2000
                 )
             }
+            
             if (data?.payload?.success) {
                 navigate('/admin/dashboard')
             }

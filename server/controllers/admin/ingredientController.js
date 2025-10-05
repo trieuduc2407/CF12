@@ -4,12 +4,14 @@ const addIngredient = async (req, res) => {
     const { name, quantity, unit, threshold } = req.body
     try {
         const checkExisting = await storageModel.findOne({ name })
+
         if (checkExisting) {
             return res.json({
                 success: false,
                 message: "Nguyên liệu đã tồn tại"
             })
         }
+
         const newIngredient = new storageModel({ name, quantity, unit, threshold, updatedAt: Date.now() })
         await newIngredient.save()
         res.json({
@@ -29,12 +31,14 @@ const getIngredient = async (req, res) => {
     const { id } = req.params
     try {
         const ingredient = await storageModel.findById(id)
+
         if (!ingredient) {
             return res.json({
                 success: false,
                 message: "Nguyên liệu không tồn tại"
             })
         }
+
         res.json({
             success: true,
             data: ingredient
@@ -69,6 +73,7 @@ const updateIngredient = async (req, res) => {
     const { name, quantity, unit, threshold } = req.body
     try {
         const checkName = await storageModel.findOne({ name, _id: { $ne: id } })
+
         if (checkName) {
             return res.json({
                 success: false,
@@ -99,12 +104,14 @@ const deleteIngredient = async (req, res) => {
     const { id } = req.params
     try {
         const ingredient = await storageModel.findById(id)
+
         if (!ingredient) {
             return res.json({
                 success: false,
                 message: "Nguyên liệu không tồn tại"
             })
         }
+
         await storageModel.findByIdAndDelete(id)
         res.json({
             success: true,

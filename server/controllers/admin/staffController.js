@@ -10,6 +10,7 @@ const addStaff = async (req, res) => {
                 message: "Bạn không có quyền tạo nhân viên với vai trò này"
             })
         }
+
         const checkExisting = await staffModel.findOne({ username })
         if (checkExisting) {
             return res.json({
@@ -17,6 +18,7 @@ const addStaff = async (req, res) => {
                 message: "Username đã tồn tại"
             })
         }
+
         const passwordHash = await bcrypt.hash(password, 10)
         const newStaff = new staffModel({ name, username, passwordHash, role, createdAt: Date.now() })
         await newStaff.save()
@@ -47,6 +49,7 @@ const getStaff = async (req, res) => {
                 message: "Nhân viên không tồn tại"
             })
         }
+
         res.json({
             success: true,
             data: {
@@ -91,12 +94,14 @@ const updateStaff = async (req, res) => {
                 message: "Nhân viên không tồn tại"
             })
         }
+
         if (req.user.role === 'staff' && role !== 'employee') {
             return res.json({
                 success: false,
                 message: "Bạn không có quyền cập nhật vai trò này"
             })
         }
+
         const updateStaff = await staffModel.findByIdAndUpdate(id, { role }, { new: true })
         res.json({
             success: true,
@@ -118,7 +123,6 @@ const deleteStaff = async (req, res) => {
     const { id } = req.params
     try {
         const staff = await staffModel.findById(id)
-
         if (!staff) {
             return res.json({
                 success: false,

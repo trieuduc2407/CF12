@@ -1,17 +1,18 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
+
 import Layout from './components/Layout'
+import RedirectIfAuth from './components/RedirectIfAuth'
+import RequireAuth from './components/RequireAuth'
+import RoleProtectedRoute from './components/RoleProtectedRoute'
+import ChangePassword from './pages/ChangePassword'
 import Dashboard from './pages/Dashboard'
-import Products from './pages/Products'
-import Orders from './pages/Orders'
 import Login from './pages/Login'
+import Notfound from './pages/Notfound'
+import Orders from './pages/Orders'
+import Products from './pages/Products'
 import Staffs from './pages/Staffs'
 import Storage from './pages/Storage'
-import Notfound from './pages/Notfound'
-import RequireAuth from './components/RequireAuth'
-import RedirectIfAuth from './components/RedirectIfAuth'
-import ChangePassword from './pages/ChangePassword'
-import RoleProtectedRoute from './components/RoleProtectedRoute'
 
 const App = () => {
     return (

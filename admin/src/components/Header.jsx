@@ -1,8 +1,9 @@
+import { LogOut, TextAlignJustify } from 'lucide-react'
 import React from 'react'
-import { TextAlignJustify, LogOut } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
-import { logoutStaff } from '../store/auth/authSlice'
 import { Navigate, useNavigate } from 'react-router-dom'
+
+import { logoutStaff } from '../store/auth/authSlice'
 
 const Header = () => {
     const navigate = useNavigate()

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation, Navigate } from 'react-router-dom'
-import { checkAuth } from '../helper/checkAuth'
 import { useDispatch } from 'react-redux'
+import { Navigate, useLocation } from 'react-router-dom'
+
+import { checkAuth } from '../helper/checkAuth'
 import { getMe } from '../store/auth/authSlice'
 
 const RequireAuth = ({ children }) => {
@@ -24,10 +25,12 @@ const RequireAuth = ({ children }) => {
         }
     }, [dispatch])
 
-    if (isLoading) return null // hoặc spinner
+    if (isLoading) return null
+
     if (!isLoggedIn) {
         return <Navigate to="/admin/login" state={{ from: location }} replace />
     }
+
     return children
 }
 

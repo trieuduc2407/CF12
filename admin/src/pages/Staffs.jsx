@@ -1,7 +1,10 @@
+import { ChevronLeft, RotateCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { addStaffForm, updateStaffForm } from '../config/form'
-import CommonForm from '../components/CommonForm'
 import { useDispatch, useSelector } from 'react-redux'
+
+import CommonForm from '../components/CommonForm'
+import ListLayout from '../components/ListLayout'
+import { addStaffForm, updateStaffForm } from '../config/form'
 import {
     addStaff,
     deleteStaff,
@@ -9,8 +12,6 @@ import {
     getStaff,
     updateStaff,
 } from '../store/admin/staffSlice'
-import ListLayout from '../components/ListLayout'
-import { ChevronLeft, RotateCcw } from 'lucide-react'
 
 const initialState = {
     name: '',
@@ -141,6 +142,7 @@ const Staffs = () => {
                     2000
                 )
             }
+
             if (
                 data?.payload?.success === false &&
                 data?.payload?.message === 'Username đã tồn tại'
@@ -156,6 +158,7 @@ const Staffs = () => {
                     2000
                 )
             }
+
             if (data?.payload?.success) {
                 dispatch(fetchAllStaff())
                 setFormData(initialState)

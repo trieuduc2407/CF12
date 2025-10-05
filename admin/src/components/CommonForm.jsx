@@ -8,14 +8,11 @@ const CommonForm = ({
     buttonText,
     isButtonDisabled,
 }) => {
-    // render a single input/select/switch. parentName optionally indicates
-    // this field belongs to a parent object or array. index (number) means array.
     const renderInput = (controlItem, parentName, index) => {
         let element = null
 
         const getValue = () => {
             if (!parentName) return formData[controlItem.name] ?? ''
-            // parent exists
             if (typeof index === 'number') {
                 return (
                     (formData[parentName] && formData[parentName][index]
@@ -23,7 +20,7 @@ const CommonForm = ({
                         : '') ?? ''
                 )
             }
-            // parent is object
+
             return (
                 (formData[parentName] &&
                     formData[parentName][controlItem.name]) ??
@@ -47,7 +44,6 @@ const CommonForm = ({
                 return
             }
 
-            // parent is object
             setFormData({
                 ...formData,
                 [parentName]: {
@@ -59,7 +55,6 @@ const CommonForm = ({
 
         switch (controlItem.component) {
             case 'input': {
-                // For number input, always use string for value to avoid 0 showing by default
                 let display = value
                 if (controlItem.type === 'number') {
                     if (
@@ -73,6 +68,7 @@ const CommonForm = ({
                         display = value.toString()
                     }
                 }
+
                 element = (
                     <input
                         id={controlItem.name}
@@ -88,11 +84,12 @@ const CommonForm = ({
             }
 
             case 'select': {
-                // Always use string for value, fallback to '' if undefined/null
                 let selectValue = value
                 if (selectValue === undefined || selectValue === null)
                     selectValue = ''
+
                 if (Array.isArray(selectValue)) selectValue = ''
+
                 element = (
                     <select
                         className="rounded-lg border border-gray-300 p-2 focus-visible:border-gray-500 focus-visible:outline-none"
@@ -192,7 +189,6 @@ const CommonForm = ({
         )
     }
 
-    // dynamicField now behaves as an array of groups (for temperature: multiple options like hot/ice each with isDefault)
     const renderDynamicField = (controlItem) => {
         const array = formData[controlItem.name] || []
 
@@ -264,7 +260,6 @@ const CommonForm = ({
         <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-4">
                 {formControls.map((controlItem) => {
-                    // dynamicArray
                     if (controlItem.type === 'dynamicArray') {
                         return (
                             <Fragment key={controlItem.name}>
@@ -273,7 +268,6 @@ const CommonForm = ({
                         )
                     }
 
-                    // dynamicField
                     if (controlItem.type === 'dynamicField') {
                         return (
                             <Fragment key={controlItem.name}>
@@ -282,7 +276,6 @@ const CommonForm = ({
                         )
                     }
 
-                    // temperature select
                     if (controlItem.name === 'temperature') {
                         return (
                             <div
@@ -295,7 +288,6 @@ const CommonForm = ({
                         )
                     }
 
-                    // isDefaultTemperature: chỉ render nếu temperature === 'hot_ice'
                     if (controlItem.name === 'isDefaultTemperature') {
                         if (formData.temperature === 'hot_ice') {
                             return (
@@ -311,7 +303,6 @@ const CommonForm = ({
                         return null
                     }
 
-                    // các field còn lại
                     return (
                         <div
                             key={controlItem.name}

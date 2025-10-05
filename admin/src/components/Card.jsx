@@ -1,7 +1,8 @@
 import React from 'react'
+
 import formatNumber from '../utils/formatNumber'
 
-const Card = ({ product, handleUpdate, handleDelete }) => {
+const Card = ({ product, getProductData, handleDelete }) => {
     return (
         <div className="card w-80 bg-white shadow-sm">
             <figure>
@@ -20,7 +21,7 @@ const Card = ({ product, handleUpdate, handleDelete }) => {
                     <button
                         className="btn btn-success"
                         onClick={() => {
-                            handleUpdate(product._id)
+                            getProductData(product._id)
                             document.activeElement.blur()
                         }}
                     >
