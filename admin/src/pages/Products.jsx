@@ -272,7 +272,7 @@ const Products = () => {
                             preview={preview}
                             setPreview={setPreview}
                         />
-                        <div className="m-4">
+                        <div className="m-4 min-h-dvw overflow-y-auto">
                             <CommonForm
                                 formControls={productForm}
                                 formData={formData}

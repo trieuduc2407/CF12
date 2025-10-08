@@ -1,4 +1,11 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
+
+import {
+    getTouchedKey,
+    isFormDataEmpty,
+    unformatNumber,
+} from '../helpers/formHelpers'
+import formatNumber from '../utils/formatNumber'
 
 const CommonForm = ({
     formControls = [],
@@ -8,6 +15,7 @@ const CommonForm = ({
     buttonText,
     isButtonDisabled,
     errors = {},
+    setErrors,
 }) => {
     const [showToast, setShowToast] = useState({
         show: false,
@@ -16,18 +24,9 @@ const CommonForm = ({
     })
     const [touched, setTouched] = useState({})
 
-    // Hàm tạo key cho touched
-    const getTouchedKey = (name, parentName, idx) => {
-        if (parentName && typeof idx === 'number')
-            return `${parentName}-${idx}-${name}`
-        if (parentName) return `${parentName}-${name}`
-        return name
-    }
-
-    const renderInput = (controlItem, parentName, index) => {
-        let element = null
-
-        const getValue = () => {
+    // Get value from formData
+    const getValue = useCallback(
+        (controlItem, parentName, index) => {
             if (!parentName) return formData[controlItem.name] ?? ''
             if (typeof index === 'number') {
                 return (
@@ -41,19 +40,26 @@ const CommonForm = ({
                     formData[parentName][controlItem.name]) ??
                 ''
             )
-        }
+        },
+        [formData]
+    )
 
-        const value = getValue()
-
-        const setValue = (next) => {
+    // Set value into formData
+    const setValue = useCallback(
+        (controlItem, next, parentName, index) => {
+            let processed = next
+            if (controlItem.name === 'price' || controlItem.type === 'number') {
+                processed = unformatNumber(next)
+                processed = processed === '' ? '' : Number(processed)
+            }
             if (!parentName) {
-                setFormData({ ...formData, [controlItem.name]: next })
+                setFormData({ ...formData, [controlItem.name]: processed })
                 return
             }
             if (typeof index === 'number') {
                 const arr = [...(formData[parentName] || [])]
                 arr[index] = { ...(arr[index] || {}) }
-                arr[index][controlItem.name] = next
+                arr[index][controlItem.name] = processed
                 setFormData({ ...formData, [parentName]: arr })
                 return
             }
@@ -61,97 +67,113 @@ const CommonForm = ({
                 ...formData,
                 [parentName]: {
                     ...(formData[parentName] || {}),
-                    [controlItem.name]: next,
+                    [controlItem.name]: processed,
                 },
             })
-        }
+        },
+        [formData, setFormData]
+    )
 
-        // Đánh dấu field đã touched
+    // Mark field as touched
+    const setFieldTouched = useCallback((key) => {
+        setTouched((prev) => ({ ...prev, [key]: true }))
+    }, [])
+
+    // Render input/select/switch control
+    const renderInput = (controlItem, parentName, index) => {
+        const value = getValue(controlItem, parentName, index)
         const key = getTouchedKey(controlItem.name, parentName, index)
-        const setFieldTouched = () =>
-            setTouched((prev) => ({ ...prev, [key]: true }))
+        const showError = errors && errors[controlItem.name] && touched[key]
+        const errorClass = showError ? 'border-red-500' : 'border-gray-300'
 
-        switch (controlItem.component) {
-            case 'input': {
-                let display = value
-                if (controlItem.type === 'number') {
-                    if (
-                        value === '' ||
-                        value === null ||
-                        value === undefined ||
-                        value === 0
-                    ) {
-                        display = ''
-                    } else if (typeof value === 'number') {
-                        display = value.toString()
+        if (controlItem.component === 'input') {
+            let display = value
+            if (controlItem.name === 'price' || controlItem.type === 'number') {
+                display =
+                    value === '' ||
+                    value === null ||
+                    value === undefined ||
+                    value === 0
+                        ? ''
+                        : formatNumber(value)
+            }
+            return (
+                <input
+                    id={
+                        typeof index === 'number'
+                            ? parentName
+                                ? `${parentName}-${index}-${controlItem.name}`
+                                : `${controlItem.name}-${index}`
+                            : controlItem.name
                     }
-                }
-                const showError =
-                    errors && errors[controlItem.name] && touched[key]
-                const errorClass = showError
-                    ? 'border-red-500'
-                    : 'border-gray-300'
-                element = (
-                    <input
-                        id={controlItem.name}
-                        type={controlItem.type}
-                        placeholder={controlItem.placeholder}
-                        className={`${controlItem?.disabled ? 'cursor-not-allowed disabled:bg-gray-50' : ''} rounded-lg border ${errorClass} p-2 focus-visible:border-gray-500 focus-visible:outline-none`}
-                        value={display}
-                        onChange={(e) => setValue(e.target.value)}
-                        onBlur={setFieldTouched}
-                        {...(controlItem?.disabled ? { disabled: true } : null)}
-                    />
-                )
-                break
-            }
-            case 'select': {
-                let selectValue = value
-                if (selectValue === undefined || selectValue === null)
-                    selectValue = ''
-                if (Array.isArray(selectValue)) selectValue = ''
-                const showError =
-                    errors && errors[controlItem.name] && touched[key]
-                const errorClass = showError
-                    ? 'border-red-500'
-                    : 'border-gray-300'
-                element = (
-                    <select
-                        className={`rounded-lg border ${errorClass} p-2 focus-visible:border-gray-500 focus-visible:outline-none`}
-                        value={selectValue}
-                        onChange={(e) => setValue(e.target.value)}
-                        onBlur={setFieldTouched}
-                    >
-                        <option value="" disabled>
-                            {controlItem.placeholder}
-                        </option>
-                        {controlItem.options?.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                )
-                break
-            }
-            case 'switch':
-                element = (
-                    <input
-                        type="checkbox"
-                        checked={!!value}
-                        onChange={(e) => setValue(e.target.checked)}
-                    />
-                )
-                break
-            default:
-                element = null
+                    type="text"
+                    inputMode={
+                        controlItem.type === 'number' ||
+                        controlItem.name === 'price'
+                            ? 'numeric'
+                            : undefined
+                    }
+                    placeholder={controlItem.placeholder}
+                    className={`${controlItem?.disabled ? 'cursor-not-allowed disabled:bg-gray-50' : ''} rounded-lg border ${errorClass} p-2 focus-visible:border-gray-500 focus-visible:outline-none`}
+                    value={display}
+                    onChange={(e) =>
+                        setValue(controlItem, e.target.value, parentName, index)
+                    }
+                    onBlur={() => setFieldTouched(key)}
+                    {...(controlItem?.disabled ? { disabled: true } : null)}
+                />
+            )
         }
-        return element
+        if (controlItem.component === 'select') {
+            let selectValue = value
+            if (
+                selectValue === undefined ||
+                selectValue === null ||
+                Array.isArray(selectValue)
+            )
+                selectValue = ''
+            return (
+                <select
+                    className={`rounded-lg border ${errorClass} p-2 focus-visible:border-gray-500 focus-visible:outline-none`}
+                    value={selectValue}
+                    onChange={(e) =>
+                        setValue(controlItem, e.target.value, parentName, index)
+                    }
+                    onBlur={() => setFieldTouched(key)}
+                >
+                    <option value="" disabled>
+                        {controlItem.placeholder}
+                    </option>
+                    {controlItem.options?.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+            )
+        }
+        if (controlItem.component === 'switch') {
+            return (
+                <input
+                    type="checkbox"
+                    checked={!!value}
+                    onChange={(e) =>
+                        setValue(
+                            controlItem,
+                            e.target.checked,
+                            parentName,
+                            index
+                        )
+                    }
+                />
+            )
+        }
+        return null
     }
 
+    // Render dynamic array field
     const renderDynamicArray = (controlItem) => {
         const array = formData[controlItem.name] || []
-
         return (
             <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
@@ -177,33 +199,32 @@ const CommonForm = ({
                         Thêm
                     </button>
                 </div>
-
                 <div className="flex flex-col gap-4">
                     {array.map((item, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                            {controlItem.fields.map((f) => (
-                                <div
-                                    key={f.name}
-                                    className="flex flex-col gap-1"
-                                >
-                                    <p className="text-sm">{f.label}</p>
-                                    {renderInput(f, controlItem.name, idx)}
-                                    {/* Hiển thị lỗi nếu có */}
-                                    {typeof errors === 'object' &&
-                                        errors[f.name] &&
-                                        touched[
-                                            getTouchedKey(
-                                                f.name,
-                                                controlItem.name,
-                                                idx
-                                            )
-                                        ] && (
-                                            <span className="text-red-500 text-xs">
-                                                {errors[f.name]}
-                                            </span>
-                                        )}
-                                </div>
-                            ))}
+                            {controlItem.fields.map((f) => {
+                                const key = getTouchedKey(
+                                    f.name,
+                                    controlItem.name,
+                                    idx
+                                )
+                                return (
+                                    <div
+                                        key={f.name}
+                                        className="flex flex-col gap-1"
+                                    >
+                                        <p className="text-sm">{f.label}</p>
+                                        {renderInput(f, controlItem.name, idx)}
+                                        {typeof errors === 'object' &&
+                                            errors[f.name] &&
+                                            touched[key] && (
+                                                <span className="text-red-500 text-xs">
+                                                    {errors[f.name]}
+                                                </span>
+                                            )}
+                                    </div>
+                                )
+                            })}
                             <button
                                 type="button"
                                 className="btn btn-sm shadow-none"
@@ -226,9 +247,9 @@ const CommonForm = ({
         )
     }
 
+    // Render dynamic field (array of objects)
     const renderDynamicField = (controlItem) => {
         const array = formData[controlItem.name] || []
-
         return (
             <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
@@ -258,7 +279,6 @@ const CommonForm = ({
                         Thêm
                     </button>
                 </div>
-
                 <div className="flex flex-col gap-4">
                     {array.map((item, idx) => (
                         <div key={idx} className="flex items-center gap-4">
@@ -293,7 +313,53 @@ const CommonForm = ({
         )
     }
 
-    // Hiển thị lỗi dưới input nếu có errors prop
+    // Render each top-level control
+    const renderControl = (controlItem) => {
+        if (controlItem.type === 'dynamicArray') {
+            return (
+                <Fragment key={controlItem.name}>
+                    {renderDynamicArray(controlItem)}
+                </Fragment>
+            )
+        }
+        if (controlItem.type === 'dynamicField') {
+            return (
+                <Fragment key={controlItem.name}>
+                    {renderDynamicField(controlItem)}
+                </Fragment>
+            )
+        }
+        // Special case: only show isDefaultTemperature if temperature is hot_ice
+        if (
+            controlItem.name === 'isDefaultTemperature' &&
+            formData.temperature !== 'hot_ice'
+        ) {
+            return null
+        }
+        const key = getTouchedKey(controlItem.name)
+        return (
+            <div key={controlItem.name} className="flex flex-col gap-2">
+                <p>{controlItem.label}</p>
+                {renderInput(controlItem)}
+                {typeof errors === 'object' &&
+                    errors[controlItem.name] &&
+                    touched[key] && (
+                        <span className="text-red-500 text-xs">
+                            {errors[controlItem.name]}
+                        </span>
+                    )}
+            </div>
+        )
+    }
+
+    // Reset touched and errors when formData is cleared (after submit)
+    useEffect(() => {
+        if (Object.keys(formData).length === 0 || isFormDataEmpty(formData)) {
+            setTouched({})
+            if (typeof setErrors === 'function') setErrors({})
+        }
+    }, [formData, setErrors])
+
     return (
         <>
             {showToast.show && (
@@ -321,89 +387,17 @@ const CommonForm = ({
                                 }),
                             2000
                         )
+                        return
                     }
-                    onSubmit && onSubmit(event)
+                    if (onSubmit) {
+                        onSubmit(event)
+                        setTouched({})
+                        if (typeof setErrors === 'function') setErrors({})
+                    }
                 }}
             >
                 <div className="flex flex-col gap-4">
-                    {formControls.map((controlItem) => {
-                        if (controlItem.type === 'dynamicArray') {
-                            return (
-                                <Fragment key={controlItem.name}>
-                                    {renderDynamicArray(controlItem)}
-                                </Fragment>
-                            )
-                        }
-                        if (controlItem.type === 'dynamicField') {
-                            return (
-                                <Fragment key={controlItem.name}>
-                                    {renderDynamicField(controlItem)}
-                                </Fragment>
-                            )
-                        }
-                        if (controlItem.name === 'temperature') {
-                            return (
-                                <div
-                                    key={controlItem.name}
-                                    className="flex flex-col gap-2"
-                                >
-                                    <p>{controlItem.label}</p>
-                                    {renderInput(controlItem)}
-                                    {/* Hiển thị lỗi nếu có */}
-                                    {typeof errors === 'object' &&
-                                        errors[controlItem.name] &&
-                                        touched[
-                                            getTouchedKey(controlItem.name)
-                                        ] && (
-                                            <span className="text-red-500 text-xs">
-                                                {errors[controlItem.name]}
-                                            </span>
-                                        )}
-                                </div>
-                            )
-                        }
-                        if (controlItem.name === 'isDefaultTemperature') {
-                            if (formData.temperature === 'hot_ice') {
-                                return (
-                                    <div
-                                        key={controlItem.name}
-                                        className="flex flex-col gap-2"
-                                    >
-                                        <p>{controlItem.label}</p>
-                                        {renderInput(controlItem)}
-                                        {typeof errors === 'object' &&
-                                            errors[controlItem.name] &&
-                                            touched[
-                                                getTouchedKey(controlItem.name)
-                                            ] && (
-                                                <span className="text-red-500 text-xs">
-                                                    {errors[controlItem.name]}
-                                                </span>
-                                            )}
-                                    </div>
-                                )
-                            }
-                            return null
-                        }
-                        return (
-                            <div
-                                key={controlItem.name}
-                                className="flex flex-col gap-2"
-                            >
-                                <p>{controlItem.label}</p>
-                                {renderInput(controlItem)}
-                                {typeof errors === 'object' &&
-                                    errors[controlItem.name] &&
-                                    touched[
-                                        getTouchedKey(controlItem.name)
-                                    ] && (
-                                        <span className="text-red-500 text-xs">
-                                            {errors[controlItem.name]}
-                                        </span>
-                                    )}
-                            </div>
-                        )
-                    })}
+                    {formControls.map(renderControl)}
                     <button
                         type="submit"
                         className={`${isButtonDisabled ? 'bg-gray-400 cursor-not-allowed border-none' : ''} btn rounded-lg `}

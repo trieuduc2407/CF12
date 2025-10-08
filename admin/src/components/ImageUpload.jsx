@@ -30,7 +30,7 @@ const ImageUpload = ({ onChange, preview, setPreview }) => {
 
     return (
         <div
-            className="h-120 w-120 relative mx-4 flex flex-col items-center justify-center border-2 border-dashed border-gray-300"
+            className="h-120 w-120 relative mx-4 flex flex-col rounded-lg items-center justify-center border-2 border-dashed border-gray-300"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
         >
