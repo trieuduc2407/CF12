@@ -52,7 +52,7 @@ const getIngredient = async (req, res) => {
     }
 }
 
-const fetchAllIngredient = async (req, res) => {
+const getAllIngredient = async (req, res) => {
     try {
         const ingredients = await storageModel.find()
         res.json({
@@ -126,4 +126,4 @@ const deleteIngredient = async (req, res) => {
     }
 }
 
-export { addIngredient, getIngredient, fetchAllIngredient, updateIngredient, deleteIngredient }
+export { addIngredient, getIngredient, getAllIngredient, updateIngredient, deleteIngredient }

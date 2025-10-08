@@ -1,6 +1,8 @@
 import { EllipsisVertical } from 'lucide-react'
 import React from 'react'
 
+import formatNumber from '../utils/formatNumber'
+
 const ListLayout = ({
     listLabel,
     listItem,
@@ -35,7 +37,7 @@ const ListLayout = ({
                               <div className="text-center" key={i}>
                                   {key.name === 'unit' || key.name === 'role'
                                       ? labelMap[item[key.name]]
-                                      : (item[key.name] ?? '')}
+                                      : formatNumber(item[key.name] ?? '')}
                               </div>
                           ))}
                           <div className="dropdown dropdown-bottom dropdown-end flex justify-center bg-white">

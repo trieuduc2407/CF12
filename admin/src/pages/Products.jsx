@@ -9,11 +9,11 @@ import { addProductForm } from '../config/form'
 import {
     addProduct,
     deleteProduct,
-    fetchAllProducts,
+    getAllProducts,
     getProduct,
     updateProduct,
 } from '../store/admin/productSlice'
-import { fetchAllIngredients } from '../store/admin/storageSlice'
+import { getAllIngredients } from '../store/admin/storageSlice'
 
 const initialState = {
     name: '',
@@ -41,8 +41,8 @@ const Products = () => {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        dispatch(fetchAllIngredients())
-        dispatch(fetchAllProducts())
+        dispatch(getAllIngredients())
+        dispatch(getAllProducts())
     }, [dispatch])
 
     const getProductData = (id) => {
@@ -97,7 +97,7 @@ const Products = () => {
 
         dispatch(updateProduct({ id, formData: payload })).then((data) => {
             if (data?.payload?.success) {
-                dispatch(fetchAllProducts())
+                dispatch(getAllProducts())
                 setCurrentUpdateId('')
                 document.getElementById('my-drawer').checked = false
                 setShowToast({
@@ -116,7 +116,7 @@ const Products = () => {
     const handleDelete = (id) => {
         dispatch(deleteProduct(id)).then((data) => {
             if (data?.payload?.success) {
-                dispatch(fetchAllProducts())
+                dispatch(getAllProducts())
                 setShowToast({
                     isShow: true,
                     type: 'success',
@@ -175,7 +175,7 @@ const Products = () => {
 
         dispatch(addProduct(payload)).then((data) => {
             if (data?.payload?.success) {
-                dispatch(fetchAllProducts())
+                dispatch(getAllProducts())
                 setFormData(initialState)
                 setImage(null)
                 setShowToast({

@@ -24,7 +24,7 @@ export const getStaff = createAsyncThunk('/staff/getStaff', async (id) => {
     return response?.data
 })
 
-export const fetchAllStaff = createAsyncThunk('/staff/fetchAllStaff', async () => {
+export const getAllStaff = createAsyncThunk('/staff/getAllStaff', async () => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all',
         { withCredentials: true })
@@ -56,14 +56,14 @@ const adminStaffSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchAllStaff.pending, (state) => {
+            .addCase(getAllStaff.pending, (state) => {
                 state.isLoading = true
             })
-            .addCase(fetchAllStaff.fulfilled, (state, action) => {
+            .addCase(getAllStaff.fulfilled, (state, action) => {
                 state.isLoading = false
                 state.staffs = action.payload?.data
             })
-            .addCase(fetchAllStaff.rejected, (state) => {
+            .addCase(getAllStaff.rejected, (state) => {
                 state.isLoading = false
                 state.staffs = []
             })

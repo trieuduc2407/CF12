@@ -8,7 +8,7 @@ import { addStaffForm, updateStaffForm } from '../config/form'
 import {
     addStaff,
     deleteStaff,
-    fetchAllStaff,
+    getAllStaff,
     getStaff,
     updateStaff,
 } from '../store/admin/staffSlice'
@@ -73,7 +73,7 @@ const Staffs = () => {
                 }
 
                 if (data?.payload?.success) {
-                    dispatch(fetchAllStaff())
+                    dispatch(getAllStaff())
                     document.getElementById('my-drawer').checked = false
                     setShowToast({
                         isShow: true,
@@ -108,7 +108,7 @@ const Staffs = () => {
             }
 
             if (data?.payload?.success) {
-                dispatch(fetchAllStaff())
+                dispatch(getAllStaff())
                 document.getElementById('my-drawer').checked = false
                 setShowToast({
                     isShow: true,
@@ -160,7 +160,7 @@ const Staffs = () => {
             }
 
             if (data?.payload?.success) {
-                dispatch(fetchAllStaff())
+                dispatch(getAllStaff())
                 setFormData(initialState)
                 document.getElementById('my-drawer').checked = false
                 setShowToast({
@@ -177,7 +177,7 @@ const Staffs = () => {
     }
 
     useEffect(() => {
-        dispatch(fetchAllStaff())
+        dispatch(getAllStaff())
     }, [dispatch])
 
     return (

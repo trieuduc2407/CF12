@@ -8,10 +8,11 @@ import { addIngredientForm } from '../config/form'
 import {
     addIngredient,
     deleteIngredient,
-    fetchAllIngredients,
+    getAllIngredients,
     getIngredient,
     updateIngredient,
 } from '../store/admin/storageSlice'
+import validateFormData from '../utils/validateFormData'
 
 const initialState = {
     name: '',
@@ -41,6 +42,9 @@ const Storage = () => {
         type: '',
         text: '',
     })
+    const errors = validateFormData(addIngredientForm, formData)
+    console.log(formData.quantity)
+    console.log(errors)
 
     const dispatch = useDispatch()
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
@@ -75,7 +79,7 @@ const Storage = () => {
                 }
 
                 if (data?.payload?.success) {
-                    dispatch(fetchAllIngredients())
+                    dispatch(getAllIngredients())
                     setFormData(initialState)
                     setCurrentUpdateId('')
                     document.getElementById('my-drawer').checked = false
@@ -98,7 +102,7 @@ const Storage = () => {
     const handleDelete = (id) => {
         dispatch(deleteIngredient(id)).then((data) => {
             if (data?.payload?.success) {
-                dispatch(fetchAllIngredients())
+                dispatch(getAllIngredients())
                 setShowToast({
                     isShow: true,
                     type: 'error',
@@ -133,7 +137,7 @@ const Storage = () => {
             }
 
             if (data?.payload?.success) {
-                dispatch(fetchAllIngredients())
+                dispatch(getAllIngredients())
                 setFormData(initialState)
                 document.getElementById('my-drawer').checked = false
                 setShowToast({
@@ -151,7 +155,7 @@ const Storage = () => {
     }
 
     useEffect(() => {
-        dispatch(fetchAllIngredients())
+        dispatch(getAllIngredients())
     }, [dispatch])
 
     return (
@@ -240,7 +244,12 @@ const Storage = () => {
                                         ? 'Cập nhật nguyên liệu'
                                         : 'Thêm nguyên liệu'
                                 }
-                                isButtonDisabled={false}
+                                isButtonDisabled={
+                                    Object.keys(errors).length > 0
+                                        ? true
+                                        : false
+                                }
+                                errors={errors}
                             />
                         </div>
                     </div>

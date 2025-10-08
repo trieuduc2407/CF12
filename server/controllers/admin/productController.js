@@ -75,7 +75,7 @@ const getProduct = async (req, res) => {
     }
 }
 
-const fetchAllProduct = async (req, res) => {
+const getAllProduct = async (req, res) => {
     try {
         const products = await productModel.find()
         res.json({
@@ -199,4 +199,4 @@ const deleteProduct = async (req, res) => {
     }
 }
 
-export { addProduct, getProduct, fetchAllProduct, updateProduct, deleteProduct }
+export { addProduct, getProduct, getAllProduct, updateProduct, deleteProduct }

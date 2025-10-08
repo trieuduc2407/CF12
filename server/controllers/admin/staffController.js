@@ -67,7 +67,7 @@ const getStaff = async (req, res) => {
     }
 }
 
-const fetchAllStaff = async (req, res) => {
+const getAllStaff = async (req, res) => {
     try {
         const staffs = await staffModel.find({}, { name: 1, role: 1 })
         res.json({
@@ -155,4 +155,4 @@ const deleteStaff = async (req, res) => {
 
 
 
-export { addStaff, getStaff, fetchAllStaff, updateStaff, deleteStaff }
+export { addStaff, getStaff, getAllStaff, updateStaff, deleteStaff }

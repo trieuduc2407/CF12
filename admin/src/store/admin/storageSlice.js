@@ -24,7 +24,7 @@ export const getIngredient = createAsyncThunk('/storage/getIngredient', async (i
     return response?.data
 })
 
-export const fetchAllIngredients = createAsyncThunk('/storage/fetchAllIngredients', async () => {
+export const getAllIngredients = createAsyncThunk('/storage/getAllIngredients', async () => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/storage/all',
         { withCredentials: true })
@@ -55,14 +55,14 @@ const adminStorageSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchAllIngredients.pending, (state) => {
+            .addCase(getAllIngredients.pending, (state) => {
                 state.isLoading = true
             })
-            .addCase(fetchAllIngredients.fulfilled, (state, action) => {
+            .addCase(getAllIngredients.fulfilled, (state, action) => {
                 state.isLoading = false
                 state.ingredients = action.payload?.data
             })
-            .addCase(fetchAllIngredients.rejected, (state) => {
+            .addCase(getAllIngredients.rejected, (state) => {
                 state.isLoading = false
                 state.ingredients = []
             })

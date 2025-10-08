@@ -17,7 +17,7 @@ export const addProduct = createAsyncThunk('/admin/addProduct', async (formData)
     return response?.data
 })
 
-export const fetchAllProducts = createAsyncThunk('/admin/fetchAllProducts', async () => {
+export const getAllProducts = createAsyncThunk('/admin/getAllProducts', async () => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/products/all',
         { withCredentials: true })
@@ -52,10 +52,10 @@ const productSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchAllProducts.pending, (state) => {
+            .addCase(getAllProducts.pending, (state) => {
                 state.isLoading = true
             })
-            .addCase(fetchAllProducts.fulfilled, (state, action) => {
+            .addCase(getAllProducts.fulfilled, (state, action) => {
                 state.isLoading = false
                 state.products = action.payload
             })
