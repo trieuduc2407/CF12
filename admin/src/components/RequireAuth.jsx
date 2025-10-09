@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Navigate, useLocation } from 'react-router-dom'
 
-import { checkAuth } from '../helper/checkAuth'
+import { checkAuth } from '../helpers/checkAuth'
 import { getMe } from '../store/auth/authSlice'
 
 const RequireAuth = ({ children }) => {

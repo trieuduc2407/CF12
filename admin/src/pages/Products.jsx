@@ -200,13 +200,13 @@ const Products = () => {
                     </div>
                 </div>
             )}
-            <div className="drawer xl:drawer-open drawer-end gap-2">
+            <div className="drawer xl:drawer-open drawer-end h-full gap-2">
                 <input
                     id="my-drawer"
                     type="checkbox"
                     className="drawer-toggle"
                 />
-                <div className="drawer-content">
+                <div className="drawer-content flex flex-col overflow-hidden">
                     <div className="my-4 flex justify-end xl:m-0">
                         <label
                             htmlFor="my-drawer"
@@ -215,7 +215,7 @@ const Products = () => {
                             Thêm sản phẩm
                         </label>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="3xl:grid-cols-3 scrollbar-hide grid flex-1 grid-cols-1 justify-items-center gap-y-8 overflow-y-auto sm:grid-cols-2 xl:max-2xl:grid-cols-1">
                         {products.data
                             ? products.data.map((product) => {
                                   return (
@@ -236,7 +236,7 @@ const Products = () => {
                         aria-label="close sidebar"
                         className="drawer-overlay"
                     ></label>
-                    <div className="menu w-xl flex min-h-screen justify-center bg-white px-8">
+                    <div className="menu w-sm md:w-xl scrollbar-hide flex h-screen flex-col justify-center overflow-y-auto bg-white px-8">
                         <div className="flex justify-between">
                             <button
                                 className="md:hidden"
@@ -272,7 +272,7 @@ const Products = () => {
                             preview={preview}
                             setPreview={setPreview}
                         />
-                        <div className="m-4 min-h-dvw overflow-y-auto">
+                        <div className="scrollbar-hide m-4 flex-1 overflow-y-auto">
                             <CommonForm
                                 formControls={productForm}
                                 formData={formData}

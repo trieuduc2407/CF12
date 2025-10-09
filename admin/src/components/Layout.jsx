@@ -6,16 +6,16 @@ import Navbar from './Navbar'
 
 const Layout = () => {
     return (
-        <div className="flex min-h-screen w-full flex-row">
+        <div className="flex h-screen w-full flex-row">
             <div className="drawer lg:drawer-open">
                 <input
                     id="navbar-drawer"
                     type="checkbox"
                     className="drawer-toggle"
                 />
-                <div className="drawer-content">
+                <div className="drawer-content flex flex-col overflow-hidden">
                     <Header />
-                    <main className="flex flex-1 flex-col p-4">
+                    <main className="scrollbar-hide flex flex-1 flex-col overflow-y-auto p-4">
                         <Outlet />
                     </main>
                 </div>

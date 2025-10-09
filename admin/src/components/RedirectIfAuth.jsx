@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 
-import { checkAuth } from '../helper/checkAuth'
+import { checkAuth } from '../helpers/checkAuth'
 
 const RedirectIfAuth = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true)

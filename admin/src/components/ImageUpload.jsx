@@ -30,7 +30,7 @@ const ImageUpload = ({ onChange, preview, setPreview }) => {
 
     return (
         <div
-            className="h-120 w-120 relative mx-4 flex flex-col rounded-lg items-center justify-center border-2 border-dashed border-gray-300"
+            className="md:h-120 md:w-120 relative mx-4 flex h-72 w-72 flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
         >
@@ -70,7 +70,7 @@ const ImageUpload = ({ onChange, preview, setPreview }) => {
                     className="flex h-full w-full cursor-pointer items-center justify-center text-xl font-semibold"
                     onClick={() => inputRef.current.click()}
                 >
-                    <span className="text-center">
+                    <span className="text-center text-lg">
                         Bấm hoặc kéo/thả để tải ảnh sản phẩm
                     </span>
                 </div>

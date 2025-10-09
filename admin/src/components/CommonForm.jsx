@@ -114,7 +114,8 @@ const CommonForm = ({
                             : undefined
                     }
                     placeholder={controlItem.placeholder}
-                    className={`${controlItem?.disabled ? 'cursor-not-allowed disabled:bg-gray-50' : ''} rounded-lg border ${errorClass} p-2 focus-visible:border-gray-500 focus-visible:outline-none`}
+                    // Make inputs responsive: full width on small viewports, fixed w-72 on sm+
+                    className={`${controlItem?.disabled ? 'cursor-not-allowed disabled:bg-gray-50' : ''} w-auto rounded-lg border xl:text-base ${errorClass} p-2 text-xs focus-visible:border-gray-500 focus-visible:outline-none sm:text-sm md:text-base`}
                     value={display}
                     onChange={(e) =>
                         setValue(controlItem, e.target.value, parentName, index)
@@ -134,7 +135,7 @@ const CommonForm = ({
                 selectValue = ''
             return (
                 <select
-                    className={`rounded-lg border ${errorClass} p-2 focus-visible:border-gray-500 focus-visible:outline-none`}
+                    className={`select w-full rounded-lg border bg-white ${errorClass} p-2 text-xs focus-visible:border-gray-500 focus-visible:outline-none sm:text-sm md:text-base xl:text-base`}
                     value={selectValue}
                     onChange={(e) =>
                         setValue(controlItem, e.target.value, parentName, index)
@@ -201,7 +202,11 @@ const CommonForm = ({
                 </div>
                 <div className="flex flex-col gap-4">
                     {array.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
+                        // allow wrapping on small screens so two inputs don't overflow
+                        <div
+                            key={idx}
+                            className="flex flex-wrap items-center gap-2"
+                        >
                             {controlItem.fields.map((f) => {
                                 const key = getTouchedKey(
                                     f.name,
@@ -211,14 +216,15 @@ const CommonForm = ({
                                 return (
                                     <div
                                         key={f.name}
-                                        className="flex flex-col gap-1"
+                                        // let children shrink and take full width on small screens
+                                        className="flex min-w-0 flex-1 flex-col gap-1 text-xs sm:text-sm md:text-base"
                                     >
                                         <p className="text-sm">{f.label}</p>
                                         {renderInput(f, controlItem.name, idx)}
                                         {typeof errors === 'object' &&
                                             errors[f.name] &&
                                             touched[key] && (
-                                                <span className="text-red-500 text-xs">
+                                                <span className="text-xs text-red-500">
                                                     {errors[f.name]}
                                                 </span>
                                             )}
@@ -281,13 +287,16 @@ const CommonForm = ({
                 </div>
                 <div className="flex flex-col gap-4">
                     {array.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-4">
+                        <div
+                            key={idx}
+                            className="flex flex-wrap items-center gap-4"
+                        >
                             {controlItem.fields.map((f) => (
                                 <div
                                     key={f.name}
-                                    className="flex flex-col gap-1"
+                                    className="flex min-w-0 flex-1 flex-col gap-1 text-xs sm:text-sm md:text-base"
                                 >
-                                    <p className="text-sm">{f.label}</p>
+                                    <p className="text-xs">{f.label}</p>
                                     {renderInput(f, controlItem.name, idx)}
                                 </div>
                             ))}
@@ -344,7 +353,7 @@ const CommonForm = ({
                 {typeof errors === 'object' &&
                     errors[controlItem.name] &&
                     touched[key] && (
-                        <span className="text-red-500 text-xs">
+                        <span className="text-xs text-red-500">
                             {errors[controlItem.name]}
                         </span>
                     )}
@@ -400,7 +409,7 @@ const CommonForm = ({
                     {formControls.map(renderControl)}
                     <button
                         type="submit"
-                        className={`${isButtonDisabled ? 'bg-gray-400 cursor-not-allowed border-none' : ''} btn rounded-lg `}
+                        className={`${isButtonDisabled ? 'cursor-not-allowed border-none bg-gray-400' : ''} btn rounded-lg`}
                         aria-disabled={isButtonDisabled}
                     >
                         {buttonText || 'Gửi'}

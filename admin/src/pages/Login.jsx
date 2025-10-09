@@ -37,7 +37,7 @@ const Login = () => {
                     2000
                 )
             }
-            
+
             if (data?.payload?.success) {
                 navigate('/admin/dashboard')
             }
