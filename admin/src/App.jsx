@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import Layout from './components/Layout'
 import RedirectIfAuth from './components/RedirectIfAuth'
@@ -63,7 +63,10 @@ const App = () => {
                     }
                 />
             </Route>
-
+            <Route
+                path="/"
+                element={<Navigate to="/admin/dashboard" replace />}
+            />
             <Route path="*" element={<Notfound />} />
         </Routes>
     )

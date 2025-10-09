@@ -7,6 +7,7 @@ import { router as adminAuthRoutes } from "./routes/admin/adminAuthRoutes.js"
 import { router as adminStorageRoutes } from "./routes/admin/adminStorageRoutes.js"
 import { router as adminStaffRoutes } from "./routes/admin/adminStaffRoutes.js"
 import { router as adminProductRoutes } from "./routes/admin/adminProductRoutes.js"
+import { router as clientProductRoutes } from "./routes/client/productRoutes.js"
 
 const app = express()
 const PORT = 4000
@@ -25,6 +26,8 @@ app.use('/api/admin/auth', adminAuthRoutes)
 app.use('/api/admin/storage', adminStorageRoutes)
 app.use('/api/admin/staff', adminStaffRoutes)
 app.use('/api/admin/products', adminProductRoutes)
+
+app.use('/api/client/products', clientProductRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
