@@ -1,5 +1,5 @@
 import { ChevronLeft, RotateCcw } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import CommonForm from '../components/CommonForm'
@@ -42,12 +42,40 @@ const Storage = () => {
         type: '',
         text: '',
     })
+    const [sortBy, setSortBy] = useState('ratio')
+    const [sortOrder, setSortOrder] = useState('asc')
     const errors = validateFormData(addIngredientForm, formData)
-    console.log(formData.quantity)
-    console.log(errors)
 
     const dispatch = useDispatch()
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
+
+    const handleSort = (column) => {
+        if (sortBy === column) {
+            setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+        } else {
+            setSortBy(column)
+            setSortOrder('asc')
+        }
+    }
+
+    const sortedIngredients = useMemo(() => {
+        if (!sortBy) return ingredients
+        return [...ingredients].sort((a, b) => {
+            if (sortBy === 'ratio') {
+                const ratioA =
+                    a.threshold === 0 ? Infinity : a.quantity / a.threshold
+                const ratioB =
+                    b.threshold === 0 ? Infinity : b.quantity / b.threshold
+                if (ratioA < ratioB) return sortOrder === 'asc' ? -1 : 1
+                if (ratioA > ratioB) return sortOrder === 'asc' ? 1 : -1
+                return 0
+            } else {
+                if (a[sortBy] < b[sortBy]) return sortOrder === 'asc' ? -1 : 1
+                if (a[sortBy] > b[sortBy]) return sortOrder === 'asc' ? 1 : -1
+                return 0
+            }
+        })
+    }, [ingredients, sortBy, sortOrder])
 
     const getIngredientData = (id) => {
         dispatch(getIngredient(id)).then((data) => {
@@ -188,10 +216,13 @@ const Storage = () => {
                     </div>
                     <ListLayout
                         listLabel={listLabel}
-                        listItem={ingredients}
+                        listItem={sortedIngredients}
                         handleUpdate={getIngredientData}
                         handleDelete={handleDelete}
                         labelMap={unitMap}
+                        handleSort={handleSort}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
                     />
                 </div>
                 <div className="drawer-side rounded-lg">

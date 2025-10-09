@@ -1,4 +1,4 @@
-import { EllipsisVertical } from 'lucide-react'
+import { ChevronDown, ChevronUp, EllipsisVertical } from 'lucide-react'
 import React from 'react'
 
 import formatNumber from '../utils/formatNumber'
@@ -9,6 +9,9 @@ const ListLayout = ({
     handleUpdate,
     handleDelete,
     labelMap,
+    handleSort,
+    sortBy,
+    sortOrder,
 }) => {
     return (
         <ul className="list rounded-lg bg-white text-xs md:text-lg">
@@ -19,8 +22,21 @@ const ListLayout = ({
                 }}
             >
                 {listLabel.map((key, index) => (
-                    <div className="text-center" key={index}>
+                    <div
+                        className="flex cursor-pointer select-none items-center justify-center text-center"
+                        key={index}
+                        onClick={() => handleSort(key.name)}
+                    >
                         {key.label}
+                        {sortBy === key.name && (
+                            <span>
+                                {sortOrder === 'asc' ? (
+                                    <ChevronUp size={16} />
+                                ) : (
+                                    <ChevronDown size={16} />
+                                )}
+                            </span>
+                        )}
                     </div>
                 ))}
             </li>
@@ -57,10 +73,6 @@ const ListLayout = ({
                                           className="btn btn-success"
                                           onClick={() => {
                                               handleUpdate(item._id)
-                                              console.log(
-                                                  'Updating item:',
-                                                  item._id
-                                              )
                                               document.activeElement.blur()
                                           }}
                                       >
