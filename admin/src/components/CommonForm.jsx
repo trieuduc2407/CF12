@@ -97,6 +97,8 @@ const CommonForm = ({
                         ? ''
                         : formatNumber(value)
             }
+            // Sử dụng type từ controlItem.type nếu có (ví dụ: password)
+            const inputType = controlItem.type || 'text'
             return (
                 <input
                     id={
@@ -106,7 +108,7 @@ const CommonForm = ({
                                 : `${controlItem.name}-${index}`
                             : controlItem.name
                     }
-                    type="text"
+                    type={inputType}
                     inputMode={
                         controlItem.type === 'number' ||
                         controlItem.name === 'price'
@@ -114,7 +116,6 @@ const CommonForm = ({
                             : undefined
                     }
                     placeholder={controlItem.placeholder}
-                    // Make inputs responsive: full width on small viewports, fixed w-72 on sm+
                     className={`${controlItem?.disabled ? 'cursor-not-allowed disabled:bg-gray-50' : ''} w-auto rounded-lg border xl:text-base ${errorClass} p-2 text-xs focus-visible:border-gray-500 focus-visible:outline-none sm:text-sm md:text-base`}
                     value={display}
                     onChange={(e) =>
