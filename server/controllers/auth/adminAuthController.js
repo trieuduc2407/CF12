@@ -88,7 +88,13 @@ const loginStaff = async (req, res) => {
 
 const logoutStaff = async (req, res) => {
     try {
-        res.clearCookie('token').json({
+        res.clearCookie('token',
+            {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            }
+        ).json({
             success: true,
             message: "Đăng xuất thành công"
         })
