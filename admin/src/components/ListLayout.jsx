@@ -56,7 +56,7 @@ const ListLayout = ({
                                       : formatNumber(item[key.name] ?? '')}
                               </div>
                           ))}
-                          <div className="dropdown dropdown-bottom dropdown-end flex justify-center bg-white">
+                          <div className="dropdown dropdown-top dropdown-end flex justify-center bg-white">
                               <div
                                   tabIndex={0}
                                   role="button"

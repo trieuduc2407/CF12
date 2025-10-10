@@ -10,8 +10,8 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
 router.post('/add', staffAuthMiddleware, requireRoleMiddleware('admin'), upload.single('image'), addProduct)
-router.get('/all', staffAuthMiddleware, requireRoleMiddleware('admin'), getAllProduct)
 router.get('/get/:id', staffAuthMiddleware, requireRoleMiddleware('admin'), getProduct)
+router.get('/all', staffAuthMiddleware, requireRoleMiddleware('admin'), getAllProduct)
 router.put('/update/:id', staffAuthMiddleware, requireRoleMiddleware('admin'), upload.single('image'), updateProduct)
 router.delete('/delete/:id', staffAuthMiddleware, requireRoleMiddleware('admin'), deleteProduct)
 
