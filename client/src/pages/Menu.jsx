@@ -24,8 +24,8 @@ const Menu = () => {
 
     return (
         <>
-            <div className="mt-5 grid grid-cols-[1fr_2fr_1fr] gap-5">
-                <div className="rounded-2xl bg-white">
+            <div className="mt-2.5 grid grid-cols-1 gap-5">
+                {/* <div className="hidden rounded-2xl bg-white md:flex">
                     <div className="my-5 ml-5 text-2xl font-bold text-black">
                         Danh mục
                     </div>
@@ -37,28 +37,18 @@ const Menu = () => {
                             {category.label}
                         </div>
                     ))}
+                </div> */}
+                <div className="grid grid-cols-2 gap-4 justify-self-center rounded-2xl bg-white">
+                    {products.map((product) => (
+                        <Card key={product._id} product={product} />
+                    ))}
                 </div>
-                <div className="grid rounded-2xl bg-white">
-                    <label className="input w-xl mt-2.5 rounded-lg border-2 border-gray-300 bg-gray-100 text-gray-700">
-                        <Search />
-                        <input
-                            type="search"
-                            className="grow"
-                            placeholder="Bạn cần tìm món gì ?"
-                        />
-                    </label>
-                    <div className="px-2.5 py-5">
-                        {products.map((product) => (
-                            <Card key={product._id} product={product} />
-                        ))}
-                    </div>
-                </div>
-                <div className="flex min-h-80 flex-col justify-center rounded-2xl bg-white align-middle">
+                {/* <div className="hidden min-h-80 flex-col justify-center rounded-2xl bg-white align-middle md:flex">
                     <img src="./icon_cart_blank.svg" alt="" />
                     <p className="py-5 text-center text-gray-500">
                         Chưa có sản phầm nào trong giỏ hàng
                     </p>
-                </div>
+                </div> */}
             </div>
         </>
     )

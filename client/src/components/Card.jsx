@@ -8,7 +8,7 @@ const Card = ({ product }) => {
     const { isLoading } = useSelector((state) => state.clientProduct)
 
     return (
-        <div className="card w-60 bg-white shadow-sm">
+        <div className="card w-40 bg-white shadow-sm">
             <figure>
                 {isLoading ? (
                     <div className="skeleton h-80 w-80"></div>
@@ -20,14 +20,14 @@ const Card = ({ product }) => {
                     />
                 )}
             </figure>
-            <div className="card-body flex flex-row justify-between py-4">
+            <div className="card-body flex flex-row justify-between px-2.5 py-2">
                 <div>
-                    <p className="card-title">{product.name}</p>
+                    <p className="card-title text-sm">{product.name}</p>
                     <p className="font-medium">
                         {formatNumber(product.basePrice)} VND
                     </p>
                 </div>
-                <div className="card-actions justify-between">
+                <div className="card-actions items-end">
                     <button
                         className="rounded-2xl bg-amber-500"
                         onClick={() => {

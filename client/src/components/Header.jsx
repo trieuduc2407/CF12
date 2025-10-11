@@ -24,7 +24,7 @@ const Header = () => {
     }, [])
 
     return (
-        <div className="flex flex-col bg-white md:flex-row md:p-5">
+        <div className="flex flex-col bg-white pb-2.5 md:flex-row md:p-5">
             <div className="relative flex-1 shrink overflow-hidden md:w-2/5">
                 <img
                     className="object-cover md:max-lg:max-w-sm lg:h-[270px] lg:w-[480px]"
@@ -66,8 +66,8 @@ const Header = () => {
             </div>
 
             <div className="flex w-full justify-center md:hidden">
-                <label className="input w-[95%] rounded-xl bg-gray-200">
-                    <Search />
+                <label className="input w-[95%] rounded-xl bg-gray-100">
+                    <Search className="text-gray-400" />
                     <input
                         id="header-search"
                         type="search"
