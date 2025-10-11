@@ -17,16 +17,16 @@ export const addStaff = createAsyncThunk('/staff/addStaff', async (formData) => 
     return response?.data
 })
 
-export const getStaff = createAsyncThunk('/staff/getStaff', async (id) => {
+export const getAllStaff = createAsyncThunk('/staff/getAllStaff', async () => {
     const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/get/${id}`,
+        import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all',
         { withCredentials: true })
     return response?.data
 })
 
-export const getAllStaff = createAsyncThunk('/staff/getAllStaff', async () => {
+export const getStaff = createAsyncThunk('/staff/getStaff', async (id) => {
     const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all',
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/get/${id}`,
         { withCredentials: true })
     return response?.data
 })

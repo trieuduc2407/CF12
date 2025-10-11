@@ -15,7 +15,6 @@ const validateFormData = (formControls, formData) => {
                 errors[control.name] = `${control.label || control.name} phải lớn hơn 0`
             }
         }
-        // Có thể bổ sung kiểm tra cho select, email, password, v.v.
     })
 
     return errors

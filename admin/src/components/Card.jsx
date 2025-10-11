@@ -1,16 +1,23 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 
 import formatNumber from '../utils/formatNumber'
 
 const Card = ({ product, getProductData, handleDelete }) => {
+    const { isLoading } = useSelector((state) => state.adminProduct)
+    console.log(isLoading)
     return (
         <div className="card w-80 bg-white shadow-sm">
             <figure>
-                <img
-                    className="w-full object-cover"
-                    src={product.imageUrl}
-                    alt=""
-                />
+                {isLoading ? (
+                    <div className="skeleton h-80 w-80"></div>
+                ) : (
+                    <img
+                        className="w-full object-cover"
+                        src={product.imageUrl}
+                        alt=""
+                    />
+                )}
             </figure>
             <div className="card-body py-4">
                 <p className="card-title">{product.name}</p>

@@ -59,6 +59,10 @@ const productSlice = createSlice({
                 state.isLoading = false
                 state.products = action.payload
             })
+            .addCase(getAllProducts.rejected, (state) => {
+                state.isLoading = false
+                state.products = []
+            })
     }
 })
 

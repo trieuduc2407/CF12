@@ -19,6 +19,8 @@ const initialState = {
     name: '',
     category: '',
     basePrice: 0,
+    sizeOption: 'single',
+    upsizePrice: 0,
     sizes: [],
     temperature: [],
     ingredients: [],
@@ -60,10 +62,28 @@ const Products = () => {
                         : ''
                 }
 
+                let sizeOption = 'single'
+                let upsizePrice = 0
+
+                if (
+                    data.payload.data.sizes &&
+                    data.payload.data.sizes.length > 1
+                ) {
+                    sizeOption = 'upsize'
+                    const lSize = data.payload.data.sizes.find(
+                        (size) => size.name === 'L'
+                    )
+                    if (lSize) {
+                        upsizePrice = lSize.price
+                    }
+                }
+
                 setFormData({
                     ...data.payload.data,
                     temperature: tempType,
                     isDefaultTemperature: isDefaultTemp,
+                    sizeOption: sizeOption,
+                    upsizePrice: upsizePrice,
                 })
                 setPreview(data.payload.data.imageUrl)
                 setCurrentUpdateId(data.payload.data._id)
@@ -84,10 +104,18 @@ const Products = () => {
             tempArr = [{ type: tempValue, isDefault: true }]
         }
 
+        let sizesArray = []
+        if (formData.sizeOption === 'upsize') {
+            sizesArray = [
+                { name: 'M', price: 0 },
+                { name: 'L', price: formData.upsizePrice || 0 },
+            ]
+        }
+
         payload.append('name', formData.name)
         payload.append('category', formData.category)
         payload.append('basePrice', formData.basePrice)
-        payload.append('sizes', JSON.stringify(formData.sizes))
+        payload.append('sizes', JSON.stringify(sizesArray))
         payload.append('temperature', JSON.stringify(tempArr))
         payload.append('ingredients', JSON.stringify(formData.ingredients))
         if (imageUpdated) {
@@ -99,6 +127,10 @@ const Products = () => {
             if (data?.payload?.success) {
                 dispatch(getAllProducts())
                 setCurrentUpdateId('')
+                setFormData(initialState)
+                setImage(null)
+                setPreview('')
+                setImageUpdated(false)
                 document.getElementById('my-drawer').checked = false
                 setShowToast({
                     isShow: true,
@@ -165,10 +197,18 @@ const Products = () => {
             tempArr = [{ type: tempValue, isDefault: true }]
         }
 
+        let sizesArray = []
+        if (formData.sizeOption === 'upsize') {
+            sizesArray = [
+                { name: 'M', price: 0 },
+                { name: 'L', price: formData.upsizePrice || 0 },
+            ]
+        }
+
         payload.append('name', formData.name)
         payload.append('category', formData.category)
         payload.append('basePrice', formData.basePrice)
-        payload.append('sizes', JSON.stringify(formData.sizes))
+        payload.append('sizes', JSON.stringify(sizesArray))
         payload.append('temperature', JSON.stringify(tempArr))
         payload.append('ingredients', JSON.stringify(formData.ingredients))
         payload.append('image', image)

@@ -26,28 +26,26 @@ export const addProductForm = [
         placeholder: 'Nhập giá sản phẩm',
         component: 'input',
         type: 'number',
+        useSeparator: true,
         required: true,
     },
     {
-        name: 'sizes',
-        label: 'Kích thước',
-        type: 'dynamicArray',
-        fields: [
-            {
-                name: 'sizeName',
-                label: 'Kích thước',
-                component: 'input',
-                type: 'text',
-                placeholder: 'Nhập kích thước',
-            },
-            {
-                name: 'price',
-                label: 'Giá',
-                placeholder: 'Phụ thu',
-                component: 'input',
-                type: 'number',
-            }
+        name: 'sizeOption',
+        label: 'Tùy chọn kích thước',
+        component: 'select',
+        options: [
+            { value: 'single', label: 'Không up size' },
+            { value: 'upsize', label: 'Có upsize' }
         ],
+        required: true,
+    },
+    {
+        name: 'upsizePrice',
+        label: 'Phụ thu upsize lên L',
+        placeholder: 'Nhập phụ thu upsize',
+        component: 'input',
+        type: 'number',
+        useSeparator: true,
         required: false,
     },
     {
@@ -88,6 +86,7 @@ export const addProductForm = [
                 placeholder: 'Nhập số lượng',
                 component: 'input',
                 type: 'number',
+                useSeparator: true,
             }
         ]
     },

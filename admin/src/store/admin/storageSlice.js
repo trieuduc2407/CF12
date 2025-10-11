@@ -17,9 +17,8 @@ export const addIngredient = createAsyncThunk('/storage/addIngredient', async (f
 })
 
 export const getIngredient = createAsyncThunk('/storage/getIngredient', async (id) => {
-    const response = await axios.post(
+    const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + `/api/admin/storage/get/${id}`,
-        {},
         { withCredentials: true })
     return response?.data
 })

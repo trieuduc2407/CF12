@@ -13,6 +13,7 @@ export const addIngredientForm = [
         placeholder: 'Nhập số lượng',
         component: 'input',
         type: 'number',
+        useSeparator: true,
         required: true,
     },
     {
@@ -33,6 +34,7 @@ export const addIngredientForm = [
         placeholder: 'Nhập ngưỡng cảnh báo',
         component: 'input',
         type: 'number',
+        useSeparator: true,
         required: true,
     }
 ]

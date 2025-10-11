@@ -24,7 +24,6 @@ const CommonForm = ({
     })
     const [touched, setTouched] = useState({})
 
-    // Get value from formData
     const getValue = useCallback(
         (controlItem, parentName, index) => {
             if (!parentName) return formData[controlItem.name] ?? ''
@@ -44,11 +43,17 @@ const CommonForm = ({
         [formData]
     )
 
-    // Set value into formData
     const setValue = useCallback(
         (controlItem, next, parentName, index) => {
             let processed = next
-            if (controlItem.name === 'price' || controlItem.type === 'number') {
+            const useSeparator = controlItem.useSeparator === true
+            if (useSeparator) {
+                processed = unformatNumber(next)
+                processed = processed === '' ? '' : Number(processed)
+            } else if (
+                controlItem.name === 'price' ||
+                controlItem.type === 'number'
+            ) {
                 processed = unformatNumber(next)
                 processed = processed === '' ? '' : Number(processed)
             }
@@ -74,12 +79,10 @@ const CommonForm = ({
         [formData, setFormData]
     )
 
-    // Mark field as touched
     const setFieldTouched = useCallback((key) => {
         setTouched((prev) => ({ ...prev, [key]: true }))
     }, [])
 
-    // Render input/select/switch control
     const renderInput = (controlItem, parentName, index) => {
         const value = getValue(controlItem, parentName, index)
         const key = getTouchedKey(controlItem.name, parentName, index)
@@ -87,18 +90,26 @@ const CommonForm = ({
         const errorClass = showError ? 'border-red-500' : 'border-gray-300'
 
         if (controlItem.component === 'input') {
+            const useSeparator = controlItem.useSeparator === true
             let display = value
-            if (controlItem.name === 'price' || controlItem.type === 'number') {
+            if (useSeparator) {
+                display =
+                    value === '' || value === null || value === undefined
+                        ? ''
+                        : formatNumber(value)
+            } else if (
+                controlItem.name === 'price' ||
+                controlItem.type === 'number'
+            ) {
                 display =
                     value === '' ||
                     value === null ||
                     value === undefined ||
                     value === 0
                         ? ''
-                        : formatNumber(value)
+                        : value
             }
-            // Sử dụng type từ controlItem.type nếu có (ví dụ: password)
-            const inputType = controlItem.type || 'text'
+            const inputType = useSeparator ? 'text' : controlItem.type || 'text'
             return (
                 <input
                     id={
@@ -110,6 +121,7 @@ const CommonForm = ({
                     }
                     type={inputType}
                     inputMode={
+                        useSeparator ||
                         controlItem.type === 'number' ||
                         controlItem.name === 'price'
                             ? 'numeric'
@@ -118,9 +130,13 @@ const CommonForm = ({
                     placeholder={controlItem.placeholder}
                     className={`${controlItem?.disabled ? 'cursor-not-allowed disabled:bg-gray-50' : ''} w-auto rounded-lg border xl:text-base ${errorClass} p-2 text-xs focus-visible:border-gray-500 focus-visible:outline-none sm:text-sm md:text-base`}
                     value={display}
-                    onChange={(e) =>
-                        setValue(controlItem, e.target.value, parentName, index)
-                    }
+                    onChange={(e) => {
+                        let val = e.target.value
+                        if (useSeparator) {
+                            val = val.replace(/[^\d.,]/g, '')
+                        }
+                        setValue(controlItem, val, parentName, index)
+                    }}
                     onBlur={() => setFieldTouched(key)}
                     {...(controlItem?.disabled ? { disabled: true } : null)}
                 />
@@ -173,7 +189,6 @@ const CommonForm = ({
         return null
     }
 
-    // Render dynamic array field
     const renderDynamicArray = (controlItem) => {
         const array = formData[controlItem.name] || []
         return (
@@ -203,7 +218,6 @@ const CommonForm = ({
                 </div>
                 <div className="flex flex-col gap-4">
                     {array.map((item, idx) => (
-                        // allow wrapping on small screens so two inputs don't overflow
                         <div
                             key={idx}
                             className="flex flex-wrap items-center gap-2"
@@ -217,7 +231,6 @@ const CommonForm = ({
                                 return (
                                     <div
                                         key={f.name}
-                                        // let children shrink and take full width on small screens
                                         className="flex min-w-0 flex-1 flex-col gap-1 text-xs sm:text-sm md:text-base"
                                     >
                                         <p className="text-sm">{f.label}</p>
@@ -254,7 +267,6 @@ const CommonForm = ({
         )
     }
 
-    // Render dynamic field (array of objects)
     const renderDynamicField = (controlItem) => {
         const array = formData[controlItem.name] || []
         return (
@@ -323,7 +335,6 @@ const CommonForm = ({
         )
     }
 
-    // Render each top-level control
     const renderControl = (controlItem) => {
         if (controlItem.type === 'dynamicArray') {
             return (
@@ -339,10 +350,15 @@ const CommonForm = ({
                 </Fragment>
             )
         }
-        // Special case: only show isDefaultTemperature if temperature is hot_ice
         if (
             controlItem.name === 'isDefaultTemperature' &&
             formData.temperature !== 'hot_ice'
+        ) {
+            return null
+        }
+        if (
+            controlItem.name === 'upsizePrice' &&
+            formData.sizeOption !== 'upsize'
         ) {
             return null
         }
@@ -362,7 +378,6 @@ const CommonForm = ({
         )
     }
 
-    // Reset touched and errors when formData is cleared (after submit)
     useEffect(() => {
         if (Object.keys(formData).length === 0 || isFormDataEmpty(formData)) {
             setTouched({})
