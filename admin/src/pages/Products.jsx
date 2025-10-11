@@ -18,9 +18,9 @@ import { getAllIngredients } from '../store/admin/storageSlice'
 const initialState = {
     name: '',
     category: '',
-    basePrice: 0,
+    basePrice: '',
     sizeOption: 'single',
-    upsizePrice: 0,
+    upsizePrice: '',
     sizes: [],
     temperature: [],
     ingredients: [],

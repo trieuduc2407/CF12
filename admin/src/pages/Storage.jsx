@@ -16,9 +16,9 @@ import validateFormData from '../utils/validateFormData'
 
 const initialState = {
     name: '',
-    quantity: 0,
+    quantity: '',
     unit: '',
-    threshold: 0,
+    threshold: '',
 }
 
 const unitMap = {

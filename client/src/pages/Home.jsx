@@ -8,7 +8,6 @@ const Home = () => {
     const navigate = useNavigate()
     return (
         <>
-            <Header />
             <div className="card m-5 flex-row justify-start bg-red-300 py-5 text-3xl">
                 <div className="px-5">
                     <ShoppingBag size={48} />

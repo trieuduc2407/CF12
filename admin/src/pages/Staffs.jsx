@@ -183,6 +183,7 @@ const Staffs = () => {
     return (
         <>
             {showToast.isShow && (
+                console.log('showToast', showToast) ||
                 <div className="toast toast-top toast-end">
                     <div className={`alert alert-${showToast.type}`}>
                         <span>{showToast.text}</span>

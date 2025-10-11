@@ -6,7 +6,7 @@ const initialState = {
     staffs: [],
 }
 
-export const addStaff = createAsyncThunk('/staff/addStaff', async (formData) => {
+export const addStaff = createAsyncThunk('/adminStaff/addStaff', async (formData) => {
     const response = await axios.post(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/add',
         formData,
@@ -17,21 +17,21 @@ export const addStaff = createAsyncThunk('/staff/addStaff', async (formData) => 
     return response?.data
 })
 
-export const getAllStaff = createAsyncThunk('/staff/getAllStaff', async () => {
+export const getAllStaff = createAsyncThunk('/adminStaff/getAllStaff', async () => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all',
         { withCredentials: true })
     return response?.data
 })
 
-export const getStaff = createAsyncThunk('/staff/getStaff', async (id) => {
+export const getStaff = createAsyncThunk('/adminStaff/getStaff', async (id) => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/get/${id}`,
         { withCredentials: true })
     return response?.data
 })
 
-export const updateStaff = createAsyncThunk('/staff/updateStaff', async ({ id, formData }) => {
+export const updateStaff = createAsyncThunk('/adminStaff/updateStaff', async ({ id, formData }) => {
     const response = await axios.put(
         import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/update/${id}`,
         formData,
@@ -42,7 +42,7 @@ export const updateStaff = createAsyncThunk('/staff/updateStaff', async ({ id, f
     return response?.data
 })
 
-export const deleteStaff = createAsyncThunk('/staff/deleteStaff', async (id) => {
+export const deleteStaff = createAsyncThunk('/adminStaff/deleteStaff', async (id) => {
     const response = await axios.delete(
         import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/delete/${id}`,
         { withCredentials: true }

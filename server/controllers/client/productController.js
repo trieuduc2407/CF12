@@ -1,4 +1,4 @@
-import {productModel} from '../../models/productModel.js'
+import { productModel } from '../../models/productModel.js'
 
 const getAllProduct = async (req, res) => {
     try {
@@ -12,7 +12,16 @@ const getAllProduct = async (req, res) => {
 
         res.json({
             success: true,
-            data: products
+            data: products.map(product => ({
+                available: product.available,
+                basePrice: product.basePrice,
+                category: product.category,
+                imageUrl: product.imageUrl,
+                name: product.name,
+                size: product.size,
+                temperature: product.temperature,
+                _id: product._id
+            }))
         })
     } catch (error) {
         console.log(error)

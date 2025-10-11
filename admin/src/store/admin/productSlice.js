@@ -6,7 +6,7 @@ const initialState = {
     products: [],
 }
 
-export const addProduct = createAsyncThunk('/admin/addProduct', async (formData) => {
+export const addProduct = createAsyncThunk('/adminProduct/addProduct', async (formData) => {
     const response = await axios.post(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/products/add',
         formData,
@@ -17,21 +17,21 @@ export const addProduct = createAsyncThunk('/admin/addProduct', async (formData)
     return response?.data
 })
 
-export const getAllProducts = createAsyncThunk('/admin/getAllProducts', async () => {
+export const getAllProducts = createAsyncThunk('/adminProduct/getAllProducts', async () => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/products/all',
         { withCredentials: true })
     return response?.data
 })
 
-export const getProduct = createAsyncThunk('/admin/getProduct', async (id) => {
+export const getProduct = createAsyncThunk('/adminProduct/getProduct', async (id) => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + `/api/admin/products/get/${id}`,
         { withCredentials: true })
     return response?.data
 })
 
-export const updateProduct = createAsyncThunk('/admin/updateProduct', async ({ id, formData }) => {
+export const updateProduct = createAsyncThunk('/adminProduct/updateProduct', async ({ id, formData }) => {
     const response = await axios.put(
         import.meta.env.VITE_BACKEND_URL + `/api/admin/products/update/${id}`,
         formData,
@@ -39,7 +39,7 @@ export const updateProduct = createAsyncThunk('/admin/updateProduct', async ({ i
     return response?.data
 })
 
-export const deleteProduct = createAsyncThunk('/admin/deleteProduct', async (id) => {
+export const deleteProduct = createAsyncThunk('/adminProduct/deleteProduct', async (id) => {
     const response = await axios.delete(
         import.meta.env.VITE_BACKEND_URL + `/api/admin/products/delete/${id}`,
         { withCredentials: true })

@@ -12,12 +12,12 @@ const Header = () => {
         const hour = now.getHours()
         if (hour >= 7 && hour <= 23) {
             setActive({
-                status: ' text-green-500 active',
+                status: 'text-green-500 active',
                 text: 'Đang mở cửa',
             })
         } else {
             setActive({
-                status: 'inactive',
+                status: 'text-red-500 inactive',
                 text: 'Đang đóng cửa',
             })
         }
@@ -41,8 +41,8 @@ const Header = () => {
                 <h2 className="text-3xl text-black md:max-lg:text-2xl">
                     Cà phê mười hai 21 Bông Lau 6
                 </h2>
-                <div className={'mt-2.5 flex' + active.status}>
-                    <Dot />
+                <div className={`mt-2.5 flex ${active.status}`}>
+                    <Dot strokeWidth={3} />
                     <p className="pl-2.5">{active.text}</p>
                 </div>
                 <div className="mt-2.5 flex text-gray-500">
