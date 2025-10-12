@@ -20,7 +20,9 @@ const getAllProduct = async (req, res) => {
                 name: product.name,
                 size: product.size,
                 temperature: product.temperature,
-                _id: product._id
+                _id: product._id,
+                createdAt: product.createdAt,
+                signature: product.signature,
             }))
         })
     } catch (error) {
@@ -32,29 +34,4 @@ const getAllProduct = async (req, res) => {
     }
 }
 
-const getLastestProducts = async (req, res) => {
-    try {
-        const products = await productModel.find().sort({ createdAt: -1 }).limit(4)
-        res.json({
-            success: true,
-            data: products.map(product => ({
-                available: product.available,
-                basePrice: product.basePrice,
-                category: product.category,
-                imageUrl: product.imageUrl,
-                name: product.name,
-                size: product.size,
-                temperature: product.temperature,
-                _id: product._id
-            }))
-        })
-    } catch (error) {
-        console.log(error)
-        res.json({
-            success: false,
-            message: "Server error"
-        })
-    }
-}
-
-export { getAllProduct, getLastestProducts }
+export { getAllProduct }

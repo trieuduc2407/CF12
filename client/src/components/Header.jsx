@@ -1,7 +1,7 @@
 import { Clock, Dot, PhoneCall, ReceiptText, Search, Store } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
-const categoryList = [
+const navbarItems = [
     { value: 'new', label: 'Món mới' },
     { value: 'coffee', label: 'Cà phê' },
     { value: 'mixed', label: 'Sinh tố' },
@@ -102,7 +102,7 @@ const Header = () => {
                         </label>
                     </div>
                     <ul className="bg-bg-base mx-2.5 grid grid-cols-3 gap-2">
-                        {categoryList.map((category) => (
+                        {navbarItems.map((category) => (
                             <li
                                 className={`h-8 content-center rounded-md bg-white`}
                                 key={category.value}
@@ -118,7 +118,7 @@ const Header = () => {
             </div>
 
             <div
-                className={`bg-bg-base sticky top-0 ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
+                className={`bg-bg-base sticky top-0 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
             >
                 <div className="relative bg-white p-1.5">
                     <p className="text-center text-gray-700">
@@ -130,7 +130,7 @@ const Header = () => {
                     />
                 </div>
                 <ul className="bg-bg-base menu grid grid-cols-3 gap-2 p-2.5">
-                    {categoryList.map((category) => (
+                    {navbarItems.map((category) => (
                         <li
                             className="h-8 content-center rounded-md bg-white"
                             key={category.value}
