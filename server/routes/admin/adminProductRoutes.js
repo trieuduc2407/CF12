@@ -1,7 +1,7 @@
 import express from 'express'
 import { staffAuthMiddleware } from '../../middleware/staffAuthMiddleware.js'
 import { requireRoleMiddleware } from '../../middleware/requireRoleMiddleware.js'
-import { addProduct, deleteProduct, getAllProduct, getProduct, updateProduct } from '../../controllers/admin/productController.js'
+import { addProduct, deleteProduct, getAllProduct, getProduct, updateProduct, toggleSignature } from '../../controllers/admin/productController.js'
 import multer from 'multer'
 
 const router = express.Router()
@@ -14,5 +14,6 @@ router.get('/get/:id', staffAuthMiddleware, requireRoleMiddleware('admin'), getP
 router.get('/all', staffAuthMiddleware, requireRoleMiddleware('admin'), getAllProduct)
 router.put('/update/:id', staffAuthMiddleware, requireRoleMiddleware('admin'), upload.single('image'), updateProduct)
 router.delete('/delete/:id', staffAuthMiddleware, requireRoleMiddleware('admin'), deleteProduct)
+router.put('/signature/:id', staffAuthMiddleware, requireRoleMiddleware('admin'), toggleSignature)
 
 export { router }

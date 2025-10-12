@@ -46,6 +46,14 @@ export const deleteProduct = createAsyncThunk('/adminProduct/deleteProduct', asy
     return response?.data
 })
 
+export const toggleSignature = createAsyncThunk('/adminProduct/toggleSignature', async (id) => {
+    const response = await axios.put(
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/products/signature/${id}`,
+        {},
+        { withCredentials: true })
+    return response?.data
+})
+
 const productSlice = createSlice({
     name: 'product',
     initialState,

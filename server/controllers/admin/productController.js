@@ -199,4 +199,47 @@ const deleteProduct = async (req, res) => {
     }
 }
 
-export { addProduct, getProduct, getAllProduct, updateProduct, deleteProduct }
+const toggleSignature = async (req, res) => {
+    const { id } = req.params
+    try {
+        const product = await productModel.findById(id)
+        if (!product) {
+            return res.json({
+                success: false,
+                message: "Sản phẩm không tồn tại"
+            })
+        }
+
+        if (product.signature) {
+            // Nếu đang là signature, remove khỏi signature
+            await productModel.findByIdAndUpdate(id, { signature: false })
+        } else {
+            // Nếu chưa là signature, thêm vào signature
+            const signatureProducts = await productModel.find({ signature: true }).sort({ updatedAt: 1 })
+
+            if (signatureProducts.length >= 4) {
+                // FIFO: Remove sản phẩm được thêm đầu tiên (oldest)
+                const oldestSignature = signatureProducts[0]
+                await productModel.findByIdAndUpdate(oldestSignature._id, { signature: false })
+            }
+
+            await productModel.findByIdAndUpdate(id, {
+                signature: true,
+                updatedAt: new Date()
+            })
+        }
+
+        res.json({
+            success: true,
+            message: product.signature ? "Đã bỏ khỏi signature" : "Đã thêm vào signature"
+        })
+    } catch (error) {
+        console.log(error)
+        res.json({
+            success: false,
+            message: "Server error"
+        })
+    }
+}
+
+export { addProduct, getProduct, getAllProduct, updateProduct, deleteProduct, toggleSignature }

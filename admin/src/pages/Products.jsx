@@ -11,6 +11,7 @@ import {
     deleteProduct,
     getAllProducts,
     getProduct,
+    toggleSignature,
     updateProduct,
 } from '../store/admin/productSlice'
 import { getAllIngredients } from '../store/admin/storageSlice'
@@ -162,6 +163,19 @@ const Products = () => {
         })
     }
 
+    const handleToggleSignature = async (id) => {
+        const result = await dispatch(toggleSignature(id))
+        if (result?.payload?.success) {
+            dispatch(getAllProducts())
+            setShowToast({
+                isShow: true,
+                type: 'success',
+                text: result.payload.message,
+            })
+            setTimeout(() => setShowToast({ isShow: false, text: '' }), 2000)
+        }
+    }
+
     const productForm = addProductForm.map((item) => {
         if (item.name === 'ingredients') {
             return {
@@ -264,6 +278,9 @@ const Products = () => {
                                           key={product._id}
                                           getProductData={getProductData}
                                           handleDelete={handleDelete}
+                                          handleToggleSignature={() =>
+                                              handleToggleSignature(product._id)
+                                          }
                                       />
                                   )
                               })

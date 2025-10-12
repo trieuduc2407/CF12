@@ -1,13 +1,37 @@
+import { Star } from 'lucide-react'
 import React from 'react'
 import { useSelector } from 'react-redux'
 
 import formatNumber from '../utils/formatNumber'
 
-const Card = ({ product, getProductData, handleDelete }) => {
+const Card = ({
+    product,
+    getProductData,
+    handleDelete,
+    handleToggleSignature,
+}) => {
     const { isLoading } = useSelector((state) => state.adminProduct)
-    console.log(isLoading)
+
     return (
-        <div className="card w-80 bg-white shadow-sm">
+        <div className="card relative w-80 bg-white shadow-sm">
+            <button
+                className={`btn btn-sm btn-circle absolute right-2 top-2 z-10 border-0 ${
+                    product.signature
+                        ? 'bg-yellow-400 text-white hover:bg-yellow-500'
+                        : 'bg-white text-gray-400 hover:bg-gray-100'
+                }`}
+                onClick={handleToggleSignature}
+                title={
+                    product.signature
+                        ? 'Bỏ khỏi signature'
+                        : 'Thêm vào signature'
+                }
+            >
+                <Star
+                    size={16}
+                    fill={product.signature ? 'currentColor' : 'none'}
+                />
+            </button>
             <figure>
                 {isLoading ? (
                     <div className="skeleton h-80 w-80"></div>
