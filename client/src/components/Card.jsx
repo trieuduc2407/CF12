@@ -8,7 +8,7 @@ const Card = ({ product }) => {
     const { isLoading } = useSelector((state) => state.clientProduct)
 
     return (
-        <div className="card w-40 bg-white shadow-sm">
+        <div className="card w-full justify-self-center bg-white shadow-sm">
             <figure>
                 {isLoading ? (
                     <div className="skeleton h-80 w-80"></div>
