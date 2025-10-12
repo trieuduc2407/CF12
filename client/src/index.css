@@ -6,6 +6,7 @@
 
 @theme {
 	--breakpoint-3xl: 120rem;
+  --color-bg-base: #f5f5f5;
 }
 
 @layer base {
