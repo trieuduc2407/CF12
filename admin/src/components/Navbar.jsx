@@ -1,12 +1,14 @@
 import {
     Coffee,
     LayoutDashboard,
+    LogOut,
     ReceiptText,
     Users,
     Warehouse,
 } from 'lucide-react'
-import React from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { useLogout } from '../hooks/useLogout'
 
 const adminNavbarItems = [
     {
@@ -43,6 +45,7 @@ const adminNavbarItems = [
 
 const Navbar = () => {
     const navigate = useNavigate()
+    const handleLogout = useLogout()
 
     return (
         <nav className="mt-8">
@@ -59,6 +62,13 @@ const Navbar = () => {
                     <span>{item.title}</span>
                 </button>
             ))}
+            <button
+                className="my-5 flex cursor-pointer items-center gap-4 md:hidden"
+                onClick={() => handleLogout()}
+            >
+                <LogOut />
+                Đăng Xuất
+            </button>
         </nav>
     )
 }

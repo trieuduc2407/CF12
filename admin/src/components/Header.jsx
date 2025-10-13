@@ -1,22 +1,13 @@
 import { LogOut, TextAlignJustify } from 'lucide-react'
-import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-import { logoutStaff } from '../store/auth/authSlice'
+import { useLogout } from '../hooks/useLogout'
 
 const Header = () => {
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
     const { staff } = useSelector((state) => state.auth)
-
-    const handleLogout = async () => {
-        await dispatch(logoutStaff()).then((data) => {
-            if (data?.payload?.success) {
-                navigate('/admin/login', { replace: true })
-            }
-        })
-    }
+    const navigate = useNavigate()
+    const handleLogout = useLogout()
 
     return (
         <div className="flex items-center justify-between bg-white px-10 py-8">
@@ -56,7 +47,7 @@ const Header = () => {
                     </li>
                 </ul>
                 <button
-                    className="flex cursor-pointer items-center gap-2 p-2"
+                    className="hidden cursor-pointer items-center gap-2 p-2 md:flex"
                     onClick={() => handleLogout()}
                 >
                     <LogOut />

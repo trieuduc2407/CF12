@@ -6,7 +6,7 @@ import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
 import Searchbar from '../components/Searchbar'
 import { addIngredientForm } from '../config/form'
-import useDebounce from '../hooks/useDebounce'
+import { useDebounce } from '../hooks/useDebounce'
 import {
     addIngredient,
     deleteIngredient,

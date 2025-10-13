@@ -13,7 +13,7 @@ import CommonForm from '../components/CommonForm'
 import ImageUpload from '../components/ImageUpload'
 import Searchbar from '../components/Searchbar'
 import { addProductForm } from '../config/form'
-import useDebounce from '../hooks/useDebounce'
+import { useDebounce } from '../hooks/useDebounce'
 import {
     addProduct,
     deleteProduct,
