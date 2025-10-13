@@ -1,4 +1,10 @@
-import { ChevronLeft, RotateCcw } from 'lucide-react'
+import {
+    ChevronLeft,
+    CircleEllipsis,
+    CirclePlus,
+    RotateCcw,
+    Search,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -51,6 +57,7 @@ const Storage = () => {
     const [query, setQuery] = useState('')
     const debouncedQuery = useDebounce(query, 500)
     const [searchResults, setSearchResults] = useState([])
+    const [showMobileSearch, setShowMobileSearch] = useState(false)
 
     const errors = validateFormData(addIngredientForm, formData)
 
@@ -191,8 +198,24 @@ const Storage = () => {
     }
 
     const onChange = (event) => {
-        const value = event.target.value
-        setQuery(value)
+        setQuery(event.target.value)
+    }
+
+    // Mobile searchbar: ẩn khi blur và input rỗng
+    const handleMobileSearchBlur = () => {
+        setTimeout(() => {
+            if (!query && showMobileSearch) {
+                setShowMobileSearch(false)
+            }
+        }, 150)
+    }
+
+    // Mobile searchbar: ẩn khi bấm X
+    const handleMobileSearchClose = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setShowMobileSearch(false)
+        setQuery('')
     }
 
     useEffect(() => {
@@ -218,6 +241,21 @@ const Storage = () => {
                     </div>
                 </div>
             )}
+
+            {/* Searchbar mobile */}
+            <div
+                id="search-bar"
+                className={`fixed left-0 right-0 top-0 z-30 bg-white pt-4 shadow-md transition-all duration-200 md:hidden ${showMobileSearch ? '' : 'hidden'}`}
+            >
+                <Searchbar
+                    searchName="nguyên liệu"
+                    onChange={onChange}
+                    value={query}
+                    onBlur={handleMobileSearchBlur}
+                    onClose={handleMobileSearchClose}
+                />
+            </div>
+
             <div className="drawer drawer-end xl:drawer-open gap-2">
                 <input
                     id="my-drawer"
@@ -229,15 +267,64 @@ const Storage = () => {
                     }}
                 />
                 <div className="drawer-content">
-                    <div className="my-4 flex justify-end xl:m-0">
+                    {/* FAB for mobile */}
+                    <div className="fab z-20 md:hidden" id="main-fab-storage">
+                        <div
+                            id="main-fab-storage-trigger"
+                            tabIndex={0}
+                            role="button"
+                            className="btn btn-lg btn-circle border-0 bg-amber-500"
+                        >
+                            <CircleEllipsis />
+                        </div>
+                        <button
+                            className="btn btn-lg btn-circle border-0 bg-amber-500"
+                            onClick={(e) => {
+                                document.getElementById('my-drawer').checked =
+                                    true
+                                document
+                                    .getElementById('main-fab-storage-trigger')
+                                    .blur()
+                                e.currentTarget.blur()
+                            }}
+                        >
+                            <CirclePlus />
+                        </button>
+                        <button
+                            className="btn btn-lg btn-circle border-0 bg-amber-500"
+                            onClick={(e) => {
+                                setShowMobileSearch(true)
+                                setTimeout(() => {
+                                    const input =
+                                        document.getElementById('menu-search')
+                                    if (input) input.focus()
+                                }, 50)
+                                document
+                                    .getElementById('main-fab-storage-trigger')
+                                    .blur()
+                                e.currentTarget.blur()
+                            }}
+                        >
+                            <Search />
+                        </button>
+                    </div>
+
+                    {/* Desktop searchbar */}
+                    <div className="my-4 hidden items-center justify-end md:flex xl:m-0">
+                        <Searchbar
+                            searchName="nguyên liệu"
+                            onChange={onChange}
+                            value={query}
+                        />
                         <label
                             htmlFor="my-drawer"
-                            className="drawer-button btn xl:hidden"
+                            className="drawer-button btn mb-4 ml-2 xl:hidden"
                         >
                             Thêm nguyên liệu
                         </label>
                     </div>
-                    <Searchbar searchName="nguyên liệu" onChange={onChange} />
+
+                    {/* List layout */}
                     {debouncedQuery ? (
                         searchResults.length > 0 ? (
                             <ListLayout
