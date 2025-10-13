@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { ReceiptText, Search, ShoppingBasket } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -33,6 +33,7 @@ const Menu = () => {
     const signatureProducts = products.filter((product) => product.signature)
 
     const [activeCategory, setActiveCategory] = useState(navbarItems[0].value)
+    const [isScrolled, setIsScrolled] = useState(false)
 
     useEffect(() => {
         const sectionIds = navbarItems.map((item) => item.value)
@@ -45,6 +46,10 @@ const Menu = () => {
             const scrollTop = window.scrollY
             const windowHeight = window.innerHeight
             const documentHeight = document.documentElement.scrollHeight
+
+            // Set sticky navbar state (show when scrolled down from header)
+            setIsScrolled(scrollTop > 100)
+
             const isNearBottom =
                 scrollTop + windowHeight >= documentHeight - 100
 
@@ -93,7 +98,64 @@ const Menu = () => {
 
     return (
         <>
-            <div className="mt-2.5 grid grid-cols-1 gap-2 md:grid-cols-[1fr_3fr_2fr]">
+            <div
+                className={`bg-bg-base flex w-full flex-col gap-2.5 transition-all duration-300 md:hidden ${isScrolled ? 'hidden -translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}
+            >
+                <div className="flex w-full justify-center bg-white pb-2.5">
+                    <label className="input w-[95%] rounded-lg bg-gray-100">
+                        <Search className="text-gray-400" />
+                        <input
+                            id="menu-search"
+                            type="search"
+                            className="grow"
+                            placeholder="Bạn đang cần tìm món gì ?"
+                        />
+                    </label>
+                </div>
+                <ul className="bg-bg-base mx-2.5 grid grid-cols-3 gap-2">
+                    {navbarItems.map((category) => (
+                        <li
+                            className={`h-8 cursor-pointer content-center rounded-md transition-colors ${activeCategory === category.value ? 'bg-amber-500 font-semibold text-white' : 'bg-white'}`}
+                            key={category.value}
+                            onClick={() => handleNavClick(category)}
+                        >
+                            <p className="text-nowrap text-center text-sm">
+                                {category.label}
+                            </p>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Sticky navbar cho mobile - hiển thị khi scroll */}
+            <div
+                className={`bg-bg-base sticky top-0 transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
+            >
+                <div className="relative bg-white p-1.5">
+                    <p className="text-center text-gray-700">
+                        Cà phê mười hai 21 Bông Lau 6
+                    </p>
+                    <Search
+                        className="absolute right-5 top-2.5 text-gray-400"
+                        size={16}
+                    />
+                </div>
+                <div className="bg-bg-base grid grid-cols-3 gap-2 p-2.5">
+                    {navbarItems.map((category) => (
+                        <button
+                            className={`h-8 cursor-pointer content-center rounded-md transition-colors ${activeCategory === category.value ? 'bg-amber-500 font-semibold text-white' : 'bg-white'}`}
+                            key={category.value}
+                            onClick={() => handleNavClick(category)}
+                        >
+                            <p className="text-nowrap text-center text-sm">
+                                {category.label}
+                            </p>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_3fr_2fr]">
                 <div className="scrollbar-thin sticky top-2 hidden h-fit max-h-screen overflow-y-auto rounded-2xl bg-white md:flex md:flex-col">
                     <div className="my-5 ml-5 text-xl font-bold text-black">
                         Danh mục
@@ -182,6 +244,17 @@ const Menu = () => {
                         Chưa có sản phẩm <br /> trong giỏ hàng
                     </p>
                 </div>
+            </div>
+            <div className="fixed bottom-0 flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
+                <button className="btn btn-sm flex flex-row border-0 bg-white py-5 shadow-none">
+                    <ReceiptText className="text-amber-500" />
+                    <p className="font-medium text-black"> Đơn hàng</p>
+                </button>
+                <button className="btn btn-sm border-0 bg-amber-500 py-5 text-white">
+                    <ShoppingBasket />
+                    <p>Giỏ hàng</p>
+                    <p></p>
+                </button>
             </div>
         </>
     )
