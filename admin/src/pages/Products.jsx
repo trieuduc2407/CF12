@@ -1,4 +1,10 @@
-import { ChevronLeft, RotateCcw } from 'lucide-react'
+import {
+    ChevronLeft,
+    CircleEllipsis,
+    CirclePlus,
+    RotateCcw,
+    Search,
+} from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -45,6 +51,7 @@ const Products = () => {
     const [query, setQuery] = useState('')
     const debouncedQuery = useDebounce(query, 500)
     const [searchResults, setSearchResults] = useState([])
+    const [showMobileSearch, setShowMobileSearch] = useState(false)
 
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
     const { products = [] } = useSelector((state) => state.adminProduct)
@@ -224,6 +231,24 @@ const Products = () => {
         setQuery(event.target.value)
     }
 
+    // Mobile searchbar: ẩn khi blur và input rỗng
+    const handleMobileSearchBlur = () => {
+        // Delay để onClick của nút X có thể chạy trước
+        setTimeout(() => {
+            if (!query && showMobileSearch) {
+                setShowMobileSearch(false)
+            }
+        }, 150)
+    }
+
+    // Mobile searchbar: ẩn khi bấm X
+    const handleMobileSearchClose = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setShowMobileSearch(false)
+        setQuery('')
+    }
+
     const onSubmit = (event) => {
         event.preventDefault()
         const payload = new FormData()
@@ -279,6 +304,19 @@ const Products = () => {
                     </div>
                 </div>
             )}
+
+            <div
+                id="search-bar"
+                className={`fixed left-0 right-0 top-0 z-30 bg-white pt-4 shadow-md transition-all duration-200 md:hidden ${showMobileSearch ? '' : 'hidden'}`}
+            >
+                <Searchbar
+                    searchName="sản phẩm"
+                    onChange={onChange}
+                    value={query}
+                    onBlur={handleMobileSearchBlur}
+                    onClose={handleMobileSearchClose}
+                />
+            </div>
             <div className="drawer drawer-end xl:drawer-open h-full gap-2">
                 <input
                     id="my-drawer"
@@ -295,9 +333,54 @@ const Products = () => {
                     }}
                 />
                 <div className="drawer-content flex flex-col overflow-hidden">
-                    <div className="flex justify-between py-4">
-                        <Searchbar searchName="sản phẩm" onChange={onChange} />
-                        <div className="my-4 flex justify-end xl:m-0">
+                    <div className="fab z-20 md:hidden" id="main-fab">
+                        <div
+                            id="main-fab-trigger"
+                            tabIndex={0}
+                            role="button"
+                            className="btn btn-lg btn-circle border-0 bg-amber-500"
+                        >
+                            <CircleEllipsis />
+                        </div>
+                        <button
+                            className="btn btn-lg btn-circle border-0 bg-amber-500"
+                            onClick={(e) => {
+                                document.getElementById('my-drawer').checked =
+                                    true
+                                document
+                                    .getElementById('main-fab-trigger')
+                                    .blur()
+                                e.currentTarget.blur()
+                            }}
+                        >
+                            <CirclePlus />
+                        </button>
+                        <button
+                            className="btn btn-lg btn-circle border-0 bg-amber-500"
+                            onClick={(e) => {
+                                setShowMobileSearch(true)
+                                setTimeout(() => {
+                                    const input =
+                                        document.getElementById('menu-search')
+                                    if (input) input.focus()
+                                }, 50)
+                                document
+                                    .getElementById('main-fab-trigger')
+                                    .blur()
+                                e.currentTarget.blur()
+                            }}
+                        >
+                            <Search />
+                        </button>
+                    </div>
+
+                    <div className="hidden items-center justify-around py-4 md:flex">
+                        <Searchbar
+                            searchName="sản phẩm"
+                            onChange={onChange}
+                            value={query}
+                        />
+                        <div className="mb-5 flex justify-end xl:m-0">
                             <label
                                 htmlFor="my-drawer"
                                 className="drawer-button btn xl:hidden"
@@ -347,7 +430,7 @@ const Products = () => {
                         )}
                     </div>
                 </div>
-                <div className="drawer-side rounded-lg">
+                <div className="drawer-side z-20 rounded-lg">
                     <label
                         htmlFor="my-drawer"
                         aria-label="close sidebar"
