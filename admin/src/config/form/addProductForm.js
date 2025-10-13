@@ -15,7 +15,7 @@ export const addProductForm = [
         options: [
             { value: 'coffee', label: 'Cà phê' },
             { value: 'mixed', label: 'Sinh tố và nước ép' },
-            { value: 'milktea', label: 'Trà sữa' },
+            { value: 'milktea', label: 'Trà sữa và trà hoa quả' },
             { value: 'yogurt', label: 'Sữa chua và thức uống khác' }
         ],
         required: true,

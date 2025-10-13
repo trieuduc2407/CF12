@@ -184,12 +184,13 @@ const Products = () => {
                     if (field.name === 'ingredientId') {
                         return {
                             ...field,
-                            options: ingredients.map((ingredient) => {
-                                return {
+                            options: ingredients
+                                .slice()
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((ingredient) => ({
                                     value: ingredient._id,
                                     label: ingredient.name,
-                                }
-                            }),
+                                })),
                         }
                     } else {
                         return field
@@ -232,6 +233,7 @@ const Products = () => {
                 dispatch(getAllProducts())
                 setFormData(initialState)
                 setImage(null)
+                setPreview('')
                 setShowToast({
                     isShow: true,
                     type: 'success',
@@ -271,19 +273,24 @@ const Products = () => {
                     </div>
                     <div className="3xl:grid-cols-3 scrollbar-hide grid flex-1 grid-cols-1 justify-items-center gap-y-8 overflow-y-auto sm:grid-cols-2 xl:max-2xl:grid-cols-1">
                         {products.data
-                            ? products.data.map((product) => {
-                                  return (
-                                      <Card
-                                          product={product}
-                                          key={product._id}
-                                          getProductData={getProductData}
-                                          handleDelete={handleDelete}
-                                          handleToggleSignature={() =>
-                                              handleToggleSignature(product._id)
-                                          }
-                                      />
-                                  )
-                              })
+                            ? products.data
+                                  .slice()
+                                  .sort((a, b) => a.name.localeCompare(b.name))
+                                  .map((product) => {
+                                      return (
+                                          <Card
+                                              product={product}
+                                              key={product._id}
+                                              getProductData={getProductData}
+                                              handleDelete={handleDelete}
+                                              handleToggleSignature={() =>
+                                                  handleToggleSignature(
+                                                      product._id
+                                                  )
+                                              }
+                                          />
+                                      )
+                                  })
                             : null}
                     </div>
                 </div>

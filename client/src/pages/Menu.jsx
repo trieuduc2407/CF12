@@ -17,8 +17,8 @@ const navbarItems = [
 const categoryItems = [
     { value: 'coffee', label: 'Cà phê' },
     { value: 'mixed', label: 'Sinh tố và nước ép' },
-    { value: 'milktea', label: 'Trà sữa' },
-    { value: 'yogurt', label: 'Sữa chua & khác' },
+    { value: 'milktea', label: 'Trà sữa và trà hoa quả' },
+    { value: 'yogurt', label: 'Sữa chua và thức uống khác' },
 ]
 
 const Menu = () => {
@@ -163,7 +163,7 @@ const Menu = () => {
                     {navbarItems.map((category) => (
                         <div
                             key={category.value}
-                            className={`text-md my-2 ml-5 cursor-pointer rounded-lg px-2 py-1 transition-colors ${activeCategory === category.value ? 'bg-amber-100 font-semibold text-amber-600' : 'font-light text-black'}`}
+                            className={`text-md my-2 ml-5 cursor-pointer rounded-lg px-2 py-1 transition-colors ${activeCategory === category.value ? 'bg-amber-500 font-semibold text-white' : 'font-light text-black'}`}
                             onClick={() => handleNavClick(category)}
                         >
                             {category.label}
