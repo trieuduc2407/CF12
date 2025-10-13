@@ -48,6 +48,13 @@ export const deleteIngredient = createAsyncThunk('/adminStorage/deleteIngredient
     return response?.data
 })
 
+export const searchIngredient = createAsyncThunk('/adminStorage/searchIngredient', async (q) => {
+    const response = await axios.get(
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/storage/search?q=${q}`,
+        { withCredentials: true })
+    return response?.data
+})
+
 const adminStorageSlice = createSlice({
     name: 'adminStorage',
     initialState,

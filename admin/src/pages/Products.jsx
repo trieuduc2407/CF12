@@ -5,12 +5,15 @@ import { useDispatch, useSelector } from 'react-redux'
 import Card from '../components/Card'
 import CommonForm from '../components/CommonForm'
 import ImageUpload from '../components/ImageUpload'
+import Searchbar from '../components/Searchbar'
 import { addProductForm } from '../config/form'
+import useDebounce from '../hooks/useDebounce'
 import {
     addProduct,
     deleteProduct,
     getAllProducts,
     getProduct,
+    searchProduct,
     toggleSignature,
     updateProduct,
 } from '../store/admin/productSlice'
@@ -39,6 +42,10 @@ const Products = () => {
         text: '',
     })
 
+    const [query, setQuery] = useState('')
+    const debouncedQuery = useDebounce(query, 500)
+    const [searchResults, setSearchResults] = useState([])
+
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
     const { products = [] } = useSelector((state) => state.adminProduct)
     const dispatch = useDispatch()
@@ -47,6 +54,18 @@ const Products = () => {
         dispatch(getAllIngredients())
         dispatch(getAllProducts())
     }, [dispatch])
+
+    useEffect(() => {
+        if (debouncedQuery) {
+            dispatch(searchProduct(debouncedQuery)).then((data) => {
+                if (data?.payload?.success) {
+                    setSearchResults(data.payload.data)
+                }
+            })
+        } else {
+            setSearchResults([])
+        }
+    }, [debouncedQuery, dispatch])
 
     const getProductData = (id) => {
         dispatch(getProduct(id)).then((data) => {
@@ -201,6 +220,10 @@ const Products = () => {
         return item
     })
 
+    const onChange = (event) => {
+        setQuery(event.target.value)
+    }
+
     const onSubmit = (event) => {
         event.preventDefault()
         const payload = new FormData()
@@ -256,42 +279,72 @@ const Products = () => {
                     </div>
                 </div>
             )}
-            <div className="drawer xl:drawer-open drawer-end h-full gap-2">
+            <div className="drawer drawer-end xl:drawer-open h-full gap-2">
                 <input
                     id="my-drawer"
                     type="checkbox"
                     className="drawer-toggle"
+                    onChange={(e) => {
+                        if (!e.target.checked) {
+                            setCurrentUpdateId('')
+                            setFormData(initialState)
+                            setImage(null)
+                            setPreview('')
+                            setImageUpdated(false)
+                        }
+                    }}
                 />
                 <div className="drawer-content flex flex-col overflow-hidden">
-                    <div className="my-4 flex justify-end xl:m-0">
-                        <label
-                            htmlFor="my-drawer"
-                            className="drawer-button btn xl:hidden"
-                        >
-                            Thêm sản phẩm
-                        </label>
+                    <div className="flex justify-between py-4">
+                        <Searchbar searchName="sản phẩm" onChange={onChange} />
+                        <div className="my-4 flex justify-end xl:m-0">
+                            <label
+                                htmlFor="my-drawer"
+                                className="drawer-button btn xl:hidden"
+                            >
+                                Thêm sản phẩm
+                            </label>
+                        </div>
                     </div>
-                    <div className="3xl:grid-cols-3 scrollbar-hide grid flex-1 grid-cols-1 justify-items-center gap-y-8 overflow-y-auto sm:grid-cols-2 xl:max-2xl:grid-cols-1">
-                        {products.data
-                            ? products.data
-                                  .slice()
-                                  .sort((a, b) => a.name.localeCompare(b.name))
-                                  .map((product) => {
-                                      return (
-                                          <Card
-                                              product={product}
-                                              key={product._id}
-                                              getProductData={getProductData}
-                                              handleDelete={handleDelete}
-                                              handleToggleSignature={() =>
-                                                  handleToggleSignature(
-                                                      product._id
-                                                  )
-                                              }
-                                          />
-                                      )
-                                  })
-                            : null}
+                    <div className="scrollbar-hide 3xl:grid-cols-3 grid flex-1 grid-cols-1 items-start justify-items-center gap-8 overflow-y-auto sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                        {debouncedQuery ? (
+                            searchResults.length > 0 ? (
+                                searchResults.map((product) => (
+                                    <Card
+                                        product={product}
+                                        key={product._id}
+                                        getProductData={getProductData}
+                                        handleDelete={handleDelete}
+                                        handleToggleSignature={() =>
+                                            handleToggleSignature(product._id)
+                                        }
+                                    />
+                                ))
+                            ) : (
+                                <p className="col-span-full text-center text-lg font-semibold text-gray-500">
+                                    Không tìm thấy sản phẩm
+                                </p>
+                            )
+                        ) : products.data && products.data.length > 0 ? (
+                            products.data
+                                .slice()
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((product) => (
+                                    <Card
+                                        product={product}
+                                        key={product._id}
+                                        getProductData={getProductData}
+                                        handleDelete={handleDelete}
+                                        handleToggleSignature={() =>
+                                            handleToggleSignature(product._id)
+                                        }
+                                    />
+                                ))
+                        ) : (
+                            <p className="col-span-full text-center text-lg font-semibold text-gray-500">
+                                Chưa có sản phẩm nào
+                            </p>
+                        )}
                     </div>
                 </div>
                 <div className="drawer-side rounded-lg">
@@ -300,8 +353,8 @@ const Products = () => {
                         aria-label="close sidebar"
                         className="drawer-overlay"
                     ></label>
-                    <div className="menu w-sm md:w-xl scrollbar-hide flex h-screen flex-col justify-center overflow-y-auto bg-white px-8">
-                        <div className="flex justify-between">
+                    <div className="scrollbar-hide menu w-sm md:w-xl flex h-screen flex-col overflow-y-auto bg-white px-8">
+                        <div className="flex items-center justify-between py-4">
                             <button
                                 className="md:hidden"
                                 onClick={() =>
@@ -309,21 +362,24 @@ const Products = () => {
                                         'my-drawer'
                                     ).checked = false)
                                 }
+                                title="Đóng"
                             >
                                 <ChevronLeft />
                             </button>
-                            <p className="p-4 text-2xl font-semibold">
+                            <h2 className="text-2xl font-semibold">
                                 {currentUpdateId
                                     ? 'Cập nhật sản phẩm'
                                     : 'Thêm sản phẩm'}
-                            </p>
+                            </h2>
                             <button
                                 onClick={() => {
                                     setFormData(initialState)
                                     setCurrentUpdateId('')
                                     setImage(null)
                                     setPreview('')
+                                    setImageUpdated(false)
                                 }}
+                                title="Đặt lại form"
                             >
                                 <RotateCcw />
                             </button>

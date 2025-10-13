@@ -242,4 +242,31 @@ const toggleSignature = async (req, res) => {
     }
 }
 
-export { addProduct, getProduct, getAllProduct, updateProduct, deleteProduct, toggleSignature }
+const searchProduct = async (req, res) => {
+    const { query } = req.query
+    try {
+        if (!query) {
+            return res.json({
+                success: false,
+                message: "Vui lòng nhập từ khóa tìm kiếm"
+            })
+        }
+
+        const products = await productModel.find({
+            name: { $regex: query, $options: 'i' }
+        })
+
+        res.json({
+            success: true,
+            data: products
+        })
+    } catch (error) {
+        console.log(error)
+        res.json({
+            success: false,
+            message: "Server error"
+        })
+    }
+}
+
+export { addProduct, getProduct, getAllProduct, updateProduct, deleteProduct, toggleSignature, searchProduct }

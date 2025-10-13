@@ -126,4 +126,23 @@ const deleteIngredient = async (req, res) => {
     }
 }
 
-export { addIngredient, getIngredient, getAllIngredient, updateIngredient, deleteIngredient }
+const searchIngredient = async (req, res) => {
+    const { q } = req.query
+    try {
+        const ingredients = await storageModel.find({
+            name: { $regex: q, $options: 'i' }
+        })
+        res.json({
+            success: true,
+            data: ingredients
+        })
+    } catch (error) {
+        console.log(error)
+        res.json({
+            success: false,
+            message: "Server error"
+        })
+    }
+}
+
+export { addIngredient, getIngredient, getAllIngredient, updateIngredient, deleteIngredient, searchIngredient }

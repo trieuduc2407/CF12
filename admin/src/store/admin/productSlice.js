@@ -54,6 +54,13 @@ export const toggleSignature = createAsyncThunk('/adminProduct/toggleSignature',
     return response?.data
 })
 
+export const searchProduct = createAsyncThunk('/adminProduct/searchProduct', async (query) => {
+    const response = await axios.get(
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/products/search?query=${query}`,
+        { withCredentials: true })
+    return response?.data
+})
+
 const productSlice = createSlice({
     name: 'product',
     initialState,

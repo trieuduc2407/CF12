@@ -1,15 +1,18 @@
 import { ChevronLeft, RotateCcw } from 'lucide-react'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
+import Searchbar from '../components/Searchbar'
 import { addIngredientForm } from '../config/form'
+import useDebounce from '../hooks/useDebounce'
 import {
     addIngredient,
     deleteIngredient,
     getAllIngredients,
     getIngredient,
+    searchIngredient,
     updateIngredient,
 } from '../store/admin/storageSlice'
 import validateFormData from '../utils/validateFormData'
@@ -44,6 +47,11 @@ const Storage = () => {
     })
     const [sortBy, setSortBy] = useState('ratio')
     const [sortOrder, setSortOrder] = useState('asc')
+
+    const [query, setQuery] = useState('')
+    const debouncedQuery = useDebounce(query, 500)
+    const [searchResults, setSearchResults] = useState([])
+
     const errors = validateFormData(addIngredientForm, formData)
 
     const dispatch = useDispatch()
@@ -182,9 +190,24 @@ const Storage = () => {
         })
     }
 
+    const onChange = (event) => {
+        const value = event.target.value
+        setQuery(value)
+    }
+
     useEffect(() => {
         dispatch(getAllIngredients())
     }, [dispatch])
+
+    useEffect(() => {
+        if (debouncedQuery) {
+            dispatch(searchIngredient(debouncedQuery)).then((data) => {
+                if (data?.payload?.success) {
+                    setSearchResults(data.payload.data)
+                }
+            })
+        }
+    }, [debouncedQuery])
 
     return (
         <>
@@ -214,16 +237,36 @@ const Storage = () => {
                             Thêm nguyên liệu
                         </label>
                     </div>
-                    <ListLayout
-                        listLabel={listLabel}
-                        listItem={sortedIngredients}
-                        handleUpdate={getIngredientData}
-                        handleDelete={handleDelete}
-                        labelMap={unitMap}
-                        handleSort={handleSort}
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                    />
+                    <Searchbar searchName="nguyên liệu" onChange={onChange} />
+                    {debouncedQuery ? (
+                        searchResults.length > 0 ? (
+                            <ListLayout
+                                listLabel={listLabel}
+                                listItem={searchResults}
+                                handleUpdate={getIngredientData}
+                                handleDelete={handleDelete}
+                                labelMap={unitMap}
+                                handleSort={handleSort}
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                            />
+                        ) : (
+                            <p className="text-center text-lg font-semibold">
+                                Không tìm thấy nguyên liệu
+                            </p>
+                        )
+                    ) : (
+                        <ListLayout
+                            listLabel={listLabel}
+                            listItem={sortedIngredients}
+                            handleUpdate={getIngredientData}
+                            handleDelete={handleDelete}
+                            labelMap={unitMap}
+                            handleSort={handleSort}
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
+                        />
+                    )}
                 </div>
                 <div className="drawer-side rounded-lg">
                     <label
