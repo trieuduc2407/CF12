@@ -29,7 +29,7 @@ const Header = () => {
 
     return (
         <>
-            <div className="flex flex-col bg-white md:flex-row md:p-5">
+            <div className="flex flex-col rounded-lg bg-white md:flex-row md:p-5">
                 <div className="relative flex-1 shrink overflow-hidden md:w-2/5">
                     <button
                         className="absolute left-2.5 top-2.5 text-white"
@@ -72,7 +72,7 @@ const Header = () => {
                             Số điện thoại cửa hàng: 0398810012
                         </p>
                     </div>
-                    <button className="absolute right-0 top-0 hidden rounded-2xl border-2 border-gray-200 bg-white p-2 text-black md:flex">
+                    <button className="absolute right-0 top-0 hidden rounded-lg border-2 border-gray-200 bg-white p-2 text-black md:flex">
                         <ReceiptText className="text-amber-500" />
                         <p className="pl-2.5">Đơn hàng</p>
                     </button>

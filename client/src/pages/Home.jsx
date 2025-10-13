@@ -12,7 +12,7 @@ const Home = () => {
                 </div>
                 Nhập số điện thoại để tích điểm
             </div>
-            <div className="h-dvh rounded-2xl bg-white">
+            <div className="h-dvh rounded-lg bg-white">
                 <div className="rounded-box flex w-full p-5">
                     <div className="card bg-base-300 rounded-box grid h-20 grow place-items-center">
                         Gọi thanh toán

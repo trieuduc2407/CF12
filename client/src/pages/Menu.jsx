@@ -155,8 +155,8 @@ const Menu = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_3fr_2fr]">
-                <div className="scrollbar-thin sticky top-2 hidden h-fit max-h-screen overflow-y-auto rounded-2xl bg-white md:flex md:flex-col">
+            <div className="mt-5 grid grid-cols-1 gap-2 md:grid-cols-[1fr_3fr_2fr]">
+                <div className="scrollbar-thin sticky top-2 hidden h-fit max-h-screen overflow-y-auto rounded-lg bg-white md:flex md:flex-col">
                     <div className="my-5 ml-5 text-xl font-bold text-black">
                         Danh mục
                     </div>
@@ -170,7 +170,7 @@ const Menu = () => {
                         </div>
                     ))}
                 </div>
-                <div className="rounded-2xl bg-white px-2.5">
+                <div className="rounded-lg bg-white px-2.5">
                     <div className="hidden w-full justify-center bg-white pt-2.5 md:flex">
                         <label className="input w-[95%] rounded-xl bg-gray-100">
                             <Search className="text-gray-400" />
@@ -185,7 +185,7 @@ const Menu = () => {
                     <div className="bg-white py-2.5">
                         <section
                             id="new"
-                            className="grid min-h-[400px] grid-cols-2 gap-4 rounded-2xl bg-gradient-to-b from-[#fff3f3] to-[#ffebc0] p-2.5"
+                            className="grid min-h-[400px] grid-cols-2 gap-4 rounded-lg bg-gradient-to-b from-[#fff3f3] to-[#ffebc0] p-2.5"
                         >
                             <p className="col-span-full text-lg font-semibold">
                                 Món mới phải thử
@@ -199,7 +199,7 @@ const Menu = () => {
                     <div className="bg-white py-2.5">
                         <section
                             id="signature"
-                            className="grid min-h-[400px] grid-cols-2 gap-4 rounded-2xl bg-gradient-to-b from-[#e6faff] to-[#caedc7] p-2.5"
+                            className="grid min-h-[400px] grid-cols-2 gap-4 rounded-lg bg-gradient-to-b from-[#e6faff] to-[#caedc7] p-2.5"
                         >
                             <p className="col-span-full text-lg font-semibold">
                                 Top bán chạy
@@ -238,7 +238,7 @@ const Menu = () => {
                         ))}
                     </div>
                 </div>
-                <div className="hidden h-80 flex-col items-center justify-center rounded-2xl bg-white md:flex">
+                <div className="hidden h-80 flex-col items-center justify-center rounded-lg bg-white md:flex">
                     <img src="./icon_cart_blank.svg" alt="" />
                     <p className="py-5 text-center text-gray-500">
                         Chưa có sản phẩm <br /> trong giỏ hàng

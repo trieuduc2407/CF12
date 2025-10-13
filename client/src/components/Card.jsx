@@ -31,7 +31,7 @@ const Card = ({ product }) => {
                     <button
                         className="rounded-2xl bg-amber-500"
                         onClick={() => {
-                            document.activeElement.blur()
+                            console.log('Add to cart clicked', product._id)
                         }}
                     >
                         <CirclePlus color="#ffffff" />
