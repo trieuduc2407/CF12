@@ -8,6 +8,7 @@
 	--breakpoint-3xl: 120rem;
   --color-bg-base: #f5f5f5;
   --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
 }
 
 @layer base {

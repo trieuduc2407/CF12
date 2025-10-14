@@ -99,7 +99,6 @@ const Menu = () => {
     return (
         <>
             <div
-                id="search-and-categories"
                 className={`bg-bg-base flex w-full flex-col gap-2.5 transition-all duration-300 md:hidden ${isScrolled ? 'hidden -translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}
             >
                 <div className="flex w-full justify-center bg-white pb-2.5">
@@ -130,7 +129,7 @@ const Menu = () => {
 
             {/* Sticky navbar cho mobile - hiển thị khi scroll */}
             <div
-                className={`bg-bg-base pt-safe-top sticky top-0 transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
+                className={`bg-bg-base pt-[var(--safe-top)] sticky top-0 transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
             >
                 <div className="relative bg-white p-1.5">
                     <p className="text-center text-gray-700">
@@ -211,7 +210,7 @@ const Menu = () => {
                             ))}
                         </section>
                     </div>
-                    <div className="flex flex-col divide-y-4 divide-gray-200 border-dashed bg-white">
+                    <div className="flex flex-col divide-y-4 divide-gray-200 border-dashed bg-white pb-20">
                         {categoryItems.map((category) => (
                             <section
                                 id={category.value}
@@ -246,7 +245,7 @@ const Menu = () => {
                     </p>
                 </div>
             </div>
-            <div className="fixed bottom-0 flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
+            <div className="mb-[var(--safe-bottom)] fixed bottom-0 flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
                 <button className="btn btn-sm flex flex-row border-0 bg-white py-5 shadow-none">
                     <ReceiptText className="text-amber-500" />
                     <p className="font-medium text-black"> Đơn hàng</p>
