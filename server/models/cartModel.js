@@ -8,10 +8,9 @@ const cartSchema = new mongoose.Schema(
         items: [
             {
                 productId: { type: mongoose.Schema.Types.ObjectId, ref: "product", required: true },
-                name: String,
-                options: mongoose.Schema.Types.Mixed,
+                selectedSize: { type: String },
+                selectedTemperature: { type: String, enum: ["hot", "ice"] },
                 quantity: { type: Number, required: true },
-                price: { type: Number, required: true },
             },
         ],
         status: { type: String, enum: ["active", "locked"], default: "active" },
