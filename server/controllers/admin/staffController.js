@@ -1,27 +1,29 @@
-import bcrypt from "bcrypt"
-import { staffModel } from "../../models/staffModel.js"
+import * as staffService from "../../services/admin/staffService.js"
 
-const addStaff = async (req, res) => {
+export const addStaff = async (req, res) => {
     const { name, username, password, role } = req.body
+
+    if (req.user.role === 'staff' && role !== 'employee') {
+        return res.json({
+            success: false,
+            message: "Bạn không có quyền tạo nhân viên với vai trò này"
+        })
+    }
+
+    if (!name || !username || !password || !role) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp đầy đủ thông tin"
+        })
+    }
+
     try {
-        if (req.user.role === 'staff' && role !== 'employee') {
-            return res.json({
-                success: false,
-                message: "Bạn không có quyền tạo nhân viên với vai trò này"
-            })
-        }
-
-        const checkExisting = await staffModel.findOne({ username })
-        if (checkExisting) {
-            return res.json({
-                success: false,
-                message: "Username đã tồn tại"
-            })
-        }
-
-        const passwordHash = await bcrypt.hash(password, 10)
-        const newStaff = new staffModel({ name, username, passwordHash, role, createdAt: Date.now() })
-        await newStaff.save()
+        const newStaff = await staffService.addStaff({
+            name,
+            username,
+            password,
+            role
+        })
         res.json({
             success: true,
             message: "Thêm nhân viên thành công",
@@ -34,22 +36,22 @@ const addStaff = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
 
-const getStaff = async (req, res) => {
+export const getStaffById = async (req, res) => {
     const { id } = req.params
-    try {
-        const staff = await staffModel.findById(id)
-        if (!staff) {
-            return res.json({
-                success: false,
-                message: "Nhân viên không tồn tại"
-            })
-        }
+    if (!id) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp ID nhân viên"
+        })
+    }
 
+    try {
+        const staff = await staffService.getStaffById(id)
         res.json({
             success: true,
             data: {
@@ -67,9 +69,9 @@ const getStaff = async (req, res) => {
     }
 }
 
-const getAllStaff = async (req, res) => {
+export const getAllStaff = async (req, res) => {
     try {
-        const staffs = await staffModel.find({}, { name: 1, role: 1 })
+        const staffs = await staffService.getAllStaffs()
         res.json({
             success: true,
             data: staffs
@@ -78,31 +80,48 @@ const getAllStaff = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
 
-const updateStaff = async (req, res) => {
+export const updateStaff = async (req, res) => {
     const { id } = req.params
+    if (!id) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp ID nhân viên"
+        })
+    }
+
     const { role } = req.body
+    if (!role) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp vai trò"
+        })
+    }
+
+    if (req.user.role === 'staff' && role !== 'employee') {
+        return res.json({
+            success: false,
+            message: "Bạn không có quyền cập nhật vai trò này"
+        })
+    }
+
+    let staff
     try {
-        const staff = await staffModel.findById(id)
-        if (!staff) {
-            return res.json({
-                success: false,
-                message: "Nhân viên không tồn tại"
-            })
-        }
+        staff = await staffService.getStaffById(id)
+    } catch (error) {
+        console.log(error)
+        return res.json({
+            success: false,
+            message: error.message || "Server error"
+        })
+    }
 
-        if (req.user.role === 'staff' && role !== 'employee') {
-            return res.json({
-                success: false,
-                message: "Bạn không có quyền cập nhật vai trò này"
-            })
-        }
-
-        const updateStaff = await staffModel.findByIdAndUpdate(id, { role }, { new: true })
+    try {
+        const updateStaff = await staffService.updateStaff(id, { role })
         res.json({
             success: true,
             message: "Cập nhật nhân viên thành công",
@@ -114,32 +133,48 @@ const updateStaff = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
 
-const deleteStaff = async (req, res) => {
+export const deleteStaff = async (req, res) => {
     const { id } = req.params
+    if (!id) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp ID nhân viên"
+        })
+    }
+
+    let staff
     try {
-        const staff = await staffModel.findById(id)
-        if (!staff) {
+        staff = await staffService.getStaffById(id)
+    } catch (error) {
+        console.log(error)
+        return res.json({
+            success: false,
+            message: error.message || "Server error"
+        })
+    }
+    if (!staff) {
+        return res.json({
+            success: false,
+            message: "Nhân viên không tồn tại"
+        })
+    }
+
+    if (req.user.role === 'staff') {
+        if (staff.role !== 'employee') {
             return res.json({
                 success: false,
-                message: "Nhân viên không tồn tại"
+                message: "Không đủ quyền xóa nhân viên này"
             })
         }
+    }
 
-        if (req.user.role === 'staff') {
-            if (staff.role !== 'employee') {
-                return res.json({
-                    success: false,
-                    message: "Không đủ quyền xóa nhân viên này"
-                })
-            }
-        }
-
-        await staffModel.findByIdAndDelete(id)
+    try {
+        await staffService.deleteStaff(id)
         res.json({
             success: true,
             message: "Xóa nhân viên thành công"
@@ -148,11 +183,7 @@ const deleteStaff = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
-
-
-
-export { addStaff, getStaff, getAllStaff, updateStaff, deleteStaff }

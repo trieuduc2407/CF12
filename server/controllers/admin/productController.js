@@ -4,23 +4,23 @@ import { parseAndValidateProductFields } from '../../helpers/admin/parseAndValid
 import { uploadToCloudinary } from '../../helpers/admin/uploadToCloudinary.js'
 
 export const addProduct = async (req, res) => {
+    const { isValid, fields } = parseAndValidateProductFields(req)
+    if (!isValid) {
+        return res.json({
+            success: false,
+            message: isValid.message || 'Vui lòng điền đầy đủ thông tin'
+        })
+    }
+
+    const file = req.file
+    if (!file) {
+        return res.json({
+            success: false,
+            message: 'Vui lòng chọn ảnh sản phẩm'
+        })
+    }
+
     try {
-        const { isValid, fields } = parseAndValidateProductFields(req)
-        if (!isValid) {
-            return res.json({
-                success: false,
-                message: isValid.message || 'Vui lòng điền đầy đủ thông tin'
-            })
-        }
-
-        const file = req.file
-        if (!file) {
-            return res.json({
-                success: false,
-                message: 'Vui lòng chọn ảnh sản phẩm'
-            })
-        }
-
         const result = await uploadToCloudinary(file.buffer)
         const newProduct = await productService.addProduct({
             ...fields,
@@ -42,14 +42,14 @@ export const addProduct = async (req, res) => {
 
 export const getProductById = async (req, res) => {
     const { id } = req.params
-    try {
-        if (!id) {
-            return res.json({
-                success: false,
-                message: "Vui lòng cung cấp ID sản phẩm"
-            })
-        }
+    if (!id) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp ID sản phẩm"
+        })
+    }
 
+    try {
         const product = await productService.getProductById(id)
         res.json({
             success: true,
@@ -59,7 +59,7 @@ export const getProductById = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
@@ -75,7 +75,7 @@ export const getAllProducts = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
@@ -158,14 +158,14 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
     const { id } = req.params
-    try {
-        if (!id) {
-            return res.json({
-                success: false,
-                message: "Vui lòng cung cấp ID sản phẩm"
-            })
-        }
+    if (!id) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp ID sản phẩm"
+        })
+    }
 
+    try {
         const product = await productService.getProductById(id)
         await cloudinary.uploader.destroy(product.imagePublicId)
         await productService.deleteProduct(id)
@@ -184,14 +184,13 @@ export const deleteProduct = async (req, res) => {
 
 export const toggleSignature = async (req, res) => {
     const { id } = req.params
+    if (!id) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp ID sản phẩm"
+        })
+    }
     try {
-        if (!id) {
-            return res.json({
-                success: false,
-                message: "Vui lòng cung cấp ID sản phẩm"
-            })
-        }
-
         const result = await productService.toggleSignature(id)
         res.json({
             success: true,
@@ -208,14 +207,14 @@ export const toggleSignature = async (req, res) => {
 
 export const searchProduct = async (req, res) => {
     const { query } = req.query
-    try {
-        if (!query) {
-            return res.json({
-                success: false,
-                message: "Vui lòng nhập từ khóa tìm kiếm"
-            })
-        }
+    if (!query) {
+        return res.json({
+            success: false,
+            message: "Vui lòng nhập từ khóa tìm kiếm"
+        })
+    }
 
+    try {
         const products = await productService.searchProducts(query)
         res.json({
             success: true,

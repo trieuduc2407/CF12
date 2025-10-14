@@ -60,6 +60,7 @@ export const deleteProduct = async (id) => {
         if (!existingProduct) {
             throw new Error("Sản phẩm không tồn tại")
         }
+        
         await productModel.findByIdAndDelete(id)
         return true
     } catch (error) {
