@@ -2,8 +2,8 @@ import { storageModel } from '../../models/storageModel.js'
 
 export const addIngredient = async (data) => {
     const { name } = data
-    const existing = await storageModel.findOne({ name })
-    if (existing) {
+    const existingIngredient = await storageModel.findOne({ name })
+    if (existingIngredient) {
         throw new Error("Nguyên liệu đã tồn tại")
     }
 
@@ -20,7 +20,11 @@ export const addIngredient = async (data) => {
 
 export const getIngredientById = async (id) => {
     try {
-        return await storageModel.findById(id)
+        const ingredient = await storageModel.findById(id)
+        if (!ingredient) {
+            throw new Error('Nguyên liệu không tồn tại')
+        }
+        return ingredient
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi lấy nguyên liệu theo ID: ${error.message}`)
     }
@@ -36,8 +40,8 @@ export const getAllIngredients = async () => {
 
 export const updateIngredient = async (id, data) => {
     try {
-        const existing = await storageModel.findById(id)
-        if (!existing) {
+        const existingIngredient = await storageModel.findById(id)
+        if (!existingIngredient) {
             throw new Error("Nguyên liệu không tồn tại")
         }
 
@@ -58,8 +62,8 @@ export const updateIngredient = async (id, data) => {
 
 export const deleteIngredient = async (id) => {
     try {
-        const existing = await storageModel.findById(id)
-        if (!existing) {
+        const existingIngredient = await storageModel.findById(id)
+        if (!existingIngredient) {
             throw new Error("Nguyên liệu không tồn tại")
         }
 

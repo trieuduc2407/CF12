@@ -1,12 +1,18 @@
-import { productModel } from '../../models/productModel.js'
 import { cloudinary } from '../../config/cloudinary.js'
+import * as productService from '../../services/admin/productService.js'
+import { parseAndValidateProductFields } from '../../helpers/admin/parseAndValidateProductFields.js'
+import { uploadToCloudinary } from '../../helpers/admin/uploadToCloudinary.js'
 
-const addProduct = async (req, res) => {
+export const addProduct = async (req, res) => {
     try {
-        const { name, category, basePrice } = req.body
-        const sizes = JSON.parse(req.body.sizes || '[]')
-        const temperature = JSON.parse(req.body.temperature || '[]')
-        const ingredients = JSON.parse(req.body.ingredients || '[]')
+        const { isValid, fields } = parseAndValidateProductFields(req)
+        if (!isValid) {
+            return res.json({
+                success: false,
+                message: isValid.message || 'Vui lòng điền đầy đủ thông tin'
+            })
+        }
+
         const file = req.file
         if (!file) {
             return res.json({
@@ -15,53 +21,36 @@ const addProduct = async (req, res) => {
             })
         }
 
-        const stream = cloudinary.uploader.upload_stream(
-            { folder: 'products' },
-            async (error, result) => {
-                if (error) {
-                    return res.json({
-                        success: false,
-                        message: error.message
-                    })
-                }
-
-                const newProduct = await productModel.create({
-                    name,
-                    category,
-                    basePrice,
-                    sizes,
-                    temperature,
-                    ingredients,
-                    imageUrl: result.secure_url,
-                    imagePublicId: result.public_id,
-                })
-
-                return res.json({
-                    success: true,
-                    data: newProduct
-                })
-            }
-        )
-        stream.end(file.buffer)
+        const result = await uploadToCloudinary(file.buffer)
+        const newProduct = await productService.addProduct({
+            ...fields,
+            imageUrl: result.secure_url,
+            imagePublicId: result.public_id,
+        })
+        return res.json({
+            success: true,
+            data: newProduct
+        })
     } catch (error) {
+        console.log(error)
         return res.json({
             success: false,
-            message: error.message
+            message: error.message || 'Server error'
         })
     }
 }
 
-const getProduct = async (req, res) => {
+export const getProductById = async (req, res) => {
     const { id } = req.params
     try {
-        const product = await productModel.findById(id)
-        if (!product) {
+        if (!id) {
             return res.json({
                 success: false,
-                message: "Sản phẩm không tồn tại"
+                message: "Vui lòng cung cấp ID sản phẩm"
             })
         }
 
+        const product = await productService.getProductById(id)
         res.json({
             success: true,
             data: product
@@ -75,9 +64,9 @@ const getProduct = async (req, res) => {
     }
 }
 
-const getAllProduct = async (req, res) => {
+export const getAllProducts = async (req, res) => {
     try {
-        const products = await productModel.find()
+        const products = await productService.getAllProducts()
         res.json({
             success: true,
             data: products
@@ -90,12 +79,24 @@ const getAllProduct = async (req, res) => {
         })
     }
 }
-const updateProduct = async (req, res) => {
+
+export const updateProduct = async (req, res) => {
     const { id } = req.params
-    const { name, category, basePrice } = req.body
-    const sizes = JSON.parse(req.body.sizes || '[]')
-    const temperature = JSON.parse(req.body.temperature || '[]')
-    const ingredients = JSON.parse(req.body.ingredients || '[]')
+    if (!id) {
+        return res.json({
+            success: false,
+            message: "Vui lòng cung cấp ID sản phẩm"
+        })
+    }
+
+    const { isValid, fields } = parseAndValidateProductFields(req)
+    if (!isValid) {
+        return res.json({
+            success: false,
+            message: 'Vui lòng điền đầy đủ thông tin'
+        })
+    }
+
     const imageUpdated = req.body.imageUpdated === 'true'
     if (imageUpdated && !req.file) {
         return res.json({
@@ -112,80 +113,62 @@ const updateProduct = async (req, res) => {
     }
 
     try {
-        const product = await productModel.findById(id)
-        if (!product) {
-            return res.json({
-                success: false,
-                message: "Sản phẩm không tồn tại"
-            })
-        }
-
+        const product = await productService.getProductById(id)
+        let result = null
         if (imageUpdated) {
-            await cloudinary.uploader.destroy(product.imagePublicId)
-            const stream = cloudinary.uploader.upload_stream(
-                { folder: 'products' },
-                async (error, result) => {
-                    if (error) {
+            if (product.imagePublicId) {
+                try {
+                    const destroyResult = await cloudinary.uploader.destroy(product.imagePublicId)
+                    if (destroyResult.result !== 'ok') {
                         return res.json({
                             success: false,
-                            message: error.message
+                            message: 'Không thể xóa ảnh cũ trên Cloudinary'
                         })
                     }
-
-                    await productModel.findByIdAndUpdate(id, {
-                        name,
-                        category,
-                        basePrice,
-                        sizes,
-                        temperature,
-                        ingredients,
-                        imageUrl: result.secure_url,
-                        imagePublicId: result.public_id,
-                    })
-
+                } catch (destroyError) {
+                    console.log(destroyError)
                     return res.json({
-                        success: true,
-                        message: "Cập nhật sản phẩm thành công"
+                        success: false,
+                        message: 'Lỗi khi xóa ảnh cũ trên Cloudinary'
                     })
                 }
-            )
-            stream.end(req.file.buffer)
-        } else {
-            await productModel.findByIdAndUpdate(id, {
-                name,
-                category,
-                basePrice,
-                sizes,
-                temperature,
-                ingredients,
-            })
-
-            return res.json({
-                success: true,
-                message: "Cập nhật sản phẩm thành công"
-            })
+            }
+            result = await uploadToCloudinary(req.file.buffer)
         }
+
+        const updatedProduct = await productService.updateProduct(id, {
+            ...fields,
+            imageUrl: result ? result.secure_url : product.imageUrl,
+            imagePublicId: result ? result.public_id : product.imagePublicId,
+            updatedAt: Date.now()
+        })
+        return res.json({
+            success: true,
+            message: "Cập nhật sản phẩm thành công",
+            data: updatedProduct
+        })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
-const deleteProduct = async (req, res) => {
+
+export const deleteProduct = async (req, res) => {
     const { id } = req.params
     try {
-        const product = await productModel.findById(id)
-        if (!product) {
+        if (!id) {
             return res.json({
                 success: false,
-                message: "Sản phẩm không tồn tại"
+                message: "Vui lòng cung cấp ID sản phẩm"
             })
         }
 
+        const product = await productService.getProductById(id)
         await cloudinary.uploader.destroy(product.imagePublicId)
-        await productModel.findByIdAndDelete(id)
+        await productService.deleteProduct(id)
         res.json({
             success: true,
             message: "Xóa sản phẩm thành công"
@@ -194,55 +177,36 @@ const deleteProduct = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
 
-const toggleSignature = async (req, res) => {
+export const toggleSignature = async (req, res) => {
     const { id } = req.params
     try {
-        const product = await productModel.findById(id)
-        if (!product) {
+        if (!id) {
             return res.json({
                 success: false,
-                message: "Sản phẩm không tồn tại"
+                message: "Vui lòng cung cấp ID sản phẩm"
             })
         }
 
-        if (product.signature) {
-            // Nếu đang là signature, remove khỏi signature
-            await productModel.findByIdAndUpdate(id, { signature: false })
-        } else {
-            // Nếu chưa là signature, thêm vào signature
-            const signatureProducts = await productModel.find({ signature: true }).sort({ updatedAt: 1 })
-
-            if (signatureProducts.length >= 4) {
-                // FIFO: Remove sản phẩm được thêm đầu tiên (oldest)
-                const oldestSignature = signatureProducts[0]
-                await productModel.findByIdAndUpdate(oldestSignature._id, { signature: false })
-            }
-
-            await productModel.findByIdAndUpdate(id, {
-                signature: true,
-                updatedAt: new Date()
-            })
-        }
-
+        const result = await productService.toggleSignature(id)
         res.json({
             success: true,
-            message: product.signature ? "Đã bỏ khỏi signature" : "Đã thêm vào signature"
+            message: result.message
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
 
-const searchProduct = async (req, res) => {
+export const searchProduct = async (req, res) => {
     const { query } = req.query
     try {
         if (!query) {
@@ -252,10 +216,7 @@ const searchProduct = async (req, res) => {
             })
         }
 
-        const products = await productModel.find({
-            name: { $regex: query, $options: 'i' }
-        })
-
+        const products = await productService.searchProducts(query)
         res.json({
             success: true,
             data: products
@@ -264,9 +225,7 @@ const searchProduct = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: error.message || "Server error"
         })
     }
 }
-
-export { addProduct, getProduct, getAllProduct, updateProduct, deleteProduct, toggleSignature, searchProduct }
