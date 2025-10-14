@@ -48,7 +48,7 @@ const Menu = () => {
             const documentHeight = document.documentElement.scrollHeight
 
             // Set sticky navbar state (show when scrolled down from header)
-            setIsScrolled(scrollTop > 100)
+            setIsScrolled(scrollTop > 424)
 
             const isNearBottom =
                 scrollTop + windowHeight >= documentHeight - 100
@@ -99,6 +99,7 @@ const Menu = () => {
     return (
         <>
             <div
+                id="search-and-categories"
                 className={`bg-bg-base flex w-full flex-col gap-2.5 transition-all duration-300 md:hidden ${isScrolled ? 'hidden -translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}
             >
                 <div className="flex w-full justify-center bg-white pb-2.5">
@@ -129,7 +130,7 @@ const Menu = () => {
 
             {/* Sticky navbar cho mobile - hiển thị khi scroll */}
             <div
-                className={`bg-bg-base sticky top-0 transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
+                className={`bg-bg-base pt-safe-top sticky top-0 transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
             >
                 <div className="relative bg-white p-1.5">
                     <p className="text-center text-gray-700">
