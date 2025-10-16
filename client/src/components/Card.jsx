@@ -15,7 +15,7 @@ const Card = ({ product }) => {
     }
 
     return (
-        <div className="card w-full justify-self-center bg-white shadow-sm">
+        <div className="card w-full justify-self-center rounded-lg bg-white shadow-sm">
             <figure>
                 {isLoading ? (
                     <div className="skeleton h-80 w-80"></div>

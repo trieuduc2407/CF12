@@ -47,7 +47,6 @@ const Menu = () => {
             const windowHeight = window.innerHeight
             const documentHeight = document.documentElement.scrollHeight
 
-            // Set sticky navbar state (show when scrolled down from header)
             setIsScrolled(scrollTop > 424)
 
             const isNearBottom =
@@ -61,7 +60,6 @@ const Menu = () => {
                 return
             }
 
-            // Find section closest to top with optimized loop
             let closestSection = null
             let closestDistance = Infinity
 
@@ -127,9 +125,8 @@ const Menu = () => {
                 </ul>
             </div>
 
-            {/* Sticky navbar cho mobile - hiển thị khi scroll */}
             <div
-                className={`bg-bg-base pt-[var(--safe-top)] sticky top-0 transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
+                className={`bg-bg-base sticky top-0 pt-[var(--safe-top)] transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
             >
                 <div className="relative bg-white p-1.5">
                     <p className="text-center text-gray-700">
@@ -245,12 +242,12 @@ const Menu = () => {
                     </p>
                 </div>
             </div>
-            <div className="mb-[var(--safe-bottom)] fixed bottom-0 flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
-                <button className="btn btn-sm flex flex-row border-0 bg-white py-5 shadow-none">
+            <div className="fixed bottom-0 mb-[var(--safe-bottom)] flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
+                <button className="btn btn-sm flex flex-row rounded-md border-0 bg-white py-5 shadow-none">
                     <ReceiptText className="text-amber-500" />
                     <p className="font-medium text-black"> Đơn hàng</p>
                 </button>
-                <button className="btn btn-sm border-0 bg-amber-500 py-5 text-white">
+                <button className="btn btn-sm rounded-md border-0 bg-amber-500 py-5 text-white">
                     <ShoppingBasket />
                     <p>Giỏ hàng</p>
                     <p></p>
