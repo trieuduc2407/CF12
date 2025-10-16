@@ -1,11 +1,18 @@
 import { CirclePlus } from 'lucide-react'
 import React from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import formatNumber from '../utils/formatNumber'
 
 const Card = ({ product }) => {
     const { isLoading } = useSelector((state) => state.clientProduct)
+    const navigate = useNavigate()
+
+    const handleAddToCart = (productId) => {
+        console.log('Add to cart clicked:', productId)
+        navigate(`/product/${productId}`)
+    }
 
     return (
         <div className="card w-full justify-self-center bg-white shadow-sm">
@@ -31,7 +38,7 @@ const Card = ({ product }) => {
                     <button
                         className="rounded-2xl bg-amber-500"
                         onClick={() => {
-                            console.log('Add to cart clicked', product._id)
+                            handleAddToCart(product._id)
                         }}
                     >
                         <CirclePlus color="#ffffff" />

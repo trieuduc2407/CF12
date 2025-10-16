@@ -18,7 +18,12 @@ const productSchema = new mongoose.Schema(
                     enum: ["hot", "ice", 'hot_ice'],
                     required: true,
                 },
-                isDefault: { type: Boolean, default: false },
+                defaultTemp: {
+                    type: String,
+                    enum: ["hot", "ice"],
+                    // Chỉ bắt buộc khi type là 'hot_ice'
+                    required: function () { return this.type === 'hot_ice' }
+                },
             },
         ],
         ingredients: [

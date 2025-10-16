@@ -83,15 +83,17 @@ const Products = () => {
                     Array.isArray(data.payload.data.temperature) &&
                     data.payload.data.temperature.length > 0
                 ) {
-                    tempType = data.payload.data.temperature[0].type
-                    isDefaultTemp = data.payload.data.temperature[0].isDefault
-                        ? data.payload.data.temperature[0].type
-                        : ''
+                    const firstTemp = data.payload.data.temperature[0]
+                    tempType = firstTemp.type
+
+                    // Nếu là hot_ice, lấy defaultTemp
+                    if (firstTemp.type === 'hot_ice' && firstTemp.defaultTemp) {
+                        isDefaultTemp = firstTemp.defaultTemp
+                    }
                 }
 
                 let sizeOption = 'single'
                 let upsizePrice = 0
-
                 if (
                     data.payload.data.sizes &&
                     data.payload.data.sizes.length > 1
@@ -121,6 +123,20 @@ const Products = () => {
     }
 
     const handleUpdate = (id) => {
+        // Validation: Nếu chọn hot_ice thì phải chọn nhiệt độ mặc định
+        if (
+            formData.temperature === 'hot_ice' &&
+            !formData.isDefaultTemperature
+        ) {
+            setShowToast({
+                isShow: true,
+                type: 'error',
+                text: 'Vui lòng chọn nhiệt độ mặc định cho sản phẩm có cả nóng và đá',
+            })
+            setTimeout(() => setShowToast({ isShow: false, text: '' }), 2000)
+            return
+        }
+
         const payload = new FormData()
         const tempValue = formData.temperature
         let tempArr = []
@@ -128,7 +144,12 @@ const Products = () => {
         if (Array.isArray(tempValue)) {
             tempArr = tempValue
         } else if (typeof tempValue === 'string' && tempValue) {
-            tempArr = [{ type: tempValue, isDefault: true }]
+            const tempObj = { type: tempValue }
+            // Nếu là hot_ice, thêm defaultTemp từ isDefaultTemperature
+            if (tempValue === 'hot_ice' && formData.isDefaultTemperature) {
+                tempObj.defaultTemp = formData.isDefaultTemperature
+            }
+            tempArr = [tempObj]
         }
 
         let sizesArray = []
@@ -251,13 +272,33 @@ const Products = () => {
 
     const onSubmit = (event) => {
         event.preventDefault()
+
+        // Validation: Nếu chọn hot_ice thì phải chọn nhiệt độ mặc định
+        if (
+            formData.temperature === 'hot_ice' &&
+            !formData.isDefaultTemperature
+        ) {
+            setShowToast({
+                isShow: true,
+                type: 'error',
+                text: 'Vui lòng chọn nhiệt độ mặc định cho sản phẩm có cả nóng và đá',
+            })
+            setTimeout(() => setShowToast({ isShow: false, text: '' }), 2000)
+            return
+        }
+
         const payload = new FormData()
         const tempValue = formData.temperature
         let tempArr = []
         if (Array.isArray(tempValue)) {
             tempArr = tempValue
         } else if (typeof tempValue === 'string' && tempValue) {
-            tempArr = [{ type: tempValue, isDefault: true }]
+            const tempObj = { type: tempValue }
+            // Nếu là hot_ice, thêm defaultTemp từ isDefaultTemperature
+            if (tempValue === 'hot_ice' && formData.isDefaultTemperature) {
+                tempObj.defaultTemp = formData.isDefaultTemperature
+            }
+            tempArr = [tempObj]
         }
 
         let sizesArray = []
