@@ -1,6 +1,7 @@
 import {
     Coffee,
     LayoutDashboard,
+    List,
     LogOut,
     ReceiptText,
     Users,
@@ -40,6 +41,12 @@ const adminNavbarItems = [
         title: 'Nguyên liệu',
         icon: <Warehouse />,
         path: '/admin/storage',
+    },
+    {
+        name: 'room',
+        title: 'Danh sách bàn',
+        icon: <List />,
+        path: '/admin/rooms',
     },
 ]
 

@@ -11,6 +11,7 @@ import Login from './pages/Login'
 import Notfound from './pages/Notfound'
 import Orders from './pages/Orders'
 import Products from './pages/Products'
+import Room from './pages/Room'
 import Staffs from './pages/Staffs'
 import Storage from './pages/Storage'
 
@@ -59,6 +60,14 @@ const App = () => {
                     element={
                         <RoleProtectedRoute allowedRoles={['admin', 'staff']}>
                             <Storage />
+                        </RoleProtectedRoute>
+                    }
+                />
+                <Route
+                    path="rooms"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['admin', 'staff']}>
+                            <Room />
                         </RoleProtectedRoute>
                     }
                 />
