@@ -11,7 +11,6 @@ export const getProductById = async (req, res) => {
 
     try {
         const product = await productService.getProductById(id)
-
         if (!product) {
             return res.json({
                 success: false,

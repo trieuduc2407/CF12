@@ -36,6 +36,18 @@ const initialState = {
     ingredients: [],
 }
 
+const buildSizesArray = (sizeOption, upsizePrice) => {
+    if (sizeOption === 'upsize') {
+        return [
+            { name: 'M', price: 0 },
+            { name: 'L', price: upsizePrice || 0 },
+        ]
+    } else {
+        // Không có upsize, mặc định gán size M
+        return [{ name: 'M', price: 0 }]
+    }
+}
+
 const Products = () => {
     const [formData, setFormData] = useState(initialState)
     const [currentUpdateId, setCurrentUpdateId] = useState('')
@@ -152,13 +164,10 @@ const Products = () => {
             tempArr = [tempObj]
         }
 
-        let sizesArray = []
-        if (formData.sizeOption === 'upsize') {
-            sizesArray = [
-                { name: 'M', price: 0 },
-                { name: 'L', price: formData.upsizePrice || 0 },
-            ]
-        }
+        const sizesArray = buildSizesArray(
+            formData.sizeOption,
+            formData.upsizePrice
+        )
 
         payload.append('name', formData.name)
         payload.append('category', formData.category)
@@ -301,13 +310,10 @@ const Products = () => {
             tempArr = [tempObj]
         }
 
-        let sizesArray = []
-        if (formData.sizeOption === 'upsize') {
-            sizesArray = [
-                { name: 'M', price: 0 },
-                { name: 'L', price: formData.upsizePrice || 0 },
-            ]
-        }
+        const sizesArray = buildSizesArray(
+            formData.sizeOption,
+            formData.upsizePrice
+        )
 
         payload.append('name', formData.name)
         payload.append('category', formData.category)
