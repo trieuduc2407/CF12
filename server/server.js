@@ -8,7 +8,7 @@ import { router as adminStorageRoutes } from "./routes/admin/adminStorageRoutes.
 import { router as adminStaffRoutes } from "./routes/admin/adminStaffRoutes.js"
 import { router as adminProductRoutes } from "./routes/admin/adminProductRoutes.js"
 import { router as clientProductRoutes } from "./routes/client/productRoutes.js"
-import { router as adminRoomRoutes } from "./routes/admin/adminRoomRoutes.js"
+import { router as adminTableRoutes } from "./routes/admin/adminTableRoutes.js"
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -27,7 +27,7 @@ app.use('/api/admin/auth', adminAuthRoutes)
 app.use('/api/admin/storage', adminStorageRoutes)
 app.use('/api/admin/staff', adminStaffRoutes)
 app.use('/api/admin/products', adminProductRoutes)
-app.use('/api/admin/rooms', adminRoomRoutes)
+app.use('/api/admin/table', adminTableRoutes)
 
 app.use('/api/client/products', clientProductRoutes)
 

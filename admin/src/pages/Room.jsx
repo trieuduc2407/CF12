@@ -1,11 +1,16 @@
 import React from 'react'
 import { useState } from 'react'
+import CommonForm from '../components/CommonForm'
+import ListLayout from '../components/ListLayout'
+import { RotateCcw } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 
 const initialState = {
     tableId: '',
     status: 'available',
     activeCartId: '',
 }
+
 
 const listLabel = [
     { name: 'tableId', label: 'Mã bàn' },
@@ -23,6 +28,22 @@ const Room = () => {
 
     // const dispatch = useDispatch()
     // const { staffs = [] } = useSelector((state) => state.adminStaff)
+
+    const getTableData = () => {
+
+    }
+
+    const handleUpdate=()=>{
+        
+    }
+
+    const handleDelete=()=>{
+
+    }
+
+    const onSubmit=()=>{
+
+    }
 
     return (
         <>
@@ -56,8 +77,8 @@ const Room = () => {
                     <ListLayout
                         listLabel={listLabel}
                         listItem={staffs}
-                        labelMap={labelMap}
-                        handleUpdate={getStaffData}
+                        // labelMap={labelMap}
+                        handleUpdate={getTableData}
                         handleDelete={handleDelete}
                     />
                 </div>

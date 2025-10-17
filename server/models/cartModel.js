@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const cartSchema = new mongoose.Schema(
     {
-        roomId: { type: mongoose.Schema.Types.ObjectId, ref: "room", required: true },
+        tableId: { type: mongoose.Schema.Types.ObjectId, ref: "table", required: true },
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
         clients: { type: String, index: true },
         items: [
@@ -20,7 +20,7 @@ const cartSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
-cartSchema.index({ roomId: 1, status: 1 })
+cartSchema.index({ tableId: 1, status: 1 })
 
 const cartModel = mongoose.models.cart || mongoose.model("cart", cartSchema)
 

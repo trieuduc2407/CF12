@@ -1,8 +1,8 @@
-import * as roomService from '../../services/admin/roomService.js'
+import * as tableService from '../../services/admin/tableService.js'
 
-export const addRoom = async (req, res) => {
-    const { tableId, status } = req.body
-    if (!tableId || !status) {
+export const addTable = async (req, res) => {
+    const { tableName, status } = req.body
+    if (!tableName || !status) {
         return res.json({
             success: false,
             message: "Vui lòng cung cấp đầy đủ thông tin"
@@ -10,13 +10,13 @@ export const addRoom = async (req, res) => {
     }
 
     try {
-        const newRoom = await roomService.addRoom({
-            tableId,
+        const newTable = await tableService.addTable({
+            tableName,
             status
         })
         return res.json({
             success: true,
-            data: newRoom
+            data: newTable
         })
     } catch (error) {
         return res.json({
@@ -26,12 +26,12 @@ export const addRoom = async (req, res) => {
     }
 }
 
-export const getAllRooms = async (req, res) => {
+export const getAllTables = async (req, res) => {
     try {
-        const rooms = await roomService.getAllRooms()
+        const tables = await tableService.getAllTables()
         return res.json({
             success: true,
-            data: rooms
+            data: tables
         })
     } catch (error) {
         return res.json({
@@ -41,27 +41,27 @@ export const getAllRooms = async (req, res) => {
     }
 }
 
-export const getRoomById = async (req, res) => {
+export const getTableById = async (req, res) => {
     const { id } = req.params
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID phòng"
+            message: "Vui lòng cung cấp ID bàn"
         })
     }
 
     try {
-        const room = await roomService.getRoomById(id)
-        if (!room) {
+        const table = await tableService.getTableById(id)
+        if (!table) {
             return res.json({
                 success: false,
-                message: "Không tìm thấy phòng"
+                message: "Không tìm thấy bàn"
             })
         }
 
         return res.json({
             success: true,
-            data: room
+            data: table
         })
     } catch (error) {
         return res.json({
@@ -71,17 +71,17 @@ export const getRoomById = async (req, res) => {
     }
 }
 
-export const updateRoom = async (req, res) => {
+export const updateTable = async (req, res) => {
     const { id } = req.params
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID phòng"
+            message: "Vui lòng cung cấp ID bàn"
         })
     }
 
-    const { tableId, status } = req.body
-    if (!tableId || !status) {
+    const { tableName, status } = req.body
+    if (!tableName || !status) {
         return res.json({
             success: false,
             message: "Vui lòng cung cấp đầy đủ thông tin"
@@ -89,13 +89,13 @@ export const updateRoom = async (req, res) => {
     }
 
     try {
-        const updatedRoom = await roomService.updateRoom(id, {
-            tableId,
+        const updatedTable = await tableService.updateTable(id, {
+            tableName,
             status
         })
         return res.json({
             success: true,
-            data: updatedRoom
+            data: updatedTable
         })
     } catch (error) {
         return res.json({
@@ -105,20 +105,20 @@ export const updateRoom = async (req, res) => {
     }
 }
 
-export const deleteRoom = async (req, res) => {
+export const deleteTable = async (req, res) => {
     const { id } = req.params
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID phòng"
+            message: "Vui lòng cung cấp ID bàn"
         })
     }
 
     try {
-        await roomService.deleteRoom(id)
+        await tableService.deleteTable(id)
         return res.json({
             success: true,
-            message: "Xóa phòng thành công"
+            message: "Xóa bàn thành công"
         })
     } catch (error) {
         return res.json({
@@ -146,10 +146,10 @@ export const updateActiveCartId = async (req, res) => {
     }
 
     try {
-        const updatedRoom = await roomService.updateActiveCartId(tableId, activeCartId)
+        const updatedTable = await tableService.updateActiveCartId(tableId, activeCartId)
         return res.json({
             success: true,
-            data: updatedRoom
+            data: updatedTable
         })
     } catch (error) {
         return res.json({
