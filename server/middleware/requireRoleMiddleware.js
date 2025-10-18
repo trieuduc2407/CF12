@@ -1,11 +1,14 @@
-const requireRoleMiddleware = (...roles) => (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-        return res.json({
-            success: false,
-            message: "Không có quyền truy cập"
-        })
+const requireRoleMiddleware =
+    (...roles) =>
+    (req, res, next) => {
+        const allowedRoles = roles.flat()
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
+            return res.json({
+                success: false,
+                message: 'Không có quyền truy cập',
+            })
+        }
+        next()
     }
-    next()
-}
 
 export { requireRoleMiddleware }

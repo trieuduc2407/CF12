@@ -1,4 +1,4 @@
-import * as staffService from "../../services/admin/staffService.js"
+import * as staffService from '../../services/admin/staffService.js'
 
 export const addStaff = async (req, res) => {
     const { name, username, password, role } = req.body
@@ -6,14 +6,14 @@ export const addStaff = async (req, res) => {
     if (req.user.role === 'staff' && role !== 'employee') {
         return res.json({
             success: false,
-            message: "Bạn không có quyền tạo nhân viên với vai trò này"
+            message: 'Bạn không có quyền tạo nhân viên với vai trò này',
         })
     }
 
     if (!name || !username || !password || !role) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp đầy đủ thông tin"
+            message: 'Vui lòng cung cấp đầy đủ thông tin',
         })
     }
 
@@ -22,21 +22,21 @@ export const addStaff = async (req, res) => {
             name,
             username,
             password,
-            role
+            role,
         })
         res.json({
             success: true,
-            message: "Thêm nhân viên thành công",
+            message: 'Thêm nhân viên thành công',
             data: {
                 name: newStaff.name,
-                role: newStaff.role
-            }
+                role: newStaff.role,
+            },
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -46,7 +46,7 @@ export const getStaffById = async (req, res) => {
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID nhân viên"
+            message: 'Vui lòng cung cấp ID nhân viên',
         })
     }
 
@@ -57,14 +57,14 @@ export const getStaffById = async (req, res) => {
             data: {
                 name: staff.name,
                 role: staff.role,
-                id: staff._id
-            }
+                id: staff._id,
+            },
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: 'Server error',
         })
     }
 }
@@ -74,13 +74,13 @@ export const getAllStaff = async (req, res) => {
         const staffs = await staffService.getAllStaffs()
         res.json({
             success: true,
-            data: staffs
+            data: staffs,
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -90,7 +90,7 @@ export const updateStaff = async (req, res) => {
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID nhân viên"
+            message: 'Vui lòng cung cấp ID nhân viên',
         })
     }
 
@@ -98,14 +98,14 @@ export const updateStaff = async (req, res) => {
     if (!role) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp vai trò"
+            message: 'Vui lòng cung cấp vai trò',
         })
     }
 
     if (req.user.role === 'staff' && role !== 'employee') {
         return res.json({
             success: false,
-            message: "Bạn không có quyền cập nhật vai trò này"
+            message: 'Bạn không có quyền cập nhật vai trò này',
         })
     }
 
@@ -116,7 +116,7 @@ export const updateStaff = async (req, res) => {
         console.log(error)
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 
@@ -124,16 +124,16 @@ export const updateStaff = async (req, res) => {
         const updateStaff = await staffService.updateStaff(id, { role })
         res.json({
             success: true,
-            message: "Cập nhật nhân viên thành công",
+            message: 'Cập nhật nhân viên thành công',
             data: {
-                role: updateStaff.role
-            }
+                role: updateStaff.role,
+            },
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -143,7 +143,7 @@ export const deleteStaff = async (req, res) => {
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID nhân viên"
+            message: 'Vui lòng cung cấp ID nhân viên',
         })
     }
 
@@ -154,13 +154,13 @@ export const deleteStaff = async (req, res) => {
         console.log(error)
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
     if (!staff) {
         return res.json({
             success: false,
-            message: "Nhân viên không tồn tại"
+            message: 'Nhân viên không tồn tại',
         })
     }
 
@@ -168,7 +168,7 @@ export const deleteStaff = async (req, res) => {
         if (staff.role !== 'employee') {
             return res.json({
                 success: false,
-                message: "Không đủ quyền xóa nhân viên này"
+                message: 'Không đủ quyền xóa nhân viên này',
             })
         }
     }
@@ -177,13 +177,13 @@ export const deleteStaff = async (req, res) => {
         await staffService.deleteStaff(id)
         res.json({
             success: true,
-            message: "Xóa nhân viên thành công"
+            message: 'Xóa nhân viên thành công',
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }

@@ -1,7 +1,14 @@
-import { tableModel } from "../../models/tableModel.js"
+import { tableModel } from '../../models/tableModel.js'
 
 export const addTable = async (data) => {
     try {
+        const existingTable = await tableModel.findOne({
+            tableName: data.tableName,
+        })
+        if (existingTable) {
+            throw new Error('Bàn đã tồn tại')
+        }
+
         const newTable = await tableModel.create(data)
         return newTable
     } catch (error) {
@@ -29,7 +36,14 @@ export const getTableById = async (id) => {
 
 export const updateTable = async (id, data) => {
     try {
-        const updatedTable = await tableModel.findByIdAndUpdate(id, data, { new: true })
+        const checkName = await tableModel.findOne({ tableName: data.tableName, _id: { $ne: id } })
+        if (checkName) {
+            throw new Error('Bàn đã tồn tại')
+        }
+
+        const updatedTable = await tableModel.findByIdAndUpdate(id, data, {
+            new: true,
+        })
         return updatedTable
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi cập nhật bàn: ${error.message}`)
@@ -53,6 +67,8 @@ export const updateActiveCartId = async (tableName, activeCartId) => {
         )
         return updatedTable
     } catch (error) {
-        throw new Error(`Xảy ra lỗi khi cập nhật activeCartId: ${error.message}`)
+        throw new Error(
+            `Xảy ra lỗi khi cập nhật activeCartId: ${error.message}`
+        )
     }
 }

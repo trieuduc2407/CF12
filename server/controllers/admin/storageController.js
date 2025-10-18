@@ -6,7 +6,7 @@ export const addIngredient = async (req, res) => {
         if (!name || quantity === null || !unit || threshold === null) {
             return res.json({
                 success: false,
-                message: "Vui lòng điền đầy đủ thông tin"
+                message: 'Vui lòng điền đầy đủ thông tin',
             })
         }
 
@@ -14,18 +14,18 @@ export const addIngredient = async (req, res) => {
             name,
             quantity,
             unit,
-            threshold
+            threshold,
         })
         res.json({
             success: true,
-            message: "Thêm nguyên liệu thành công",
-            data: newIngredient
+            message: 'Thêm nguyên liệu thành công',
+            data: newIngredient,
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -36,7 +36,7 @@ export const getIngredientById = async (req, res) => {
         if (!id) {
             return res.json({
                 success: false,
-                message: "ID không hợp lệ"
+                message: 'ID không hợp lệ',
             })
         }
 
@@ -44,18 +44,18 @@ export const getIngredientById = async (req, res) => {
         if (!ingredient) {
             return res.json({
                 success: false,
-                message: "Nguyên liệu không tồn tại"
+                message: 'Nguyên liệu không tồn tại',
             })
         }
         res.json({
             success: true,
-            data: ingredient
+            data: ingredient,
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -65,13 +65,13 @@ export const getAllIngredients = async (req, res) => {
         const ingredients = await storageService.getAllIngredients()
         res.json({
             success: true,
-            data: ingredients
+            data: ingredients,
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -83,7 +83,7 @@ export const updateIngredient = async (req, res) => {
         if (!id || !name || quantity === null || !unit || threshold === null) {
             return res.json({
                 success: false,
-                message: "Vui lòng điền đầy đủ thông tin"
+                message: 'Vui lòng điền đầy đủ thông tin',
             })
         }
 
@@ -91,18 +91,18 @@ export const updateIngredient = async (req, res) => {
             name,
             quantity,
             unit,
-            threshold
+            threshold,
         })
         res.json({
             success: true,
-            message: "Cập nhật nguyên liệu thành công",
-            data: updatedIngredient
+            message: 'Cập nhật nguyên liệu thành công',
+            data: updatedIngredient,
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -113,21 +113,21 @@ export const deleteIngredient = async (req, res) => {
         if (!id) {
             return res.json({
                 success: false,
-                message: "ID không hợp lệ"
+                message: 'ID không hợp lệ',
             })
         }
 
         await storageService.deleteIngredient(id)
         res.json({
             success: true,
-            message: "Xóa nguyên liệu thành công",
+            message: 'Xóa nguyên liệu thành công',
         })
     } catch (error) {
         console.log(error)
 
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -138,21 +138,20 @@ export const searchIngredient = async (req, res) => {
         if (!query) {
             return res.json({
                 success: false,
-                message: "Query không hợp lệ"
+                message: 'Query không hợp lệ',
             })
         }
 
         const ingredients = await storageService.searchIngredient(query)
         res.json({
             success: true,
-            data: ingredients
+            data: ingredients,
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
-

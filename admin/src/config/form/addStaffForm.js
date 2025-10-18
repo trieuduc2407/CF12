@@ -34,5 +34,5 @@ export const addStaffForm = [
             { value: 'admin', label: 'Quản trị viên' },
         ],
         required: true,
-    }
+    },
 ]

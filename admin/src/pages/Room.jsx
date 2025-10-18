@@ -1,60 +1,141 @@
+import { ChevronLeft, RotateCcw } from 'lucide-react'
 import React from 'react'
 import { useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
 import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
-import { RotateCcw } from 'lucide-react'
-import { ChevronLeft } from 'lucide-react'
+import { addTableForm, updateTableForm } from '../config/form'
+import {
+    addTable,
+    deleteTable,
+    getAllTables,
+    getTableById,
+    updateTable,
+} from '../store/admin/tableSlice'
 
 const initialState = {
-    tableId: '',
+    tableName: '',
     status: 'available',
     activeCartId: '',
 }
 
-
 const listLabel = [
-    { name: 'tableId', label: 'Mã bàn' },
-    { name: 'status', label: 'Trạng thái' }
+    { name: 'tableName', label: 'Tên bàn' },
+    { name: 'status', label: 'Trạng thái' },
 ]
+
+const labelMap = {
+    available: 'Có sẵn',
+    occupied: 'Đang sử dụng',
+    closed: 'Không sử dụng',
+}
 
 const Room = () => {
     const [formData, setFormData] = useState(initialState)
     const [currentUpdateId, setCurrentUpdateId] = useState('')
-    // const [showToast, setShowToast] = useState({
-    //     isShow: false,
-    //     type: '',
-    //     text: '',
-    // })
+    const [showToast, setShowToast] = useState({
+        isShow: false,
+        type: '',
+        text: '',
+    })
 
-    // const dispatch = useDispatch()
-    // const { staffs = [] } = useSelector((state) => state.adminStaff)
+    const { tables = [] } = useSelector((state) => state.adminTable)
+    const dispatch = useDispatch()
 
-    const getTableData = () => {
+    useEffect(() => {
+        dispatch(getAllTables())
+    }, [dispatch])
 
+    const getTableData = (id) => {
+        dispatch(getTableById(id)).then((data) => {
+            if (data?.payload?.success) {
+                setFormData({
+                    tableName: data.payload.data.tableName,
+                    status: data.payload.data.status,
+                    activeCartId: data.payload.data.activeCartId,
+                })
+                setCurrentUpdateId(id)
+                document.getElementById('my-drawer').checked = true
+            }
+        })
     }
 
-    const handleUpdate=()=>{
-        
+    const handleUpdate = () => {
+        dispatch(updateTable({ id: currentUpdateId, formData })).then(
+            (data) => {
+                if (data?.payload?.success) {
+                    dispatch(getAllTables())
+                    document.getElementById('my-drawer').checked = false
+                    setShowToast({
+                        isShow: true,
+                        type: 'success',
+                        text: 'Cập nhật bàn thành công',
+                    })
+                    setFormData(initialState)
+                    setCurrentUpdateId('')
+                    setTimeout(() => {
+                        setShowToast({
+                            isShow: false,
+                            type: '',
+                            text: '',
+                        })
+                    }, 2000)
+                }
+            }
+        )
     }
 
-    const handleDelete=()=>{
-
+    const handleDelete = (id) => {
+        dispatch(deleteTable(id)).then((data) => {
+            if (data?.payload?.success) {
+                dispatch(getAllTables())
+                document.getElementById('my-drawer').checked = false
+                setShowToast({
+                    isShow: true,
+                    type: 'success',
+                    text: 'Xóa bàn thành công',
+                })
+            }
+        })
     }
 
-    const onSubmit=()=>{
-
+    const onSubmit = (event) => {
+        event.preventDefault()
+        dispatch(addTable(formData)).then((data) => {
+            if (data?.payload?.success) {
+                dispatch(getAllTables())
+                document.getElementById('my-drawer').checked = false
+                setShowToast({
+                    isShow: true,
+                    type: 'success',
+                    text: 'Thêm bàn thành công',
+                })
+                setFormData(initialState)
+                setTimeout(() => {
+                    setShowToast({
+                        isShow: false,
+                        type: '',
+                        text: '',
+                    })
+                }, 2000)
+            }
+        })
     }
 
     return (
         <>
-            {/* {showToast.isShow &&
-                (console.log('showToast', showToast) || (
-                    <div className="toast toast-top toast-end">
-                        <div className={`alert alert-${showToast.type}`}>
-                            <span>{showToast.text}</span>
-                        </div>
+            {showToast.isShow && (
+                <div
+                    className="toast toast-top toast-end"
+                    key={showToast.type + showToast.text}
+                >
+                    <div className={`alert alert-${showToast.type}`}>
+                        <span>{showToast.text}</span>
                     </div>
-                ))} */}
+                </div>
+            )}
             <div className="drawer drawer-end xl:drawer-open gap-2">
                 <input
                     id="my-drawer"
@@ -76,8 +157,8 @@ const Room = () => {
                     </div>
                     <ListLayout
                         listLabel={listLabel}
-                        listItem={staffs}
-                        // labelMap={labelMap}
+                        listItem={tables}
+                        labelMap={labelMap}
                         handleUpdate={getTableData}
                         handleDelete={handleDelete}
                     />
@@ -101,9 +182,7 @@ const Room = () => {
                                 <ChevronLeft />
                             </button>
                             <p className="p-4 text-2xl font-semibold">
-                                {currentUpdateId
-                                    ? 'Cập nhật nhân viên'
-                                    : 'Thêm nhân viên'}
+                                {currentUpdateId ? 'Cập nhật bàn' : 'Thêm bàn'}
                             </p>
                             <button
                                 onClick={() => {
@@ -118,8 +197,8 @@ const Room = () => {
                             <CommonForm
                                 formControls={
                                     currentUpdateId
-                                        ? updateStaffForm
-                                        : addStaffForm
+                                        ? updateTableForm
+                                        : addTableForm
                                 }
                                 formData={formData}
                                 setFormData={setFormData}
@@ -133,8 +212,8 @@ const Room = () => {
                                 }
                                 buttonText={
                                     currentUpdateId
-                                        ? 'Cập nhật nhân viên'
-                                        : 'Thêm nhân viên'
+                                        ? 'Cập nhật bàn'
+                                        : 'Thêm bàn'
                                 }
                                 isButtonDisabled={false}
                             />

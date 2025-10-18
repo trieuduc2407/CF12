@@ -14,5 +14,5 @@ export const loginForm = [
         type: 'password',
         placeholder: 'Nhập mật khẩu',
         required: true,
-    }
+    },
 ]

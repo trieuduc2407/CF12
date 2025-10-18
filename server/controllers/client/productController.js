@@ -5,7 +5,7 @@ export const getProductById = async (req, res) => {
     if (!id) {
         return res.json({
             success: false,
-            message: "Thiếu ID sản phẩm"
+            message: 'Thiếu ID sản phẩm',
         })
     }
 
@@ -14,14 +14,14 @@ export const getProductById = async (req, res) => {
         if (!product) {
             return res.json({
                 success: false,
-                message: "Không tìm thấy sản phẩm"
+                message: 'Không tìm thấy sản phẩm',
             })
         }
 
         // Expand temperature options cho client
         let temperatureOptions = []
         if (Array.isArray(product.temperature)) {
-            product.temperature.forEach(temp => {
+            product.temperature.forEach((temp) => {
                 if (temp.type === 'hot_ice') {
                     // Expand hot_ice thành 2 tuỳ chọn, sử dụng defaultTemp để xác định mặc định
                     const defaultTemp = temp.defaultTemp || 'hot' // fallback to 'hot' nếu không có
@@ -31,7 +31,10 @@ export const getProductById = async (req, res) => {
                     )
                 } else {
                     // hot hoặc ice riêng lẻ, luôn là mặc định (vì chỉ có 1 tuỳ chọn)
-                    temperatureOptions.push({ type: temp.type, isDefault: true })
+                    temperatureOptions.push({
+                        type: temp.type,
+                        isDefault: true,
+                    })
                 }
             })
         }
@@ -45,13 +48,13 @@ export const getProductById = async (req, res) => {
                 category: product.category,
                 sizes: product.sizes,
                 temperature: temperatureOptions,
-            }
+            },
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -62,7 +65,7 @@ export const getAllProducts = async (req, res) => {
 
         res.json({
             success: true,
-            data: products.map(product => ({
+            data: products.map((product) => ({
                 available: product.available,
                 basePrice: product.basePrice,
                 category: product.category,
@@ -73,13 +76,13 @@ export const getAllProducts = async (req, res) => {
                 _id: product._id,
                 createdAt: product.createdAt,
                 signature: product.signature,
-            }))
+            })),
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: 'Server error',
         })
     }
 }

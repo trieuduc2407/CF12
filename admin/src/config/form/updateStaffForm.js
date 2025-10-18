@@ -15,6 +15,6 @@ export const updateStaffForm = [
             { value: 'employee', label: 'Nhân viên' },
             { value: 'staff', label: 'Quản lý' },
             { value: 'admin', label: 'Quản trị viên' },
-        ]
-    }
+        ],
+    },
 ]

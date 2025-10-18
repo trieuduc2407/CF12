@@ -1,19 +1,23 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import axios from "axios"
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import axios from 'axios'
 
 const initialState = {
     isLoading: false,
     isAuthenticated: false,
-    staff: null
+    staff: null,
 }
 
-export const loginStaff = createAsyncThunk('/auth/loginStaff', async (formData) => {
-    const response = await axios.post(
-        import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/login',
-        formData,
-        { withCredentials: true })
-    return response?.data
-})
+export const loginStaff = createAsyncThunk(
+    '/auth/loginStaff',
+    async (formData) => {
+        const response = await axios.post(
+            import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/login',
+            formData,
+            { withCredentials: true }
+        )
+        return response?.data
+    }
+)
 
 export const logoutStaff = createAsyncThunk('/auth/logoutStaff', async () => {
     const response = await axios.post(
@@ -27,23 +31,29 @@ export const logoutStaff = createAsyncThunk('/auth/logoutStaff', async () => {
 export const getMe = createAsyncThunk('/auth/getMe', async () => {
     const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/me',
-        { withCredentials: true })
+        { withCredentials: true }
+    )
     return response?.data
 })
 
-export const changePassword = createAsyncThunk('/staff/changePassword', async ({ id, formData }) => {
-    const response = await axios.put(
-        import.meta.env.VITE_BACKEND_URL + `/api/admin/auth/change-password/${id}`,
-        formData,
-        {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true
-        })
-    return response?.data
-})
+export const changePassword = createAsyncThunk(
+    '/staff/changePassword',
+    async ({ id, formData }) => {
+        const response = await axios.put(
+            import.meta.env.VITE_BACKEND_URL +
+                `/api/admin/auth/change-password/${id}`,
+            formData,
+            {
+                headers: { 'Content-Type': 'application/json' },
+                withCredentials: true,
+            }
+        )
+        return response?.data
+    }
+)
 
 const authSlice = createSlice({
-    name: 'auth',
+    name: 'adminAuth',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
@@ -61,7 +71,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false
                 state.staff = null
             })
-            .addCase(logoutStaff.pending, state => {
+            .addCase(logoutStaff.pending, (state) => {
                 state.isLoading = true
             })
             .addCase(logoutStaff.fulfilled, (state) => {
@@ -69,7 +79,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false
                 state.staff = null
             })
-            .addCase(logoutStaff.rejected, state => {
+            .addCase(logoutStaff.rejected, (state) => {
                 state.isLoading = false
                 state.isAuthenticated = false
                 state.staff = null
@@ -98,7 +108,7 @@ const authSlice = createSlice({
             .addCase(changePassword.rejected, (state) => {
                 state.isLoading = false
             })
-    }
+    },
 })
 
 export default authSlice.reducer

@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken"
+import jwt from 'jsonwebtoken'
 
 const roles = ['employee', 'staff', 'admin']
 
@@ -7,7 +7,7 @@ const staffAuthMiddleware = (req, res, next) => {
     if (!token) {
         return res.json({
             success: false,
-            message: "Chưa đăng nhập"
+            message: 'Chưa đăng nhập',
         })
     }
     try {
@@ -15,7 +15,7 @@ const staffAuthMiddleware = (req, res, next) => {
         if (!roles.includes(decoded.role)) {
             return res.json({
                 success: false,
-                message: "Không đủ quyền truy cập"
+                message: 'Không đủ quyền truy cập',
             })
         }
         req.user = decoded
@@ -24,7 +24,7 @@ const staffAuthMiddleware = (req, res, next) => {
         console.log(error)
         res.json({
             success: false,
-            message: "Token không hợp lệ"
+            message: 'Token không hợp lệ',
         })
     }
 }

@@ -345,7 +345,10 @@ const Products = () => {
     return (
         <>
             {showToast.isShow && (
-                <div className="toast toast-top toast-end">
+                <div
+                    className="toast toast-top toast-end"
+                    key={showToast.type + showToast.text}
+                >
                     <div className={`alert alert-${showToast.type}`}>
                         <span>{showToast.text}</span>
                     </div>

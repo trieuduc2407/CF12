@@ -16,7 +16,7 @@ export const addProductForm = [
             { value: 'coffee', label: 'Cà phê' },
             { value: 'mixed', label: 'Sinh tố và nước ép' },
             { value: 'milktea', label: 'Trà sữa và trà hoa quả' },
-            { value: 'yogurt', label: 'Sữa chua và thức uống khác' }
+            { value: 'yogurt', label: 'Sữa chua và thức uống khác' },
         ],
         required: true,
     },
@@ -35,7 +35,7 @@ export const addProductForm = [
         component: 'select',
         options: [
             { value: 'single', label: 'Không up size' },
-            { value: 'upsize', label: 'Có upsize' }
+            { value: 'upsize', label: 'Có upsize' },
         ],
         required: true,
     },
@@ -55,7 +55,7 @@ export const addProductForm = [
         options: [
             { value: 'hot', label: 'Nóng' },
             { value: 'ice', label: 'Đá' },
-            { value: 'hot_ice', label: 'Nóng và Đá' }
+            { value: 'hot_ice', label: 'Nóng và Đá' },
         ],
         required: true,
     },
@@ -65,7 +65,7 @@ export const addProductForm = [
         component: 'select',
         options: [
             { value: 'hot', label: 'Nóng' },
-            { value: 'ice', label: 'Đá' }
+            { value: 'ice', label: 'Đá' },
         ],
         required: false,
     },
@@ -78,7 +78,7 @@ export const addProductForm = [
                 name: 'ingredientId',
                 label: 'Tên nguyên liệu',
                 component: 'select',
-                options: []
+                options: [],
             },
             {
                 name: 'amount',
@@ -87,8 +87,8 @@ export const addProductForm = [
                 component: 'input',
                 type: 'number',
                 useSeparator: true,
-            }
-        ]
+            },
+        ],
     },
     // {
     //     name: 'available',

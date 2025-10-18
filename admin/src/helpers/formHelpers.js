@@ -7,7 +7,8 @@ export const isFormDataEmpty = (data) => {
     })
 }
 export const getTouchedKey = (name, parentName, idx) => {
-    if (parentName && typeof idx === 'number') return `${parentName}-${idx}-${name}`
+    if (parentName && typeof idx === 'number')
+        return `${parentName}-${idx}-${name}`
     if (parentName) return `${parentName}-${name}`
     return name
 }

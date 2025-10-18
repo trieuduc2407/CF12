@@ -1,6 +1,12 @@
-import express from "express"
-import { changePassword, loginStaff, logoutStaff, me } from "../../controllers/auth/adminAuthController.js"
-import { staffAuthMiddleware } from "../../middleware/staffAuthMiddleware.js"
+import express from 'express'
+
+import {
+    changePassword,
+    loginStaff,
+    logoutStaff,
+    me,
+} from '../../controllers/auth/adminAuthController.js'
+import { staffAuthMiddleware } from '../../middleware/staffAuthMiddleware.js'
 
 const router = express.Router()
 

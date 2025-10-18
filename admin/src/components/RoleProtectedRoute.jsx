@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 const RoleProtectedRoute = ({ allowedRoles, children }) => {
-    const { staff } = useSelector((state) => state.auth)
+    const { staff } = useSelector((state) => state.adminAuth)
 
     if (!staff) return null
 

@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 
 const storageSchema = new mongoose.Schema(
     {
@@ -6,11 +6,11 @@ const storageSchema = new mongoose.Schema(
         quantity: { type: Number, default: 0 },
         unit: { type: String, required: true },
         threshold: { type: Number, default: 0 },
-        updatedAt: { type: Date, default: Date.now },
-
-    }
+    },
+    { timestamps: true }
 )
 
-const storageModel = mongoose.models.storage || mongoose.model("storage", storageSchema)
+const storageModel =
+    mongoose.models.storage || mongoose.model('storage', storageSchema)
 
 export { storageModel }

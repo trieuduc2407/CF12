@@ -107,7 +107,8 @@ const Storage = () => {
             (data) => {
                 if (
                     data?.payload?.success === false &&
-                    data?.payload?.message === 'Tên nguyên liệu đã tồn tại'
+                    data?.payload?.message ===
+                        'Xảy ra lỗi khi cập nhật nguyên liệu: Tên nguyên liệu đã tồn tại'
                 ) {
                     document.getElementById('my-drawer').checked = false
                     setShowToast({
@@ -235,14 +236,16 @@ const Storage = () => {
     return (
         <>
             {showToast.isShow && (
-                <div className="toast toast-top toast-end">
+                <div
+                    className="toast toast-top toast-end"
+                    key={showToast.type + showToast.text}
+                >
                     <div className={`alert alert-${showToast.type}`}>
                         <span>{showToast.text}</span>
                     </div>
                 </div>
             )}
 
-            {/* Searchbar mobile */}
             <div
                 id="search-bar"
                 className={`fixed left-0 right-0 top-0 z-30 bg-white pt-4 shadow-md transition-all duration-200 md:hidden ${showMobileSearch ? '' : 'hidden'}`}

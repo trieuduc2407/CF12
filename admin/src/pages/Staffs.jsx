@@ -182,14 +182,16 @@ const Staffs = () => {
 
     return (
         <>
-            {showToast.isShow && (
-                console.log('showToast', showToast) ||
-                <div className="toast toast-top toast-end">
+            {showToast.isShow && 
+                <div
+                    className="toast toast-top toast-end"
+                    key={showToast.type + showToast.text}
+                >
                     <div className={`alert alert-${showToast.type}`}>
                         <span>{showToast.text}</span>
                     </div>
                 </div>
-            )}
+            }
             <div className="drawer drawer-end xl:drawer-open gap-2">
                 <input
                     id="my-drawer"

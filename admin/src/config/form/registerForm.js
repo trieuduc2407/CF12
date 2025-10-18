@@ -30,8 +30,8 @@ export const registerForm = [
         placeholder: 'Nhập chức vụ',
         options: [
             { value: 'staff', label: 'Quản lý' },
-            { value: 'employee', label: 'Nhân viên' }
+            { value: 'employee', label: 'Nhân viên' },
         ],
         required: true,
-    }
+    },
 ]

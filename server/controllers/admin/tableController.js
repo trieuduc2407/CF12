@@ -5,23 +5,23 @@ export const addTable = async (req, res) => {
     if (!tableName || !status) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp đầy đủ thông tin"
+            message: 'Vui lòng cung cấp đầy đủ thông tin',
         })
     }
 
     try {
         const newTable = await tableService.addTable({
             tableName,
-            status
+            status,
         })
         return res.json({
             success: true,
-            data: newTable
+            data: newTable,
         })
     } catch (error) {
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -31,12 +31,12 @@ export const getAllTables = async (req, res) => {
         const tables = await tableService.getAllTables()
         return res.json({
             success: true,
-            data: tables
+            data: tables,
         })
     } catch (error) {
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -46,7 +46,7 @@ export const getTableById = async (req, res) => {
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID bàn"
+            message: 'Vui lòng cung cấp ID bàn',
         })
     }
 
@@ -55,18 +55,18 @@ export const getTableById = async (req, res) => {
         if (!table) {
             return res.json({
                 success: false,
-                message: "Không tìm thấy bàn"
+                message: 'Không tìm thấy bàn',
             })
         }
 
         return res.json({
             success: true,
-            data: table
+            data: table,
         })
     } catch (error) {
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -76,7 +76,7 @@ export const updateTable = async (req, res) => {
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID bàn"
+            message: 'Vui lòng cung cấp ID bàn',
         })
     }
 
@@ -84,23 +84,23 @@ export const updateTable = async (req, res) => {
     if (!tableName || !status) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp đầy đủ thông tin"
+            message: 'Vui lòng cung cấp đầy đủ thông tin',
         })
     }
 
     try {
         const updatedTable = await tableService.updateTable(id, {
             tableName,
-            status
+            status,
         })
         return res.json({
             success: true,
-            data: updatedTable
+            data: updatedTable,
         })
     } catch (error) {
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -110,7 +110,7 @@ export const deleteTable = async (req, res) => {
     if (!id) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp ID bàn"
+            message: 'Vui lòng cung cấp ID bàn',
         })
     }
 
@@ -118,12 +118,12 @@ export const deleteTable = async (req, res) => {
         await tableService.deleteTable(id)
         return res.json({
             success: true,
-            message: "Xóa bàn thành công"
+            message: 'Xóa bàn thành công',
         })
     } catch (error) {
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }
@@ -133,7 +133,7 @@ export const updateActiveCartId = async (req, res) => {
     if (!tableId) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp tableId"
+            message: 'Vui lòng cung cấp tableId',
         })
     }
 
@@ -141,20 +141,23 @@ export const updateActiveCartId = async (req, res) => {
     if (!activeCartId) {
         return res.json({
             success: false,
-            message: "Vui lòng cung cấp activeCartId"
+            message: 'Vui lòng cung cấp activeCartId',
         })
     }
 
     try {
-        const updatedTable = await tableService.updateActiveCartId(tableId, activeCartId)
+        const updatedTable = await tableService.updateActiveCartId(
+            tableId,
+            activeCartId
+        )
         return res.json({
             success: true,
-            data: updatedTable
+            data: updatedTable,
         })
     } catch (error) {
         return res.json({
             success: false,
-            message: error.message || "Server error"
+            message: error.message || 'Server error',
         })
     }
 }

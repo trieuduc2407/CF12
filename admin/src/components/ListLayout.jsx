@@ -3,6 +3,8 @@ import React from 'react'
 
 import formatNumber from '../utils/formatNumber'
 
+const mapList = ['unit', 'role', 'status']
+
 const ListLayout = ({
     listLabel,
     listItem,
@@ -51,8 +53,9 @@ const ListLayout = ({
                       >
                           {listLabel.map((key, i) => (
                               <div className="text-center" key={i}>
-                                  {key.name === 'unit' || key.name === 'role'
-                                      ? labelMap[item[key.name]]
+                                  {mapList.includes(key.name)
+                                      ? labelMap[item[key.name]] ||
+                                        item[key.name]
                                       : formatNumber(item[key.name] ?? '')}
                               </div>
                           ))}

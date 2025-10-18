@@ -22,5 +22,5 @@ export const changePasswordForm = [
         type: 'password',
         placeholder: 'Nhập xác nhận mật khẩu mới',
         required: true,
-    }
+    },
 ]

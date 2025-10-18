@@ -1,24 +1,37 @@
-import express from "express"
-import cors from "cors"
-import cookieParser from "cookie-parser"
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
 import 'dotenv/config'
-import { connectDB } from "./config/db.js"
-import { router as adminAuthRoutes } from "./routes/admin/adminAuthRoutes.js"
-import { router as adminStorageRoutes } from "./routes/admin/adminStorageRoutes.js"
-import { router as adminStaffRoutes } from "./routes/admin/adminStaffRoutes.js"
-import { router as adminProductRoutes } from "./routes/admin/adminProductRoutes.js"
-import { router as clientProductRoutes } from "./routes/client/productRoutes.js"
-import { router as adminTableRoutes } from "./routes/admin/adminTableRoutes.js"
+import express from 'express'
+
+import { connectDB } from './config/db.js'
+import { router as adminAuthRoutes } from './routes/admin/adminAuthRoutes.js'
+import { router as adminProductRoutes } from './routes/admin/adminProductRoutes.js'
+import { router as adminStaffRoutes } from './routes/admin/adminStaffRoutes.js'
+import { router as adminStorageRoutes } from './routes/admin/adminStorageRoutes.js'
+import { router as adminTableRoutes } from './routes/admin/adminTableRoutes.js'
+import { router as clientProductRoutes } from './routes/client/productRoutes.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
 
-app.use(cors({
-    origin: [process.env.FRONTEND_URL, process.env.ADMIN_URL, 'http://localhost:5173'],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Expires', 'Pragma'],
-    credentials: true,
-}))
+app.use(
+    cors({
+        origin: [
+            process.env.FRONTEND_URL,
+            process.env.ADMIN_URL,
+            'http://localhost:5173',
+        ],
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization',
+            'Cache-Control',
+            'Expires',
+            'Pragma',
+        ],
+        credentials: true,
+    })
+)
 app.use(express.json())
 app.use(cookieParser())
 connectDB()

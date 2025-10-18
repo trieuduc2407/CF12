@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLogout } from '../hooks/useLogout'
 
 const Header = () => {
-    const { staff } = useSelector((state) => state.auth)
+    const { staff } = useSelector((state) => state.adminAuth)
     const navigate = useNavigate()
     const handleLogout = useLogout()
 

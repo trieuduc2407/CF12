@@ -8,23 +8,30 @@ const initialState = {
     error: null,
 }
 
-export const getProductById = createAsyncThunk('/clientProduct/getProductById', async (productId, { rejectWithValue }) => {
-    try {
+export const getProductById = createAsyncThunk(
+    '/clientProduct/getProductById',
+    async (productId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(
+                import.meta.env.VITE_BACKEND_URL +
+                    `/api/client/products/${productId}`
+            )
+            return response?.data
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message)
+        }
+    }
+)
+
+export const getAllProducts = createAsyncThunk(
+    '/clientProduct/getAllProducts',
+    async () => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + `/api/client/products/${productId}`,
+            import.meta.env.VITE_BACKEND_URL + '/api/client/products/all'
         )
         return response?.data
-    } catch (error) {
-        return rejectWithValue(error.response?.data || error.message)
     }
-})
-
-export const getAllProducts = createAsyncThunk('/clientProduct/getAllProducts', async () => {
-    const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + '/api/client/products/all',
-    )
-    return response?.data
-})
+)
 
 const productSlice = createSlice({
     name: 'clientProduct',
@@ -61,7 +68,7 @@ const productSlice = createSlice({
                 state.selectedProduct = null
                 state.error = action.payload || action.error.message
             })
-    }
+    },
 })
 
 export default productSlice.reducer

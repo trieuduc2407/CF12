@@ -36,5 +36,5 @@ export const addIngredientForm = [
         type: 'number',
         useSeparator: true,
         required: true,
-    }
+    },
 ]

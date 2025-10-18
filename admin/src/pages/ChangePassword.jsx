@@ -22,7 +22,7 @@ const ChangePassword = () => {
     const navigate = useNavigate()
 
     const dispatch = useDispatch()
-    const { staff } = useSelector((state) => state.auth)
+    const { staff } = useSelector((state) => state.adminAuth)
 
     const onSubmit = (event) => {
         event.preventDefault()
@@ -73,7 +73,10 @@ const ChangePassword = () => {
     return (
         <>
             {showToast.isShow && (
-                <div className="toast toast-top toast-end">
+                <div
+                    className="toast toast-top toast-end"
+                    key={showToast.type + showToast.text}
+                >
                     <div className={`alert alert-${showToast.type}`}>
                         <span>{showToast.text}</span>
                     </div>
