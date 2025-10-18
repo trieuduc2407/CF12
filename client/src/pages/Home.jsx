@@ -1,9 +1,10 @@
 import { ShoppingBag } from 'lucide-react'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const Home = () => {
     const navigate = useNavigate()
+    const { tableName } = useParams()
     return (
         <>
             <div className="card m-5 flex-row justify-start bg-red-300 py-5 text-3xl">
@@ -27,7 +28,7 @@ const Home = () => {
                     </div>
                 </div>
                 <div
-                    onClick={() => navigate('/menu')}
+                    onClick={() => navigate(`/tables/${tableName}/menu`)}
                     className="card m-5 h-16 justify-center bg-red-300 text-center text-3xl"
                 >
                     Xem Menu - Gọi Món

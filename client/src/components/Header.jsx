@@ -1,7 +1,7 @@
 import { Clock, Dot, PhoneCall, ReceiptText, Store } from 'lucide-react'
 import { ChevronLeft } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const Header = () => {
     const [openStatus, setOpenStatus] = useState({
@@ -10,6 +10,7 @@ const Header = () => {
     })
 
     const navigate = useNavigate()
+    const { tableName } = useParams()
 
     useEffect(() => {
         const now = new Date()
@@ -33,19 +34,19 @@ const Header = () => {
                 <div className="relative flex-1 shrink overflow-hidden md:w-2/5">
                     <button
                         className="absolute left-2.5 top-2.5 text-white"
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate(`/tables/${tableName}`)}
                     >
                         <ChevronLeft />
                     </button>
                     <img
                         className="object-cover md:max-lg:max-w-sm lg:h-[270px] lg:w-[480px]"
-                        src="./cover_img.png"
-                        alt=""
+                        src="/cover_img.png"
+                        alt="Cover Image"
                     />
                     <img
                         className="rounded-box absolute bottom-2.5 left-2.5 w-20 border-2 border-white"
-                        src="./logo.png"
-                        alt=""
+                        src="/logo.png"
+                        alt="Logo"
                     />
                 </div>
                 <div className="relative m-2.5 md:w-3/5">
