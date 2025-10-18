@@ -1,4 +1,4 @@
-import { cloudinary } from '../../config/cloudinary.js'
+import { cloudinary } from '../../config/cloudinaryConfig.js'
 import { parseAndValidateProductFields } from '../../helpers/admin/parseAndValidateProductFields.js'
 import { uploadToCloudinary } from '../../helpers/admin/uploadToCloudinary.js'
 import * as productService from '../../services/admin/productService.js'
