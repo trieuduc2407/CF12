@@ -13,16 +13,5 @@ export const initSocket = (server) => {
         },
     })
 
-    io.on('connection', (socket) => {
-        console.log('A user connected:', socket.id)
-        socket.on('disconnect', () => {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('A user disconnected:', socket.id)
-            } else {
-                console.log('A user disconnected')
-            }
-        })
-    })
-
     return io
 }
