@@ -7,11 +7,11 @@ import formatNumber from '../utils/formatNumber'
 
 const Card = ({ product }) => {
     const { isLoading } = useSelector((state) => state.clientProduct)
+    const { tableName } = useSelector((state) => state.clientSession)
     const navigate = useNavigate()
 
     const handleAddToCart = (productId) => {
-        console.log('Add to cart clicked:', productId)
-        navigate(`/product/${productId}`)
+        navigate(`/tables/${tableName}/product/${productId}`)
     }
 
     return (
