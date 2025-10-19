@@ -1,17 +1,18 @@
 import mongoose from 'mongoose'
 
 const orderSchema = new mongoose.Schema({
-    roomId: {
+    tableId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Room',
+        ref: 'table',
         required: true,
     },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     items: [
         {
             productId: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
             name: String,
-            options: mongoose.Schema.Types.Mixed,
+            selectedSize: { type: String, enum: ['small', 'medium', 'large'] },
+            selectedTemperature: { type: String, enum: ['hot', 'ice'] },
             quantity: Number,
             price: Number,
         },
@@ -25,7 +26,7 @@ const orderSchema = new mongoose.Schema({
         enum: ['pending', 'paid', 'cancelled'],
         default: 'pending',
     },
-    staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff' },
+    staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'staff' },
     createdAt: { type: Date, default: Date.now },
     paidAt: { type: Date },
 })

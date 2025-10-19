@@ -5,7 +5,7 @@ import * as productService from '../../services/admin/productService.js'
 
 export const addProduct = async (req, res) => {
     const { isValid, fields } = parseAndValidateProductFields(req)
-    if (!isValid) {
+    if (!isValid.valid) {
         return res.json({
             success: false,
             message: isValid.message || 'Vui lòng điền đầy đủ thông tin',
@@ -90,10 +90,10 @@ export const updateProduct = async (req, res) => {
     }
 
     const { isValid, fields } = parseAndValidateProductFields(req)
-    if (!isValid) {
+    if (!isValid.valid) {
         return res.json({
             success: false,
-            message: 'Vui lòng điền đầy đủ thông tin',
+            message: isValid.message || 'Vui lòng điền đầy đủ thông tin',
         })
     }
 

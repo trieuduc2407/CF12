@@ -129,11 +129,11 @@ export const deleteTable = async (req, res) => {
 }
 
 export const updateActiveCartId = async (req, res) => {
-    const { tableId } = req.params
-    if (!tableId) {
+    const { tableName } = req.params
+    if (!tableName) {
         return res.json({
             success: false,
-            message: 'Vui lòng cung cấp tableId',
+            message: 'Vui lòng cung cấp tableName',
         })
     }
 
@@ -147,7 +147,7 @@ export const updateActiveCartId = async (req, res) => {
 
     try {
         const updatedTable = await tableService.updateActiveCartId(
-            tableId,
+            tableName,
             activeCartId
         )
         return res.json({

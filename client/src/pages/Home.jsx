@@ -1,10 +1,35 @@
 import { ShoppingBag } from 'lucide-react'
 import React from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+
+import socket from '../socket/socket'
 
 const Home = () => {
     const navigate = useNavigate()
     const { tableName } = useParams()
+
+    useEffect(() => {
+        if (!tableName) return
+
+        // Join table room
+        socket.emit('joinTable', { tableName })
+
+        // Optional: Listen for errors
+        const handleError = (err) => {
+            console.error('Socket error:', err)
+        }
+        socket.on('connect_error', handleError)
+        socket.on('error', handleError)
+
+        // Cleanup: leave room and remove listeners
+        return () => {
+            socket.emit('leaveTable', { tableName })
+            socket.off('connect_error', handleError)
+            socket.off('error', handleError)
+        }
+    }, [tableName])
+
     return (
         <>
             <div className="card m-5 flex-row justify-start bg-red-300 py-5 text-3xl">
