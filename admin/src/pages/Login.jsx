@@ -22,28 +22,51 @@ const Login = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const onSubmit = (event) => {
+    const onSubmit = async (event) => {
         event.preventDefault()
-        dispatch(loginStaff(formData)).then((data) => {
-            if (data?.payload?.success === false) {
+
+        try {
+            const data = await dispatch(loginStaff(formData)).unwrap()
+
+            if (data?.success === false) {
                 setFormData(initialState)
                 setShowToast({
                     isShow: true,
                     type: 'error',
-                    text: data.payload.message,
+                    text: data.message,
                 })
                 setTimeout(
                     () => setShowToast({ isShow: false, text: '' }),
                     2000
                 )
+                return
             }
 
-            if (data?.payload?.success) {
-                navigate('/admin/dashboard')
+            if (data?.success) {
+                // Try multiple redirect methods for Safari mobile compatibility
+                // try {
+                navigate('/admin/dashboard', { replace: true })
+                // } catch (error) {
+                // Fallback for Safari mobile
+                // window.location.href = '/admin/dashboard'
+                // }
             }
-        })
+        } catch (error) {
+            console.error('Login error:', error)
+            window.location.href = '/admin/dashboard'
+
+            setFormData(initialState)
+
+            setShowToast({
+                isShow: true,
+                type: 'error',
+                text:
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    'Đã xảy ra lỗi khi đăng nhập',
+            })
+        }
     }
-
     return (
         <>
             {showToast.isShow && (

@@ -138,6 +138,33 @@ const CommonForm = ({
                         setValue(controlItem, val, parentName, index)
                     }}
                     onBlur={() => setFieldTouched(key)}
+                    autoComplete={
+                        controlItem.name === 'username'
+                            ? 'username'
+                            : controlItem.name === 'password'
+                              ? 'current-password'
+                              : controlItem.name === 'email'
+                                ? 'email'
+                                : 'off'
+                    }
+                    autoCapitalize={
+                        controlItem.name === 'username' ||
+                        controlItem.name === 'email'
+                            ? 'none'
+                            : 'sentences'
+                    }
+                    autoCorrect={
+                        controlItem.name === 'username' ||
+                        controlItem.name === 'email'
+                            ? 'off'
+                            : 'on'
+                    }
+                    spellCheck={
+                        controlItem.name === 'username' ||
+                        controlItem.name === 'email'
+                            ? false
+                            : true
+                    }
                     {...(controlItem?.disabled ? { disabled: true } : null)}
                 />
             )
@@ -395,9 +422,11 @@ const CommonForm = ({
                 </div>
             )}
             <form
-                onSubmit={(event) => {
+                onSubmit={async (event) => {
+                    // Luôn preventDefault để tránh Safari mobile submit form theo cách mặc định
+                    event.preventDefault()
+
                     if (isButtonDisabled) {
-                        event.preventDefault()
                         setShowToast({
                             show: true,
                             type: 'error',
@@ -414,12 +443,19 @@ const CommonForm = ({
                         )
                         return
                     }
+
                     if (onSubmit) {
-                        onSubmit(event)
-                        setTouched({})
-                        if (typeof setErrors === 'function') setErrors({})
+                        try {
+                            await onSubmit(event)
+                            setTouched({})
+                            if (typeof setErrors === 'function') setErrors({})
+                        } catch (error) {
+                            console.error('Form submission error:', error)
+                        }
                     }
                 }}
+                autoComplete="off"
+                noValidate
             >
                 <div className="flex flex-col gap-4">
                     {formControls.map(renderControl)}
@@ -427,6 +463,7 @@ const CommonForm = ({
                         type="submit"
                         className={`${isButtonDisabled ? 'cursor-not-allowed border-none bg-gray-400' : ''} btn rounded-lg`}
                         aria-disabled={isButtonDisabled}
+                        disabled={isButtonDisabled}
                     >
                         {buttonText || 'Gửi'}
                     </button>
