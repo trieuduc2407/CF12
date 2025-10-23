@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import CommonForm from '../components/CommonForm'
+import Toast from '../components/Toast'
 import { changePasswordForm } from '../config/form'
+import { useFormWithToast } from '../hooks/useFormWithToast'
 import { changePassword, getMe } from '../store/auth/authSlice'
 
 const initialState = {
@@ -13,12 +15,9 @@ const initialState = {
 }
 
 const ChangePassword = () => {
-    const [formData, setFormData] = useState(initialState)
-    const [showToast, setShowToast] = useState({
-        isShow: false,
-        type: '',
-        text: '',
-    })
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+
     const navigate = useNavigate()
 
     const dispatch = useDispatch()
@@ -37,29 +36,13 @@ const ChangePassword = () => {
                     data?.payload?.success === false &&
                     data?.payload?.message === 'Mật khẩu không đúng'
                 ) {
-                    setFormData(initialState)
-                    setShowToast({
-                        isShow: true,
-                        type: 'error',
-                        text: data.payload.message,
-                    })
-                    setTimeout(
-                        () => setShowToast({ isShow: false, text: '' }),
-                        2000
-                    )
+                    resetForm()
+                    showToastMessage('error', data.payload.message)
                 }
 
                 if (data?.payload?.success) {
-                    setFormData(initialState)
-                    setShowToast({
-                        isShow: true,
-                        type: 'success',
-                        text: data.payload.message,
-                    })
-                    setTimeout(
-                        () => setShowToast({ isShow: false, text: '' }),
-                        2000
-                    )
+                    resetForm()
+                    showToastMessage('success', data.payload.message)
                     navigate('/admin/login')
                 }
             }
@@ -72,16 +55,7 @@ const ChangePassword = () => {
 
     return (
         <>
-            {showToast.isShow && (
-                <div
-                    className="toast toast-top toast-end"
-                    key={showToast.type + showToast.text}
-                >
-                    <div className={`alert alert-${showToast.type}`}>
-                        <span>{showToast.text}</span>
-                    </div>
-                </div>
-            )}
+            <Toast showToast={showToast} />
             <div className="flex min-h-screen items-center justify-center">
                 <div className="flex flex-col rounded-2xl bg-white p-10">
                     <div className="flex items-center gap-4">

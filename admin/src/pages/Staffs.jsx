@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
+import Toast from '../components/Toast'
 import { addStaffForm, updateStaffForm } from '../config/form'
+import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
     addStaff,
     deleteStaff,
@@ -32,13 +34,10 @@ const listLabel = [
 ]
 
 const Staffs = () => {
-    const [formData, setFormData] = useState(initialState)
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+
     const [currentUpdateId, setCurrentUpdateId] = useState('')
-    const [showToast, setShowToast] = useState({
-        isShow: false,
-        type: '',
-        text: '',
-    })
 
     const dispatch = useDispatch()
     const { staffs = [] } = useSelector((state) => state.adminStaff)
@@ -61,29 +60,16 @@ const Staffs = () => {
                     data?.payload?.message === 'Không có quyền truy cập'
                 ) {
                     document.getElementById('my-drawer').checked = false
-                    setShowToast({
-                        isShow: true,
-                        type: 'error',
-                        text: 'Bạn không có quyền cập nhật vai trò này',
-                    })
-                    setTimeout(
-                        () => setShowToast({ isShow: false, text: '' }),
-                        2000
+                    showToastMessage(
+                        'error',
+                        'Bạn không có quyền cập nhật vai trò này'
                     )
                 }
 
                 if (data?.payload?.success) {
                     dispatch(getAllStaff())
                     document.getElementById('my-drawer').checked = false
-                    setShowToast({
-                        isShow: true,
-                        type: 'success',
-                        text: data.payload.message,
-                    })
-                    setTimeout(
-                        () => setShowToast({ isShow: false, text: '' }),
-                        2000
-                    )
+                    showToastMessage('success', data.payload.message)
                 }
             }
         )
@@ -96,29 +82,13 @@ const Staffs = () => {
                 data?.payload?.message === 'Không đủ quyền xóa nhân viên này'
             ) {
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'error',
-                    text: data.payload.message,
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('error', data.payload.message)
             }
 
             if (data?.payload?.success) {
                 dispatch(getAllStaff())
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text: data.payload.message,
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('success', data.payload.message)
             }
         })
     }
@@ -132,15 +102,7 @@ const Staffs = () => {
                     'Bạn không có quyền tạo nhân viên với vai trò này'
             ) {
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'error',
-                    text: data.payload.message,
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('error', data.payload.message)
             }
 
             if (
@@ -148,30 +110,14 @@ const Staffs = () => {
                 data?.payload?.message === 'Username đã tồn tại'
             ) {
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'error',
-                    text: data.payload.message,
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('error', data.payload.message)
             }
 
             if (data?.payload?.success) {
                 dispatch(getAllStaff())
-                setFormData(initialState)
+                resetForm()
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text: data?.payload?.message,
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('success', data?.payload?.message)
             }
         })
     }
@@ -182,16 +128,7 @@ const Staffs = () => {
 
     return (
         <>
-            {showToast.isShow && 
-                <div
-                    className="toast toast-top toast-end"
-                    key={showToast.type + showToast.text}
-                >
-                    <div className={`alert alert-${showToast.type}`}>
-                        <span>{showToast.text}</span>
-                    </div>
-                </div>
-            }
+            <Toast showToast={showToast} />
             <div className="drawer drawer-end xl:drawer-open gap-2">
                 <input
                     id="my-drawer"
@@ -199,7 +136,7 @@ const Staffs = () => {
                     className="drawer-toggle"
                     onChange={() => {
                         setCurrentUpdateId('')
-                        setFormData(initialState)
+                        resetForm()
                     }}
                 />
                 <div className="drawer-content">
@@ -244,7 +181,7 @@ const Staffs = () => {
                             </p>
                             <button
                                 onClick={() => {
-                                    setFormData(initialState)
+                                    resetForm()
                                     setCurrentUpdateId('')
                                 }}
                             >

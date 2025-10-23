@@ -1,33 +1,38 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useLocation } from 'react-router-dom'
 
-import { checkAuth } from '../helpers/checkAuth'
 import { getMe } from '../store/auth/authSlice'
 
 const RequireAuth = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true)
-    const [isLoggedIn, setIsLoggedIn] = useState(false)
     const location = useLocation()
     const dispatch = useDispatch()
+    const { isAuthenticated } = useSelector((state) => state.adminAuth)
 
     useEffect(() => {
-        let mounted = true
-        checkAuth().then((result) => {
-            if (mounted) {
-                setIsLoggedIn(result)
-                setIsLoading(false)
-            }
-        })
-        dispatch(getMe())
-        return () => {
-            mounted = false
+        const token = localStorage.getItem('adminToken')
+
+        if (!token) {
+            setIsLoading(false)
+            return
         }
+
+        // Chỉ gọi getMe nếu có token
+        dispatch(getMe())
+            .unwrap()
+            .then(() => {
+                setIsLoading(false)
+            })
+            .catch(() => {
+                localStorage.removeItem('adminToken')
+                setIsLoading(false)
+            })
     }, [dispatch])
 
     if (isLoading) return null
 
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
         return <Navigate to="/admin/login" state={{ from: location }} replace />
     }
 

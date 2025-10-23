@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import CommonForm from '../components/CommonForm'
+import Toast from '../components/Toast'
 import { loginForm } from '../config/form'
+import { useFormWithToast } from '../hooks/useFormWithToast'
 import { loginStaff } from '../store/auth/authSlice'
 
 const initialState = {
@@ -12,12 +14,8 @@ const initialState = {
 }
 
 const Login = () => {
-    const [formData, setFormData] = useState(initialState)
-    const [showToast, setShowToast] = useState({
-        isShow: false,
-        type: '',
-        text: '',
-    })
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -28,16 +26,8 @@ const Login = () => {
         dispatch(loginStaff(formData))
             .then((result) => {
                 if (result?.payload?.success === false) {
-                    setFormData(initialState)
-                    setShowToast({
-                        isShow: true,
-                        type: 'error',
-                        text: result.payload.message,
-                    })
-                    setTimeout(
-                        () => setShowToast({ isShow: false, text: '' }),
-                        2000
-                    )
+                    resetForm()
+                    showToastMessage('error', result.payload.message, 2000)
                     return
                 }
 
@@ -46,33 +36,19 @@ const Login = () => {
                 }
             })
             .catch((error) => {
-                setFormData(initialState)
-                setShowToast({
-                    isShow: true,
-                    type: 'error',
-                    text:
-                        error?.response?.data?.message ||
+                resetForm()
+                showToastMessage(
+                    'error',
+                    error?.response?.data?.message ||
                         error?.message ||
                         'Đã xảy ra lỗi khi đăng nhập',
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
                     3000
                 )
             })
     }
     return (
         <>
-            {showToast.isShow && (
-                <div
-                    className="toast toast-top toast-end"
-                    key={showToast.type + showToast.text}
-                >
-                    <div className={`alert alert-${showToast.type}`}>
-                        <span>{showToast.text}</span>
-                    </div>
-                </div>
-            )}
+            <Toast showToast={showToast} />
 
             <div className="flex min-h-screen items-center justify-center">
                 <div className="flex flex-col rounded-2xl bg-white p-10">

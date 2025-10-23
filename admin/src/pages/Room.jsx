@@ -6,7 +6,9 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
+import Toast from '../components/Toast'
 import { addTableForm, updateTableForm } from '../config/form'
+import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
     addTable,
     deleteTable,
@@ -33,13 +35,10 @@ const labelMap = {
 }
 
 const Room = () => {
-    const [formData, setFormData] = useState(initialState)
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+
     const [currentUpdateId, setCurrentUpdateId] = useState('')
-    const [showToast, setShowToast] = useState({
-        isShow: false,
-        type: '',
-        text: '',
-    })
 
     const { tables = [] } = useSelector((state) => state.adminTable)
     const dispatch = useDispatch()
@@ -68,20 +67,9 @@ const Room = () => {
                 if (data?.payload?.success) {
                     dispatch(getAllTables())
                     document.getElementById('my-drawer').checked = false
-                    setShowToast({
-                        isShow: true,
-                        type: 'success',
-                        text: 'Cập nhật bàn thành công',
-                    })
-                    setFormData(initialState)
+                    showToastMessage('success', 'Cập nhật bàn thành công')
+                    resetForm()
                     setCurrentUpdateId('')
-                    setTimeout(() => {
-                        setShowToast({
-                            isShow: false,
-                            type: '',
-                            text: '',
-                        })
-                    }, 2000)
                 }
             }
         )
@@ -92,11 +80,7 @@ const Room = () => {
             if (data?.payload?.success) {
                 dispatch(getAllTables())
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text: 'Xóa bàn thành công',
-                })
+                showToastMessage('success', 'Xóa bàn thành công')
             }
         })
     }
@@ -107,35 +91,15 @@ const Room = () => {
             if (data?.payload?.success) {
                 dispatch(getAllTables())
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text: 'Thêm bàn thành công',
-                })
-                setFormData(initialState)
-                setTimeout(() => {
-                    setShowToast({
-                        isShow: false,
-                        type: '',
-                        text: '',
-                    })
-                }, 2000)
+                showToastMessage('success', 'Thêm bàn thành công')
+                resetForm()
             }
         })
     }
 
     return (
         <>
-            {showToast.isShow && (
-                <div
-                    className="toast toast-top toast-end"
-                    key={showToast.type + showToast.text}
-                >
-                    <div className={`alert alert-${showToast.type}`}>
-                        <span>{showToast.text}</span>
-                    </div>
-                </div>
-            )}
+            <Toast showToast={showToast} />
             <div className="drawer drawer-end xl:drawer-open gap-2">
                 <input
                     id="my-drawer"
@@ -143,7 +107,7 @@ const Room = () => {
                     className="drawer-toggle"
                     onChange={() => {
                         setCurrentUpdateId('')
-                        setFormData(initialState)
+                        resetForm()
                     }}
                 />
                 <div className="drawer-content">
@@ -186,7 +150,7 @@ const Room = () => {
                             </p>
                             <button
                                 onClick={() => {
-                                    setFormData(initialState)
+                                    resetForm()
                                     setCurrentUpdateId('')
                                 }}
                             >

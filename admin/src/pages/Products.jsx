@@ -12,8 +12,10 @@ import Card from '../components/Card'
 import CommonForm from '../components/CommonForm'
 import ImageUpload from '../components/ImageUpload'
 import Searchbar from '../components/Searchbar'
+import Toast from '../components/Toast'
 import { addProductForm } from '../config/form'
 import { useDebounce } from '../hooks/useDebounce'
+import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
     addProduct,
     deleteProduct,
@@ -42,23 +44,18 @@ const buildSizesArray = (sizeOption, upsizePrice) => {
             { name: 'M', price: 0 },
             { name: 'L', price: upsizePrice || 0 },
         ]
-    } else {
-        // Không có upsize, mặc định gán size M
-        return [{ name: 'M', price: 0 }]
     }
+    return [{ name: 'M', price: 0 }]
 }
 
 const Products = () => {
-    const [formData, setFormData] = useState(initialState)
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+
     const [currentUpdateId, setCurrentUpdateId] = useState('')
     const [image, setImage] = useState(null)
     const [preview, setPreview] = useState(image || '')
     const [imageUpdated, setImageUpdated] = useState(false)
-    const [showToast, setShowToast] = useState({
-        isShow: false,
-        type: '',
-        text: '',
-    })
 
     const [query, setQuery] = useState('')
     const debouncedQuery = useDebounce(query, 500)
@@ -68,6 +65,10 @@ const Products = () => {
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
     const { products = [] } = useSelector((state) => state.adminProduct)
     const dispatch = useDispatch()
+
+    const productsList = Array.isArray(products)
+        ? products
+        : products.data || []
 
     useEffect(() => {
         dispatch(getAllIngredients())
@@ -98,7 +99,6 @@ const Products = () => {
                     const firstTemp = data.payload.data.temperature[0]
                     tempType = firstTemp.type
 
-                    // Nếu là hot_ice, lấy defaultTemp
                     if (firstTemp.type === 'hot_ice' && firstTemp.defaultTemp) {
                         isDefaultTemp = firstTemp.defaultTemp
                     }
@@ -135,17 +135,14 @@ const Products = () => {
     }
 
     const handleUpdate = (id) => {
-        // Validation: Nếu chọn hot_ice thì phải chọn nhiệt độ mặc định
         if (
             formData.temperature === 'hot_ice' &&
             !formData.isDefaultTemperature
         ) {
-            setShowToast({
-                isShow: true,
-                type: 'error',
-                text: 'Vui lòng chọn nhiệt độ mặc định cho sản phẩm có cả nóng và đá',
-            })
-            setTimeout(() => setShowToast({ isShow: false, text: '' }), 2000)
+            showToastMessage(
+                'error',
+                'Vui lòng chọn nhiệt độ mặc định cho sản phẩm có cả nóng và đá'
+            )
             return
         }
 
@@ -184,20 +181,12 @@ const Products = () => {
             if (data?.payload?.success) {
                 dispatch(getAllProducts())
                 setCurrentUpdateId('')
-                setFormData(initialState)
+                resetForm()
                 setImage(null)
                 setPreview('')
                 setImageUpdated(false)
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text: 'Cập nhật sản phẩm thành công!',
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('success', 'Cập nhật sản phẩm thành công!')
             }
         })
     }
@@ -206,15 +195,7 @@ const Products = () => {
         dispatch(deleteProduct(id)).then((data) => {
             if (data?.payload?.success) {
                 dispatch(getAllProducts())
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text: 'Xóa sản phẩm thành công!',
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('success', 'Xóa sản phẩm thành công!')
             }
         })
     }
@@ -223,12 +204,7 @@ const Products = () => {
         const result = await dispatch(toggleSignature(id))
         if (result?.payload?.success) {
             dispatch(getAllProducts())
-            setShowToast({
-                isShow: true,
-                type: 'success',
-                text: result.payload.message,
-            })
-            setTimeout(() => setShowToast({ isShow: false, text: '' }), 2000)
+            showToastMessage('success', result.payload.message)
         }
     }
 
@@ -261,9 +237,7 @@ const Products = () => {
         setQuery(event.target.value)
     }
 
-    // Mobile searchbar: ẩn khi blur và input rỗng
     const handleMobileSearchBlur = () => {
-        // Delay để onClick của nút X có thể chạy trước
         setTimeout(() => {
             if (!query && showMobileSearch) {
                 setShowMobileSearch(false)
@@ -271,7 +245,6 @@ const Products = () => {
         }, 150)
     }
 
-    // Mobile searchbar: ẩn khi bấm X
     const handleMobileSearchClose = (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -282,17 +255,14 @@ const Products = () => {
     const onSubmit = (event) => {
         event.preventDefault()
 
-        // Validation: Nếu chọn hot_ice thì phải chọn nhiệt độ mặc định
         if (
             formData.temperature === 'hot_ice' &&
             !formData.isDefaultTemperature
         ) {
-            setShowToast({
-                isShow: true,
-                type: 'error',
-                text: 'Vui lòng chọn nhiệt độ mặc định cho sản phẩm có cả nóng và đá',
-            })
-            setTimeout(() => setShowToast({ isShow: false, text: '' }), 2000)
+            showToastMessage(
+                'error',
+                'Vui lòng chọn nhiệt độ mặc định cho sản phẩm có cả nóng và đá'
+            )
             return
         }
 
@@ -326,34 +296,17 @@ const Products = () => {
         dispatch(addProduct(payload)).then((data) => {
             if (data?.payload?.success) {
                 dispatch(getAllProducts())
-                setFormData(initialState)
+                resetForm()
                 setImage(null)
                 setPreview('')
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text: 'Thêm sản phẩm thành công!',
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('success', 'Thêm sản phẩm thành công!')
             }
         })
     }
 
     return (
         <>
-            {showToast.isShow && (
-                <div
-                    className="toast toast-top toast-end"
-                    key={showToast.type + showToast.text}
-                >
-                    <div className={`alert alert-${showToast.type}`}>
-                        <span>{showToast.text}</span>
-                    </div>
-                </div>
-            )}
+            <Toast showToast={showToast} />
 
             <div
                 id="search-bar"
@@ -375,7 +328,7 @@ const Products = () => {
                     onChange={(e) => {
                         if (!e.target.checked) {
                             setCurrentUpdateId('')
-                            setFormData(initialState)
+                            resetForm()
                             setImage(null)
                             setPreview('')
                             setImageUpdated(false)
@@ -458,8 +411,8 @@ const Products = () => {
                                     Không tìm thấy sản phẩm
                                 </p>
                             )
-                        ) : products.data && products.data.length > 0 ? (
-                            products.data
+                        ) : productsList.length > 0 ? (
+                            productsList
                                 .slice()
                                 .sort((a, b) => a.name.localeCompare(b.name))
                                 .map((product) => (
@@ -506,7 +459,7 @@ const Products = () => {
                             </h2>
                             <button
                                 onClick={() => {
-                                    setFormData(initialState)
+                                    resetForm()
                                     setCurrentUpdateId('')
                                     setImage(null)
                                     setPreview('')

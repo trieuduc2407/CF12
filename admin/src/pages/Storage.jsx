@@ -11,8 +11,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
 import Searchbar from '../components/Searchbar'
+import Toast from '../components/Toast'
 import { addIngredientForm } from '../config/form'
 import { useDebounce } from '../hooks/useDebounce'
+import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
     addIngredient,
     deleteIngredient,
@@ -44,13 +46,10 @@ const listLabel = [
 ]
 
 const Storage = () => {
-    const [formData, setFormData] = useState(initialState)
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+
     const [currentUpdateId, setCurrentUpdateId] = useState('')
-    const [showToast, setShowToast] = useState({
-        isShow: false,
-        type: '',
-        text: '',
-    })
     const [sortBy, setSortBy] = useState('ratio')
     const [sortOrder, setSortOrder] = useState('asc')
 
@@ -111,32 +110,18 @@ const Storage = () => {
                         'Xảy ra lỗi khi cập nhật nguyên liệu: Tên nguyên liệu đã tồn tại'
                 ) {
                     document.getElementById('my-drawer').checked = false
-                    setShowToast({
-                        isShow: true,
-                        type: 'error',
-                        text: data.payload.message,
-                    })
-                    setTimeout(
-                        () => setShowToast({ isShow: false, text: '' }),
-                        2000
-                    )
+                    showToastMessage('error', data.payload.message)
                 }
 
                 if (data?.payload?.success) {
                     dispatch(getAllIngredients())
-                    setFormData(initialState)
+                    resetForm()
                     setCurrentUpdateId('')
                     document.getElementById('my-drawer').checked = false
-                    setShowToast({
-                        isShow: true,
-                        type: 'success',
-                        text:
-                            data?.payload?.message ||
-                            'Cập nhật nguyên liệu thành công',
-                    })
-                    setTimeout(
-                        () => setShowToast({ isShow: false, text: '' }),
-                        2000
+                    showToastMessage(
+                        'success',
+                        data?.payload?.message ||
+                            'Cập nhật nguyên liệu thành công'
                     )
                 }
             }
@@ -147,15 +132,9 @@ const Storage = () => {
         dispatch(deleteIngredient(id)).then((data) => {
             if (data?.payload?.success) {
                 dispatch(getAllIngredients())
-                setShowToast({
-                    isShow: true,
-                    type: 'error',
-                    text:
-                        data?.payload?.message || 'Xóa nguyên liệu thành công',
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
+                showToastMessage(
+                    'error',
+                    data?.payload?.message || 'Xóa nguyên liệu thành công'
                 )
             }
         })
@@ -169,30 +148,16 @@ const Storage = () => {
                 data?.payload?.message === 'Nguyên liệu đã tồn tại'
             ) {
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'error',
-                    text: data.payload.message,
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
-                )
+                showToastMessage('error', data.payload.message)
             }
 
             if (data?.payload?.success) {
                 dispatch(getAllIngredients())
-                setFormData(initialState)
+                resetForm()
                 document.getElementById('my-drawer').checked = false
-                setShowToast({
-                    isShow: true,
-                    type: 'success',
-                    text:
-                        data?.payload?.message || 'Thêm nguyên liệu thành công',
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
+                showToastMessage(
+                    'success',
+                    data?.payload?.message || 'Thêm nguyên liệu thành công'
                 )
             }
         })
@@ -202,7 +167,6 @@ const Storage = () => {
         setQuery(event.target.value)
     }
 
-    // Mobile searchbar: ẩn khi blur và input rỗng
     const handleMobileSearchBlur = () => {
         setTimeout(() => {
             if (!query && showMobileSearch) {
@@ -211,7 +175,6 @@ const Storage = () => {
         }, 150)
     }
 
-    // Mobile searchbar: ẩn khi bấm X
     const handleMobileSearchClose = (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -231,20 +194,11 @@ const Storage = () => {
                 }
             })
         }
-    }, [debouncedQuery])
+    }, [debouncedQuery, dispatch])
 
     return (
         <>
-            {showToast.isShow && (
-                <div
-                    className="toast toast-top toast-end"
-                    key={showToast.type + showToast.text}
-                >
-                    <div className={`alert alert-${showToast.type}`}>
-                        <span>{showToast.text}</span>
-                    </div>
-                </div>
-            )}
+            <Toast showToast={showToast} />
 
             <div
                 id="search-bar"
@@ -266,11 +220,10 @@ const Storage = () => {
                     className="drawer-toggle"
                     onChange={() => {
                         setCurrentUpdateId('')
-                        setFormData(initialState)
+                        resetForm()
                     }}
                 />
                 <div className="drawer-content">
-                    {/* FAB for mobile */}
                     <div className="fab z-20 md:hidden" id="main-fab-storage">
                         <div
                             id="main-fab-storage-trigger"
@@ -312,7 +265,6 @@ const Storage = () => {
                         </button>
                     </div>
 
-                    {/* Desktop searchbar */}
                     <div className="my-4 hidden items-center justify-end md:flex xl:m-0">
                         <Searchbar
                             searchName="nguyên liệu"
@@ -327,7 +279,6 @@ const Storage = () => {
                         </label>
                     </div>
 
-                    {/* List layout */}
                     {debouncedQuery ? (
                         searchResults.length > 0 ? (
                             <ListLayout
@@ -383,7 +334,7 @@ const Storage = () => {
                             </p>
                             <button
                                 onClick={() => {
-                                    setFormData(initialState)
+                                    resetForm()
                                     setCurrentUpdateId('')
                                 }}
                             >
