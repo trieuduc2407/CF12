@@ -14,7 +14,6 @@ export const addProduct = createAsyncThunk(
             formData,
             {
                 headers: { 'Content-Type': 'multipart/form-data' },
-                withCredentials: true,
             }
         )
         return response?.data
@@ -25,8 +24,7 @@ export const getAllProducts = createAsyncThunk(
     '/adminProduct/getAllProducts',
     async () => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + '/api/admin/products/all',
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + '/api/admin/products/all'
         )
         return response?.data
     }
@@ -36,8 +34,7 @@ export const getProduct = createAsyncThunk(
     '/adminProduct/getProduct',
     async (id) => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + `/api/admin/products/get/${id}`,
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + `/api/admin/products/get/${id}`
         )
         return response?.data
     }
@@ -49,8 +46,7 @@ export const updateProduct = createAsyncThunk(
         const response = await axios.put(
             import.meta.env.VITE_BACKEND_URL +
                 `/api/admin/products/update/${id}`,
-            formData,
-            { withCredentials: true }
+            formData
         )
         return response?.data
     }
@@ -61,8 +57,7 @@ export const deleteProduct = createAsyncThunk(
     async (id) => {
         const response = await axios.delete(
             import.meta.env.VITE_BACKEND_URL +
-                `/api/admin/products/delete/${id}`,
-            { withCredentials: true }
+                `/api/admin/products/delete/${id}`
         )
         return response?.data
     }
@@ -74,8 +69,7 @@ export const toggleSignature = createAsyncThunk(
         const response = await axios.put(
             import.meta.env.VITE_BACKEND_URL +
                 `/api/admin/products/signature/${id}`,
-            {},
-            { withCredentials: true }
+            {}
         )
         return response?.data
     }
@@ -86,8 +80,7 @@ export const searchProduct = createAsyncThunk(
     async (query) => {
         const response = await axios.get(
             import.meta.env.VITE_BACKEND_URL +
-                `/api/admin/products/search?query=${query}`,
-            { withCredentials: true }
+                `/api/admin/products/search?query=${query}`
         )
         return response?.data
     }

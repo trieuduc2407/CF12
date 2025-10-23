@@ -69,15 +69,10 @@ const loginStaff = async (req, res) => {
             }
         )
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            partitioned: true,
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
-        }).json({
+        res.json({
             success: true,
             message: 'Đăng nhập thành công',
+            token: token,
             data: {
                 username: checkStaff.username,
                 name: checkStaff.name,
@@ -95,12 +90,7 @@ const loginStaff = async (req, res) => {
 
 const logoutStaff = async (req, res) => {
     try {
-        res.clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            partitioned: true,
-        }).json({
+        res.json({
             success: true,
             message: 'Đăng xuất thành công',
         })
@@ -136,12 +126,7 @@ const changePassword = async (req, res) => {
         const newPasswordHash = await bcrypt.hash(newPassword, 10)
         staff.passwordHash = newPasswordHash
         await staff.save()
-        res.clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            partitioned: true,
-        }).json({
+        res.json({
             success: true,
             message: 'Đổi mật khẩu thành công',
         })

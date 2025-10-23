@@ -14,7 +14,6 @@ export const addTable = createAsyncThunk(
             formData,
             {
                 headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
             }
         )
         return response.data
@@ -25,8 +24,7 @@ export const getAllTables = createAsyncThunk(
     '/adminTable/getAllTables',
     async () => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + '/api/admin/table/all',
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + '/api/admin/table/all'
         )
         return response.data
     }
@@ -36,8 +34,7 @@ export const getTableById = createAsyncThunk(
     '/adminTable/getTableById',
     async (id) => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + `/api/admin/table/get/${id}`,
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + `/api/admin/table/get/${id}`
         )
         return response.data
     }
@@ -51,7 +48,6 @@ export const updateTable = createAsyncThunk(
             formData,
             {
                 headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
             }
         )
         return response.data
@@ -62,8 +58,7 @@ export const deleteTable = createAsyncThunk(
     '/adminTable/deleteTable',
     async (id) => {
         const response = await axios.delete(
-            import.meta.env.VITE_BACKEND_URL + `/api/admin/table/delete/${id}`,
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + `/api/admin/table/delete/${id}`
         )
         return response.data
     }

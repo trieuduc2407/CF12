@@ -14,7 +14,6 @@ export const addStaff = createAsyncThunk(
             formData,
             {
                 headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
             }
         )
         return response?.data
@@ -25,8 +24,7 @@ export const getAllStaff = createAsyncThunk(
     '/adminStaff/getAllStaff',
     async () => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all',
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + '/api/admin/staff/all'
         )
         return response?.data
     }
@@ -34,8 +32,7 @@ export const getAllStaff = createAsyncThunk(
 
 export const getStaff = createAsyncThunk('/adminStaff/getStaff', async (id) => {
     const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/get/${id}`,
-        { withCredentials: true }
+        import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/get/${id}`
     )
     return response?.data
 })
@@ -48,7 +45,6 @@ export const updateStaff = createAsyncThunk(
             formData,
             {
                 headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
             }
         )
         return response?.data
@@ -59,8 +55,7 @@ export const deleteStaff = createAsyncThunk(
     '/adminStaff/deleteStaff',
     async (id) => {
         const response = await axios.delete(
-            import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/delete/${id}`,
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + `/api/admin/staff/delete/${id}`
         )
         return response?.data
     }

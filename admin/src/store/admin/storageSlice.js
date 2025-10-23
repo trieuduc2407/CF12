@@ -14,7 +14,6 @@ export const addIngredient = createAsyncThunk(
             formData,
             {
                 headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
             }
         )
         return response?.data
@@ -25,8 +24,7 @@ export const getIngredient = createAsyncThunk(
     '/adminStorage/getIngredient',
     async (id) => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + `/api/admin/storage/get/${id}`,
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + `/api/admin/storage/get/${id}`
         )
         return response?.data
     }
@@ -36,8 +34,7 @@ export const getAllIngredients = createAsyncThunk(
     '/adminStorage/getAllIngredients',
     async () => {
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + '/api/admin/storage/all',
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + '/api/admin/storage/all'
         )
         return response?.data
     }
@@ -52,7 +49,6 @@ export const updateIngredient = createAsyncThunk(
             formData,
             {
                 headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
             }
         )
         return response?.data
@@ -63,9 +59,7 @@ export const deleteIngredient = createAsyncThunk(
     '/adminStorage/deleteIngredient',
     async (id) => {
         const response = await axios.delete(
-            import.meta.env.VITE_BACKEND_URL +
-                `/api/admin/storage/delete/${id}`,
-            { withCredentials: true }
+            import.meta.env.VITE_BACKEND_URL + `/api/admin/storage/delete/${id}`
         )
         return response?.data
     }
@@ -76,8 +70,7 @@ export const searchIngredient = createAsyncThunk(
     async (q) => {
         const response = await axios.get(
             import.meta.env.VITE_BACKEND_URL +
-                `/api/admin/storage/search?q=${q}`,
-            { withCredentials: true }
+                `/api/admin/storage/search?q=${q}`
         )
         return response?.data
     }
