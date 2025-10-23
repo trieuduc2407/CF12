@@ -165,6 +165,11 @@ const CommonForm = ({
                             ? false
                             : true
                     }
+                    style={{
+                        WebkitAppearance: 'none',
+                        WebkitUserSelect: 'text',
+                        WebkitTapHighlightColor: 'transparent',
+                    }}
                     {...(controlItem?.disabled ? { disabled: true } : null)}
                 />
             )
@@ -425,6 +430,7 @@ const CommonForm = ({
                 onSubmit={async (event) => {
                     // Luôn preventDefault để tránh Safari mobile submit form theo cách mặc định
                     event.preventDefault()
+                    event.stopPropagation()
 
                     if (isButtonDisabled) {
                         setShowToast({
@@ -456,6 +462,7 @@ const CommonForm = ({
                 }}
                 autoComplete="off"
                 noValidate
+                style={{ WebkitUserSelect: 'none' }}
             >
                 <div className="flex flex-col gap-4">
                     {formControls.map(renderControl)}
@@ -464,6 +471,11 @@ const CommonForm = ({
                         className={`${isButtonDisabled ? 'cursor-not-allowed border-none bg-gray-400' : ''} btn rounded-lg`}
                         aria-disabled={isButtonDisabled}
                         disabled={isButtonDisabled}
+                        style={{
+                            WebkitUserSelect: 'none',
+                            WebkitTapHighlightColor: 'transparent',
+                            WebkitTouchCallout: 'none',
+                        }}
                     >
                         {buttonText || 'Gửi'}
                     </button>

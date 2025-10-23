@@ -43,17 +43,33 @@ const Login = () => {
             }
 
             if (data?.success) {
-                // Try multiple redirect methods for Safari mobile compatibility
-                // try {
-                navigate('/admin/dashboard', { replace: true })
-                // } catch (error) {
-                // Fallback for Safari mobile
-                // window.location.href = '/admin/dashboard'
-                // }
+                // Kiểm tra nếu đang chạy trên iOS Safari
+                const isIOSSafari =
+                    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+                    !window.MSStream
+
+                if (isIOSSafari) {
+                    // Đối với iOS Safari, sử dụng window.location trực tiếp
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard'
+                    }, 150)
+                } else {
+                    // Đối với các trình duyệt khác, sử dụng navigate
+                    setTimeout(() => {
+                        try {
+                            navigate('/admin/dashboard', { replace: true })
+                        } catch (navError) {
+                            console.warn(
+                                'Navigate failed, using window.location:',
+                                navError
+                            )
+                            window.location.href = '/admin/dashboard'
+                        }
+                    }, 100)
+                }
             }
         } catch (error) {
             console.error('Login error:', error)
-            window.location.href = '/admin/dashboard'
 
             setFormData(initialState)
 
@@ -65,6 +81,8 @@ const Login = () => {
                     error?.message ||
                     'Đã xảy ra lỗi khi đăng nhập',
             })
+
+            setTimeout(() => setShowToast({ isShow: false, text: '' }), 3000)
         }
     }
     return (
