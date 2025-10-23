@@ -1,13 +1,14 @@
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
-import { staffModel } from "../../models/staffModel.js"
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+
+import { staffModel } from '../../models/staffModel.js'
 
 const me = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             return res.json({
                 success: false,
-                message: "Chưa đăng nhập"
+                message: 'Chưa đăng nhập',
             })
         }
 
@@ -15,7 +16,7 @@ const me = async (req, res) => {
         if (!staff) {
             return res.json({
                 success: false,
-                message: "Không tìm thấy nhân viên"
+                message: 'Không tìm thấy nhân viên',
             })
         }
 
@@ -24,13 +25,13 @@ const me = async (req, res) => {
             data: {
                 name: staff.name,
                 role: staff.role,
-                id: staff._id
-            }
+                id: staff._id,
+            },
         })
     } catch (error) {
         res.json({
             success: false,
-            message: "Server error"
+            message: 'Server error',
         })
     }
 }
@@ -42,67 +43,72 @@ const loginStaff = async (req, res) => {
         if (!checkStaff) {
             return res.json({
                 success: false,
-                message: "Sai tên đăng nhập"
+                message: 'Sai tên đăng nhập',
             })
         }
 
-        const checkPassword = await bcrypt.compare(password, checkStaff.passwordHash)
+        const checkPassword = await bcrypt.compare(
+            password,
+            checkStaff.passwordHash
+        )
         if (!checkPassword) {
             return res.json({
                 success: false,
-                message: "Sai mật khẩu"
+                message: 'Sai mật khẩu',
             })
         }
 
         const token = jwt.sign(
             {
                 id: checkStaff._id,
-                role: checkStaff.role
+                role: checkStaff.role,
             },
             process.env.JWT_SECRET,
             {
-                expiresIn: "1d"
-            })
+                expiresIn: '1d',
+            }
+        )
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'none'
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+            partitioned: true,
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
         }).json({
             success: true,
-            message: "Đăng nhập thành công",
+            message: 'Đăng nhập thành công',
             data: {
                 username: checkStaff.username,
                 name: checkStaff.name,
                 role: checkStaff.role,
-            }
+            },
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: 'Server error',
         })
     }
 }
 
 const logoutStaff = async (req, res) => {
     try {
-        res.clearCookie('token',
-            {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none',
-            }
-        ).json({
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+            partitioned: true,
+        }).json({
             success: true,
-            message: "Đăng xuất thành công"
+            message: 'Đăng xuất thành công',
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: 'Server error',
         })
     }
 }
@@ -115,7 +121,7 @@ const changePassword = async (req, res) => {
         if (!staff) {
             return res.json({
                 success: false,
-                message: "Nhân viên không tồn tại"
+                message: 'Nhân viên không tồn tại',
             })
         }
 
@@ -123,22 +129,27 @@ const changePassword = async (req, res) => {
         if (!checkPassword) {
             return res.json({
                 success: false,
-                message: "Mật khẩu không đúng"
+                message: 'Mật khẩu không đúng',
             })
         }
 
         const newPasswordHash = await bcrypt.hash(newPassword, 10)
         staff.passwordHash = newPasswordHash
         await staff.save()
-        res.clearCookie('token').json({
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+            partitioned: true,
+        }).json({
             success: true,
-            message: "Đổi mật khẩu thành công"
+            message: 'Đổi mật khẩu thành công',
         })
     } catch (error) {
         console.log(error)
         res.json({
             success: false,
-            message: "Server error"
+            message: 'Server error',
         })
     }
 }
