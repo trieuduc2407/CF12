@@ -19,6 +19,12 @@ const Login = () => {
         type: '',
         text: '',
     })
+    const [debugInfo, setDebugInfo] = useState({
+        userAgent: '',
+        isIOS: false,
+        lastAction: '',
+        error: null,
+    })
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -28,12 +34,30 @@ const Login = () => {
 
         const isIOS =
             /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-        console.log('Form submitted on iOS:', isIOS)
+        const userAgent = navigator.userAgent
+
+        // Cập nhật debug info
+        setDebugInfo({
+            userAgent: userAgent,
+            isIOS: isIOS,
+            lastAction: 'Form submitted',
+            error: null,
+        })
+
+        console.log('=== LOGIN DEBUG INFO ===')
+        console.log('User Agent:', userAgent)
+        console.log('Is iOS device:', isIOS)
         console.log('Form data:', formData)
+        console.log('Current URL:', window.location.href)
+        console.log('========================')
 
         if (isIOS) {
             // Sử dụng axios trực tiếp cho iOS
             console.log('Using direct axios for iOS')
+            setDebugInfo((prev) => ({
+                ...prev,
+                lastAction: 'Using iOS axios method',
+            }))
             axios
                 .post(
                     import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/login',
@@ -42,9 +66,18 @@ const Login = () => {
                 )
                 .then((response) => {
                     console.log('iOS Login response:', response.data)
+                    setDebugInfo((prev) => ({
+                        ...prev,
+                        lastAction: 'iOS Login response received',
+                    }))
 
                     if (response.data?.success === false) {
                         console.log('iOS Login failed:', response.data.message)
+                        setDebugInfo((prev) => ({
+                            ...prev,
+                            lastAction: 'iOS Login failed',
+                            error: response.data.message,
+                        }))
                         setFormData(initialState)
                         setShowToast({
                             isShow: true,
@@ -60,6 +93,10 @@ const Login = () => {
 
                     if (response.data?.success) {
                         console.log('iOS Login successful, redirecting...')
+                        setDebugInfo((prev) => ({
+                            ...prev,
+                            lastAction: 'iOS Login successful, redirecting...',
+                        }))
                         // Cập nhật Redux state
                         dispatch({
                             type: 'adminAuth/loginStaff/fulfilled',
@@ -70,12 +107,22 @@ const Login = () => {
                         setTimeout(() => {
                             try {
                                 // Thử navigate trước
+                                setDebugInfo((prev) => ({
+                                    ...prev,
+                                    lastAction: 'Trying navigate()...',
+                                }))
                                 navigate('/admin/dashboard', { replace: true })
                             } catch (navError) {
                                 console.warn(
                                     'Navigate failed on iOS, using window.location:',
                                     navError
                                 )
+                                setDebugInfo((prev) => ({
+                                    ...prev,
+                                    lastAction:
+                                        'Navigate failed, using window.location',
+                                    error: navError.message,
+                                }))
                                 // Fallback cho iOS
                                 window.location.href = '/admin/dashboard'
                             }
@@ -85,6 +132,10 @@ const Login = () => {
                         setTimeout(() => {
                             if (window.location.pathname === '/admin/login') {
                                 console.log('Fallback redirect for iOS')
+                                setDebugInfo((prev) => ({
+                                    ...prev,
+                                    lastAction: 'Fallback redirect triggered',
+                                }))
                                 window.location.href = '/admin/dashboard'
                             }
                         }, 1000)
@@ -92,6 +143,11 @@ const Login = () => {
                 })
                 .catch((error) => {
                     console.error('iOS Login error:', error)
+                    setDebugInfo((prev) => ({
+                        ...prev,
+                        lastAction: 'iOS Login error',
+                        error: error.message,
+                    }))
 
                     setFormData(initialState)
 
@@ -180,6 +236,30 @@ const Login = () => {
                     </div>
                 </div>
             )}
+
+            {/* Debug Panel - Chỉ hiển thị trong development */}
+            {import.meta.env.DEV && (
+                <div className="fixed left-4 top-4 z-50 max-w-sm rounded-lg bg-black bg-opacity-90 p-4 text-xs text-white">
+                    <h3 className="mb-2 font-bold">🐛 Debug Info</h3>
+                    <div className="space-y-1">
+                        <div>
+                            <strong>iOS:</strong>{' '}
+                            {debugInfo.isIOS ? '✅ Yes' : '❌ No'}
+                        </div>
+                        <div>
+                            <strong>Action:</strong> {debugInfo.lastAction}
+                        </div>
+                        <div>
+                            <strong>Error:</strong> {debugInfo.error || 'None'}
+                        </div>
+                        <div className="break-all text-xs opacity-75">
+                            <strong>UA:</strong>{' '}
+                            {debugInfo.userAgent.substring(0, 50)}...
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="flex min-h-screen items-center justify-center">
                 <div className="flex flex-col rounded-2xl bg-white p-10">
                     <div className="flex items-center gap-4">
