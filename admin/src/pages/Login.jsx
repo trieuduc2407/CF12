@@ -1,3 +1,4 @@
+import axios from 'axios'
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -22,67 +23,149 @@ const Login = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const onSubmit = async (event) => {
+    const onSubmit = (event) => {
         event.preventDefault()
 
-        try {
-            const data = await dispatch(loginStaff(formData)).unwrap()
+        const isIOS =
+            /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+        console.log('Form submitted on iOS:', isIOS)
+        console.log('Form data:', formData)
 
-            if (data?.success === false) {
-                setFormData(initialState)
-                setShowToast({
-                    isShow: true,
-                    type: 'error',
-                    text: data.message,
-                })
-                setTimeout(
-                    () => setShowToast({ isShow: false, text: '' }),
-                    2000
+        if (isIOS) {
+            // Sử dụng axios trực tiếp cho iOS
+            console.log('Using direct axios for iOS')
+            axios
+                .post(
+                    import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/login',
+                    formData,
+                    { withCredentials: true }
                 )
-                return
-            }
+                .then((response) => {
+                    console.log('iOS Login response:', response.data)
 
-            if (data?.success) {
-                // Kiểm tra nếu đang chạy trên iOS Safari
-                const isIOSSafari =
-                    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-                    !window.MSStream
+                    if (response.data?.success === false) {
+                        console.log('iOS Login failed:', response.data.message)
+                        setFormData(initialState)
+                        setShowToast({
+                            isShow: true,
+                            type: 'error',
+                            text: response.data.message,
+                        })
+                        setTimeout(
+                            () => setShowToast({ isShow: false, text: '' }),
+                            2000
+                        )
+                        return
+                    }
 
-                if (isIOSSafari) {
-                    // Đối với iOS Safari, sử dụng window.location trực tiếp
-                    setTimeout(() => {
-                        window.location.href = '/admin/dashboard'
-                    }, 150)
-                } else {
-                    // Đối với các trình duyệt khác, sử dụng navigate
-                    setTimeout(() => {
-                        try {
-                            navigate('/admin/dashboard', { replace: true })
-                        } catch (navError) {
-                            console.warn(
-                                'Navigate failed, using window.location:',
-                                navError
-                            )
-                            window.location.href = '/admin/dashboard'
-                        }
-                    }, 100)
-                }
-            }
-        } catch (error) {
-            console.error('Login error:', error)
+                    if (response.data?.success) {
+                        console.log('iOS Login successful, redirecting...')
+                        // Cập nhật Redux state
+                        dispatch({
+                            type: 'adminAuth/loginStaff/fulfilled',
+                            payload: response.data,
+                        })
 
-            setFormData(initialState)
+                        // Thử nhiều cách redirect cho iOS
+                        setTimeout(() => {
+                            try {
+                                // Thử navigate trước
+                                navigate('/admin/dashboard', { replace: true })
+                            } catch (navError) {
+                                console.warn(
+                                    'Navigate failed on iOS, using window.location:',
+                                    navError
+                                )
+                                // Fallback cho iOS
+                                window.location.href = '/admin/dashboard'
+                            }
+                        }, 200)
 
-            setShowToast({
-                isShow: true,
-                type: 'error',
-                text:
-                    error?.response?.data?.message ||
-                    error?.message ||
-                    'Đã xảy ra lỗi khi đăng nhập',
-            })
+                        // Fallback timeout cho iOS
+                        setTimeout(() => {
+                            if (window.location.pathname === '/admin/login') {
+                                console.log('Fallback redirect for iOS')
+                                window.location.href = '/admin/dashboard'
+                            }
+                        }, 1000)
+                    }
+                })
+                .catch((error) => {
+                    console.error('iOS Login error:', error)
 
-            setTimeout(() => setShowToast({ isShow: false, text: '' }), 3000)
+                    setFormData(initialState)
+
+                    setShowToast({
+                        isShow: true,
+                        type: 'error',
+                        text:
+                            error?.response?.data?.message ||
+                            error?.message ||
+                            'Đã xảy ra lỗi khi đăng nhập',
+                    })
+
+                    setTimeout(
+                        () => setShowToast({ isShow: false, text: '' }),
+                        3000
+                    )
+                })
+        } else {
+            // Sử dụng Redux thunk cho các trình duyệt khác
+            console.log('Using Redux thunk for non-iOS')
+            dispatch(loginStaff(formData))
+                .then((result) => {
+                    console.log('Login result:', result)
+
+                    if (result?.payload?.success === false) {
+                        console.log('Login failed:', result.payload.message)
+                        setFormData(initialState)
+                        setShowToast({
+                            isShow: true,
+                            type: 'error',
+                            text: result.payload.message,
+                        })
+                        setTimeout(
+                            () => setShowToast({ isShow: false, text: '' }),
+                            2000
+                        )
+                        return
+                    }
+
+                    if (result?.payload?.success) {
+                        console.log('Login successful, redirecting...')
+
+                        setTimeout(() => {
+                            try {
+                                navigate('/admin/dashboard', { replace: true })
+                            } catch (navError) {
+                                console.warn(
+                                    'Navigate failed, using window.location:',
+                                    navError
+                                )
+                                window.location.href = '/admin/dashboard'
+                            }
+                        }, 100)
+                    }
+                })
+                .catch((error) => {
+                    console.error('Login error:', error)
+
+                    setFormData(initialState)
+
+                    setShowToast({
+                        isShow: true,
+                        type: 'error',
+                        text:
+                            error?.response?.data?.message ||
+                            error?.message ||
+                            'Đã xảy ra lỗi khi đăng nhập',
+                    })
+
+                    setTimeout(
+                        () => setShowToast({ isShow: false, text: '' }),
+                        3000
+                    )
+                })
         }
     }
     return (
