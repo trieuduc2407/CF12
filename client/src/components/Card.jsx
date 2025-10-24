@@ -15,7 +15,12 @@ const Card = ({ product }) => {
     }
 
     return (
-        <div className="card w-full justify-self-center rounded-lg bg-white shadow-sm">
+        <div
+            className="card w-full justify-self-center rounded-lg bg-white shadow-sm"
+            onClick={() => {
+                handleAddToCart(product._id)
+            }}
+        >
             <figure>
                 {isLoading ? (
                     <div className="skeleton h-80 w-80"></div>
@@ -35,12 +40,7 @@ const Card = ({ product }) => {
                     </p>
                 </div>
                 <div className="card-actions items-end">
-                    <button
-                        className="rounded-2xl bg-amber-500"
-                        onClick={() => {
-                            handleAddToCart(product._id)
-                        }}
-                    >
+                    <button className="rounded-2xl bg-amber-500">
                         <CirclePlus color="#ffffff" />
                     </button>
                 </div>

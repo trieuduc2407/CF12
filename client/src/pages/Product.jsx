@@ -53,29 +53,38 @@ const Product = () => {
     }, [dispatch, productId])
 
     return (
-        <>
-            <div className="min-h-screen overflow-auto pb-20">
-                <button
-                    className="fixed left-4 top-4 z-10 text-white"
-                    onClick={() => navigate(`/tables/${tableName}/menu`)}
-                >
-                    <ChevronLeft />
-                </button>
-                <div className="flex flex-col">
+        <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">
+            <button
+                className="btn-circle fixed left-4 top-4 z-10 text-white xl:bg-gray-400"
+                onClick={() => navigate(`/tables/${tableName}/menu`)}
+            >
+                <ChevronLeft />
+            </button>
+            <div className="flex flex-col xl:flex-row xl:justify-around">
+                <div className="relative">
                     <img
-                        className="w-full bg-cover"
+                        className="xl:w-2xl 2xl:w-3xl w-full bg-cover xl:rounded-2xl"
                         src={product.imageUrl}
                         alt=""
                     />
-                    <div className="mx-5 mt-2.5 flex flex-col gap-2.5">
-                        <div className="flex justify-between pb-2.5">
-                            <p className="text-xl font-semibold">
+                    <div className="">
+                        <div className="absolute bottom-0 left-10 hidden flex-col justify-between pb-2.5 xl:flex">
+                            <p className="text-xl font-semibold text-white">
                                 {product.name}
                             </p>
-                            <p className="text-xl font-semibold">
-                                {formatNumber(product.basePrice)}đ
+                            <p className="text-md text-primary font-semibold">
+                                Giá: {formatNumber(product.basePrice)}đ
                             </p>
                         </div>
+                    </div>
+                </div>
+
+                <div className="xl:w-sm flex flex-col justify-between">
+                    <div className="mx-5 mt-2.5 flex justify-between gap-2.5 pb-2.5 xl:m-0 xl:hidden">
+                        <p className="text-xl font-semibold">{product.name}</p>
+                        <p className="text-xl font-semibold">
+                            {formatNumber(product.basePrice)}đ
+                        </p>
                     </div>
                     <form
                         className="mx-5 my-2.5 flex flex-col gap-2.5"
@@ -168,7 +177,7 @@ const Product = () => {
                         </div>
                     </form>
 
-                    <div className="bg-bg-base fixed bottom-0 flex w-full justify-center gap-2 py-4">
+                    <div className="bg-bg-base fixed bottom-0 flex w-full justify-center gap-2 py-4 xl:static xl:justify-between">
                         <QuantityInput
                             className="hidden items-center justify-between md:flex md:w-[35%]"
                             formData={formData}
@@ -188,7 +197,7 @@ const Product = () => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 export default Product
