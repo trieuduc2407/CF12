@@ -14,6 +14,7 @@ import ImageUpload from '../components/ImageUpload'
 import Searchbar from '../components/Searchbar'
 import Toast from '../components/Toast'
 import { addProductForm } from '../config/form'
+import { buildProductPayload } from '../helpers/productFormHelpers'
 import { useDebounce } from '../hooks/useDebounce'
 import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
@@ -36,16 +37,6 @@ const initialState = {
     sizes: [],
     temperature: [],
     ingredients: [],
-}
-
-const buildSizesArray = (sizeOption, upsizePrice) => {
-    if (sizeOption === 'upsize') {
-        return [
-            { name: 'M', price: 0 },
-            { name: 'L', price: upsizePrice || 0 },
-        ]
-    }
-    return [{ name: 'M', price: 0 }]
 }
 
 const Products = () => {
@@ -146,36 +137,7 @@ const Products = () => {
             return
         }
 
-        const payload = new FormData()
-        const tempValue = formData.temperature
-        let tempArr = []
-
-        if (Array.isArray(tempValue)) {
-            tempArr = tempValue
-        } else if (typeof tempValue === 'string' && tempValue) {
-            const tempObj = { type: tempValue }
-            // Nếu là hot_ice, thêm defaultTemp từ isDefaultTemperature
-            if (tempValue === 'hot_ice' && formData.isDefaultTemperature) {
-                tempObj.defaultTemp = formData.isDefaultTemperature
-            }
-            tempArr = [tempObj]
-        }
-
-        const sizesArray = buildSizesArray(
-            formData.sizeOption,
-            formData.upsizePrice
-        )
-
-        payload.append('name', formData.name)
-        payload.append('category', formData.category)
-        payload.append('basePrice', formData.basePrice)
-        payload.append('sizes', JSON.stringify(sizesArray))
-        payload.append('temperature', JSON.stringify(tempArr))
-        payload.append('ingredients', JSON.stringify(formData.ingredients))
-        if (imageUpdated) {
-            payload.append('imageUpdated', 'true')
-            payload.append('image', image)
-        }
+        const payload = buildProductPayload(formData, image, imageUpdated)
 
         dispatch(updateProduct({ id, formData: payload })).then((data) => {
             if (data?.payload?.success) {
@@ -266,32 +228,7 @@ const Products = () => {
             return
         }
 
-        const payload = new FormData()
-        const tempValue = formData.temperature
-        let tempArr = []
-        if (Array.isArray(tempValue)) {
-            tempArr = tempValue
-        } else if (typeof tempValue === 'string' && tempValue) {
-            const tempObj = { type: tempValue }
-            // Nếu là hot_ice, thêm defaultTemp từ isDefaultTemperature
-            if (tempValue === 'hot_ice' && formData.isDefaultTemperature) {
-                tempObj.defaultTemp = formData.isDefaultTemperature
-            }
-            tempArr = [tempObj]
-        }
-
-        const sizesArray = buildSizesArray(
-            formData.sizeOption,
-            formData.upsizePrice
-        )
-
-        payload.append('name', formData.name)
-        payload.append('category', formData.category)
-        payload.append('basePrice', formData.basePrice)
-        payload.append('sizes', JSON.stringify(sizesArray))
-        payload.append('temperature', JSON.stringify(tempArr))
-        payload.append('ingredients', JSON.stringify(formData.ingredients))
-        payload.append('image', image)
+        const payload = buildProductPayload(formData, image)
 
         dispatch(addProduct(payload)).then((data) => {
             if (data?.payload?.success) {
@@ -307,7 +244,6 @@ const Products = () => {
     return (
         <>
             <Toast showToast={showToast} />
-
             <div
                 id="search-bar"
                 className={`fixed left-0 right-0 top-0 z-30 bg-white pt-4 shadow-md transition-all duration-200 md:hidden ${showMobileSearch ? '' : 'hidden'}`}

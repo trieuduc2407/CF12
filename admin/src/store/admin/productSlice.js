@@ -26,7 +26,7 @@ export const getProduct = createAsyncThunk(
 
 export const updateProduct = createAsyncThunk(
     '/adminProduct/updateProduct',
-    crudHelpers.update(ENDPOINT)
+    crudHelpers.update(ENDPOINT, 'multipart/form-data')
 )
 
 export const deleteProduct = createAsyncThunk(
