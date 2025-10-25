@@ -40,19 +40,17 @@ const initialState = {
 }
 
 const Products = () => {
-    const { formData, setFormData, resetForm, showToast, showToastMessage } =
-        useFormWithToast(initialState)
-
     const [currentUpdateId, setCurrentUpdateId] = useState('')
     const [image, setImage] = useState(null)
     const [preview, setPreview] = useState(image || '')
     const [imageUpdated, setImageUpdated] = useState(false)
-
     const [query, setQuery] = useState('')
-    const debouncedQuery = useDebounce(query, 500)
     const [searchResults, setSearchResults] = useState([])
     const [showMobileSearch, setShowMobileSearch] = useState(false)
 
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+    const debouncedQuery = useDebounce(query, 500)
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
     const { products = [] } = useSelector((state) => state.adminProduct)
     const dispatch = useDispatch()
@@ -77,6 +75,50 @@ const Products = () => {
             setSearchResults([])
         }
     }, [debouncedQuery, dispatch])
+
+    const productForm = addProductForm.map((item) => {
+        if (item.name === 'ingredients') {
+            return {
+                ...item,
+                fields: item.fields.map((field) => {
+                    if (field.name === 'ingredientId') {
+                        return {
+                            ...field,
+                            options: ingredients
+                                .slice()
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((ingredient) => ({
+                                    value: ingredient._id,
+                                    label: ingredient.name,
+                                })),
+                        }
+                    } else {
+                        return field
+                    }
+                }),
+            }
+        }
+        return item
+    })
+
+    const onChange = (event) => {
+        setQuery(event.target.value)
+    }
+
+    const handleMobileSearchBlur = () => {
+        setTimeout(() => {
+            if (!query && showMobileSearch) {
+                setShowMobileSearch(false)
+            }
+        }, 150)
+    }
+
+    const handleMobileSearchClose = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setShowMobileSearch(false)
+        setQuery('')
+    }
 
     const getProductData = (id) => {
         dispatch(getProduct(id)).then((data) => {
@@ -168,50 +210,6 @@ const Products = () => {
             dispatch(getAllProducts())
             showToastMessage('success', result.payload.message)
         }
-    }
-
-    const productForm = addProductForm.map((item) => {
-        if (item.name === 'ingredients') {
-            return {
-                ...item,
-                fields: item.fields.map((field) => {
-                    if (field.name === 'ingredientId') {
-                        return {
-                            ...field,
-                            options: ingredients
-                                .slice()
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((ingredient) => ({
-                                    value: ingredient._id,
-                                    label: ingredient.name,
-                                })),
-                        }
-                    } else {
-                        return field
-                    }
-                }),
-            }
-        }
-        return item
-    })
-
-    const onChange = (event) => {
-        setQuery(event.target.value)
-    }
-
-    const handleMobileSearchBlur = () => {
-        setTimeout(() => {
-            if (!query && showMobileSearch) {
-                setShowMobileSearch(false)
-            }
-        }, 150)
-    }
-
-    const handleMobileSearchClose = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setShowMobileSearch(false)
-        setQuery('')
     }
 
     const onSubmit = (event) => {

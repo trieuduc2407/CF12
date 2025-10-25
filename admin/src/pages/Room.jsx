@@ -1,7 +1,5 @@
 import { ChevronLeft, RotateCcw } from 'lucide-react'
-import React from 'react'
-import { useState } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import CommonForm from '../components/CommonForm'
@@ -35,11 +33,10 @@ const labelMap = {
 }
 
 const Room = () => {
-    const { formData, setFormData, resetForm, showToast, showToastMessage } =
-        useFormWithToast(initialState)
-
     const [currentUpdateId, setCurrentUpdateId] = useState('')
 
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
     const { tables = [] } = useSelector((state) => state.adminTable)
     const dispatch = useDispatch()
 

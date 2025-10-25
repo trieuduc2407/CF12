@@ -46,31 +46,19 @@ const listLabel = [
 ]
 
 const Storage = () => {
-    const { formData, setFormData, resetForm, showToast, showToastMessage } =
-        useFormWithToast(initialState)
-
     const [currentUpdateId, setCurrentUpdateId] = useState('')
     const [sortBy, setSortBy] = useState('ratio')
     const [sortOrder, setSortOrder] = useState('asc')
-
     const [query, setQuery] = useState('')
-    const debouncedQuery = useDebounce(query, 500)
     const [searchResults, setSearchResults] = useState([])
     const [showMobileSearch, setShowMobileSearch] = useState(false)
 
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+    const debouncedQuery = useDebounce(query, 500)
     const errors = validateFormData(addIngredientForm, formData)
-
     const dispatch = useDispatch()
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
-
-    const handleSort = (column) => {
-        if (sortBy === column) {
-            setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
-        } else {
-            setSortBy(column)
-            setSortOrder('asc')
-        }
-    }
 
     const sortedIngredients = useMemo(() => {
         if (!sortBy) return ingredients
@@ -91,6 +79,48 @@ const Storage = () => {
         })
     }, [ingredients, sortBy, sortOrder])
 
+    useEffect(() => {
+        dispatch(getAllIngredients())
+    }, [dispatch])
+
+    useEffect(() => {
+        if (debouncedQuery) {
+            dispatch(searchIngredient(debouncedQuery)).then((data) => {
+                if (data?.payload?.success) {
+                    setSearchResults(data.payload.data)
+                }
+            })
+        }
+    }, [debouncedQuery, dispatch])
+
+    const handleSort = (column) => {
+        if (sortBy === column) {
+            setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+        } else {
+            setSortBy(column)
+            setSortOrder('asc')
+        }
+    }
+
+    const onChange = (event) => {
+        setQuery(event.target.value)
+    }
+
+    const handleMobileSearchBlur = () => {
+        setTimeout(() => {
+            if (!query && showMobileSearch) {
+                setShowMobileSearch(false)
+            }
+        }, 150)
+    }
+
+    const handleMobileSearchClose = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setShowMobileSearch(false)
+        setQuery('')
+    }
+
     const getIngredientData = (id) => {
         dispatch(getIngredient(id)).then((data) => {
             if (data?.payload?.success) {
@@ -109,20 +139,21 @@ const Storage = () => {
                     data?.payload?.message ===
                         'Xảy ra lỗi khi cập nhật nguyên liệu: Tên nguyên liệu đã tồn tại'
                 ) {
-                    document.getElementById('my-drawer').checked = false
                     showToastMessage('error', data.payload.message)
+                    document.getElementById('my-drawer').checked = false
+                    return
                 }
 
                 if (data?.payload?.success) {
                     dispatch(getAllIngredients())
                     resetForm()
                     setCurrentUpdateId('')
-                    document.getElementById('my-drawer').checked = false
                     showToastMessage(
                         'success',
                         data?.payload?.message ||
                             'Cập nhật nguyên liệu thành công'
                     )
+                    document.getElementById('my-drawer').checked = false
                 }
             }
         )
@@ -147,54 +178,22 @@ const Storage = () => {
                 data?.payload?.success === false &&
                 data?.payload?.message === 'Nguyên liệu đã tồn tại'
             ) {
-                document.getElementById('my-drawer').checked = false
                 showToastMessage('error', data.payload.message)
+                document.getElementById('my-drawer').checked = false
+                return
             }
 
             if (data?.payload?.success) {
                 dispatch(getAllIngredients())
                 resetForm()
-                document.getElementById('my-drawer').checked = false
                 showToastMessage(
                     'success',
                     data?.payload?.message || 'Thêm nguyên liệu thành công'
                 )
+                document.getElementById('my-drawer').checked = false
             }
         })
     }
-
-    const onChange = (event) => {
-        setQuery(event.target.value)
-    }
-
-    const handleMobileSearchBlur = () => {
-        setTimeout(() => {
-            if (!query && showMobileSearch) {
-                setShowMobileSearch(false)
-            }
-        }, 150)
-    }
-
-    const handleMobileSearchClose = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setShowMobileSearch(false)
-        setQuery('')
-    }
-
-    useEffect(() => {
-        dispatch(getAllIngredients())
-    }, [dispatch])
-
-    useEffect(() => {
-        if (debouncedQuery) {
-            dispatch(searchIngredient(debouncedQuery)).then((data) => {
-                if (data?.payload?.success) {
-                    setSearchResults(data.payload.data)
-                }
-            })
-        }
-    }, [debouncedQuery, dispatch])
 
     return (
         <>

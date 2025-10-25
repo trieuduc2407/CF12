@@ -24,6 +24,13 @@ const CommonForm = ({
     })
     const [touched, setTouched] = useState({})
 
+    useEffect(() => {
+        if (Object.keys(formData).length === 0 || isFormDataEmpty(formData)) {
+            setTouched({})
+            if (typeof setErrors === 'function') setErrors({})
+        }
+    }, [formData, setErrors])
+
     const getValue = useCallback(
         (controlItem, parentName, index) => {
             if (!parentName) return formData[controlItem.name] ?? ''

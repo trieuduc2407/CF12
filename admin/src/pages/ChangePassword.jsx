@@ -17,11 +17,13 @@ const initialState = {
 const ChangePassword = () => {
     const { formData, setFormData, resetForm, showToast, showToastMessage } =
         useFormWithToast(initialState)
-
     const navigate = useNavigate()
-
     const dispatch = useDispatch()
     const { staff } = useSelector((state) => state.adminAuth)
+
+    useEffect(() => {
+        dispatch(getMe())
+    }, [dispatch])
 
     const onSubmit = (event) => {
         event.preventDefault()
@@ -38,6 +40,7 @@ const ChangePassword = () => {
                 ) {
                     resetForm()
                     showToastMessage('error', data.payload.message)
+                    return
                 }
 
                 if (data?.payload?.success) {
@@ -48,10 +51,6 @@ const ChangePassword = () => {
             }
         )
     }
-
-    useEffect(() => {
-        dispatch(getMe())
-    }, [dispatch])
 
     return (
         <>

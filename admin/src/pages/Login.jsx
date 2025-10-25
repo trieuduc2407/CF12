@@ -16,7 +16,6 @@ const initialState = {
 const Login = () => {
     const { formData, setFormData, resetForm, showToast, showToastMessage } =
         useFormWithToast(initialState)
-
     const navigate = useNavigate()
     const dispatch = useDispatch()
 

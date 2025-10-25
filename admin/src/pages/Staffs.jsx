@@ -34,11 +34,10 @@ const listLabel = [
 ]
 
 const Staffs = () => {
-    const { formData, setFormData, resetForm, showToast, showToastMessage } =
-        useFormWithToast(initialState)
-
     const [currentUpdateId, setCurrentUpdateId] = useState('')
 
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
     const dispatch = useDispatch()
     const { staffs = [] } = useSelector((state) => state.adminStaff)
 
@@ -59,17 +58,18 @@ const Staffs = () => {
                     data?.payload?.success === false &&
                     data?.payload?.message === 'Không có quyền truy cập'
                 ) {
-                    document.getElementById('my-drawer').checked = false
                     showToastMessage(
                         'error',
                         'Bạn không có quyền cập nhật vai trò này'
                     )
+                    document.getElementById('my-drawer').checked = false
+                    return
                 }
 
                 if (data?.payload?.success) {
                     dispatch(getAllStaff())
-                    document.getElementById('my-drawer').checked = false
                     showToastMessage('success', data.payload.message)
+                    document.getElementById('my-drawer').checked = false
                 }
             }
         )
@@ -81,14 +81,15 @@ const Staffs = () => {
                 data?.payload?.success === false &&
                 data?.payload?.message === 'Không đủ quyền xóa nhân viên này'
             ) {
-                document.getElementById('my-drawer').checked = false
                 showToastMessage('error', data.payload.message)
+                document.getElementById('my-drawer').checked = false
+                return
             }
 
             if (data?.payload?.success) {
                 dispatch(getAllStaff())
-                document.getElementById('my-drawer').checked = false
                 showToastMessage('success', data.payload.message)
+                document.getElementById('my-drawer').checked = false
             }
         })
     }
@@ -101,23 +102,25 @@ const Staffs = () => {
                 data?.payload?.message ===
                     'Bạn không có quyền tạo nhân viên với vai trò này'
             ) {
-                document.getElementById('my-drawer').checked = false
                 showToastMessage('error', data.payload.message)
+                document.getElementById('my-drawer').checked = false
+                return
             }
 
             if (
                 data?.payload?.success === false &&
                 data?.payload?.message === 'Username đã tồn tại'
             ) {
-                document.getElementById('my-drawer').checked = false
                 showToastMessage('error', data.payload.message)
+                document.getElementById('my-drawer').checked = false
+                return
             }
 
             if (data?.payload?.success) {
                 dispatch(getAllStaff())
                 resetForm()
-                document.getElementById('my-drawer').checked = false
                 showToastMessage('success', data?.payload?.message)
+                document.getElementById('my-drawer').checked = false
             }
         })
     }
