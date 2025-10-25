@@ -1,5 +1,4 @@
 import { ChevronLeft } from 'lucide-react'
-import React from 'react'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -18,29 +17,27 @@ const initialState = {
 }
 
 const Product = () => {
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
     const { id: productId, tableName: urlTableName, itemId } = useParams()
-    const [product, setProduct] = useState({})
-    const [formData, setFormData] = useState(initialState)
-    const [isEditMode, setIsEditMode] = useState(false)
 
     const { clientId: storeClientId, tableName: storeTableName } = useSelector(
         (state) => state.clientSession
     )
     const { items: cartItems } = useSelector((state) => state.clientCart)
 
+    const [product, setProduct] = useState({})
+    const [formData, setFormData] = useState(initialState)
+    const [isEditMode, setIsEditMode] = useState(false)
+
     const tableName = storeTableName || urlTableName
     const clientId = storeClientId || localStorage.getItem('clientId')
 
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
-
     const handleOrder = () => {
         if (isEditMode) {
-            // Edit mode: emit update event
             socket.emit('cart:updateItem', formData)
             navigate(`/tables/${tableName}/cart`)
         } else {
-            // Add mode: emit add event
             socket.emit('cart:addItem', formData)
             navigate(`/tables/${tableName}/menu`)
         }
@@ -49,7 +46,6 @@ const Product = () => {
     useEffect(() => {
         if (!clientId || !tableName) return
 
-        // Check if edit mode (có itemId trong URL)
         const editMode = !!itemId
         setIsEditMode(editMode)
 
@@ -57,7 +53,6 @@ const Product = () => {
             setProduct(data.payload.data)
 
             if (editMode) {
-                // EDIT MODE: Pre-fill với data từ cart
                 const cartItem = cartItems.find(
                     (item) => item.itemId === itemId
                 )
@@ -75,7 +70,6 @@ const Product = () => {
                 }
             }
 
-            // ADD MODE: Default values
             let defaultTemp = 'hot'
             if (
                 Array.isArray(data.payload.data.temperature) &&
@@ -104,13 +98,7 @@ const Product = () => {
         <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">
             <button
                 className="btn-circle fixed left-4 top-4 z-10 text-white xl:bg-gray-400"
-                onClick={() => {
-                    if (!tableName) {
-                        console.error('Table name is not available')
-                        return
-                    }
-                    navigate(`/tables/${tableName}/menu`)
-                }}
+                onClick={() => navigate(`/tables/${tableName}/menu`)}
             >
                 <ChevronLeft />
             </button>
@@ -127,7 +115,8 @@ const Product = () => {
                                 {product.name}
                             </p>
                             <p className="text-md text-primary font-semibold">
-                                Giá: {product.basePrice.toLocaleString()}đ
+                                Giá: {(product.basePrice || 0).toLocaleString()}
+                                đ
                             </p>
                         </div>
                     </div>
@@ -137,7 +126,7 @@ const Product = () => {
                     <div className="mx-5 mt-2.5 flex justify-between gap-2.5 pb-2.5 xl:m-0 xl:hidden">
                         <p className="text-xl font-semibold">{product.name}</p>
                         <p className="text-xl font-semibold">
-                            {product.basePrice.toLocaleString()}đ
+                            {(product.basePrice || 0).toLocaleString()}đ
                         </p>
                     </div>
                     <form
@@ -178,7 +167,7 @@ const Product = () => {
                                         </div>
                                         <p>
                                             {size.price
-                                                ? `+ ${size.price.toLocaleString()}đ`
+                                                ? `+ ${(size.price || 0).toLocaleString()}đ`
                                                 : null}
                                         </p>
                                     </div>

@@ -1,13 +1,12 @@
 import { ChevronLeft, Trash2 } from 'lucide-react'
-import React from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import CartItem from '../components/CartItem'
 
 const Cart = () => {
-    const { tableName: urlTableName } = useParams()
     const navigate = useNavigate()
+    const { tableName: urlTableName } = useParams()
 
     const { items: cartItems, totalPrice } = useSelector(
         (state) => state.clientCart
@@ -17,8 +16,6 @@ const Cart = () => {
     )
 
     const tableName = storeTableName || urlTableName
-
-    console.log('Cart items:', cartItems)
 
     return (
         <div className="bg-bg-base flex min-h-screen flex-col">
@@ -42,11 +39,11 @@ const Cart = () => {
                     )}
                     <div className="mt-5 flex justify-between">
                         <p>Tổng tiền</p>
-                        <p>{totalPrice.toLocaleString()} ₫</p>
+                        <p>{(totalPrice || 0).toLocaleString()} ₫</p>
                     </div>
                 </div>
                 <div className="flex justify-center">
-                    <button className="btn-primary btn w-full rounded-lg border-0 text-white">
+                    <button className="btn btn-primary w-full rounded-lg border-0 text-white">
                         Xác nhận gửi yêu cầu gọi món
                     </button>
                 </div>

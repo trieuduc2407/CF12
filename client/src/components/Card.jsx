@@ -1,5 +1,4 @@
 import { CirclePlus } from 'lucide-react'
-import React from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -14,10 +13,6 @@ const Card = ({ product }) => {
     const tableName = storeTableName || urlTableName
 
     const handleAddToCart = (productId) => {
-        if (!tableName) {
-            console.error('Table name is not available')
-            return
-        }
         navigate(`/tables/${tableName}/product/${productId}`)
     }
 
@@ -43,7 +38,7 @@ const Card = ({ product }) => {
                 <div>
                     <p className="card-title text-sm">{product.name}</p>
                     <p className="font-medium">
-                        {product.basePrice.toLocaleString()} VND
+                        {(product.basePrice || 0).toLocaleString()} VND
                     </p>
                 </div>
                 <div className="card-actions items-end">

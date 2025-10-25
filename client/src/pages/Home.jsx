@@ -1,5 +1,4 @@
 import { ShoppingBag } from 'lucide-react'
-import React from 'react'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -11,6 +10,7 @@ const Home = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const { tableName } = useParams()
+
     const clientId = localStorage.getItem('clientId')
 
     useEffect(() => {

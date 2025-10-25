@@ -1,5 +1,5 @@
 import { ReceiptText, Search, ShoppingBasket } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -27,7 +27,9 @@ const categoryItems = [
 
 const Menu = () => {
     const dispatch = useDispatch()
+    const navigate = useNavigate()
     const { tableName: urlTableName } = useParams()
+
     const { products = [] } = useSelector((state) => state.clientProduct)
     const { tableName: storeTableName } = useSelector(
         (state) => state.clientSession
@@ -36,18 +38,23 @@ const Menu = () => {
         (state) => state.clientCart
     )
 
-    const tableName = urlTableName || storeTableName
+    const [activeCategory, setActiveCategory] = useState(navbarItems[0].value)
+    const [isScrolled, setIsScrolled] = useState(false)
 
-    const navigate = useNavigate()
+    const tableName = urlTableName || storeTableName
     const latestProducts = products
         .filter((product) => product.createdAt)
         .slice(-4)
         .reverse()
-
     const signatureProducts = products.filter((product) => product.signature)
 
-    const [activeCategory, setActiveCategory] = useState(navbarItems[0].value)
-    const [isScrolled, setIsScrolled] = useState(false)
+    const handleNavClick = (category) => {
+        setActiveCategory(category.value)
+        const section = document.getElementById(category.value)
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+    }
 
     useEffect(() => {
         if (urlTableName && urlTableName !== storeTableName) {
@@ -62,6 +69,10 @@ const Menu = () => {
             }
         }
     }, [dispatch, urlTableName, storeTableName])
+
+    useEffect(() => {
+        dispatch(getAllProducts())
+    }, [dispatch])
 
     useEffect(() => {
         if (tableName) {
@@ -125,19 +136,6 @@ const Menu = () => {
         handleScroll()
         return () => window.removeEventListener('scroll', handleScroll)
     }, [activeCategory])
-
-    const handleNavClick = (category) => {
-        setActiveCategory(category.value)
-        const section = document.getElementById(category.value)
-        if (section) {
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
-    }
-
-    useEffect(() => {
-        dispatch(getAllProducts())
-        dispatch(getCart(tableName))
-    }, [dispatch, tableName])
 
     return (
         <>
