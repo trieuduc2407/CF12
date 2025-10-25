@@ -20,10 +20,14 @@ const CartItem = ({ item }) => {
                 />
                 <div className="flex flex-col justify-between">
                     <p className="text-sm">
-                        <span className="text-primary">{item.quantity} x</span>{' '}
+                        <span className="text-primary">{item.quantity} x </span>
                         {item.product.name}
                     </p>
                     <p className="text-sm">
+                        {item.selectedSize} -
+                        {item.selectedTemperature === 'ice' ? ' Đá' : ' Nóng'}
+                    </p>
+                    <p className="text-sm font-semibold">
                         {item.subTotal.toLocaleString()} đ
                     </p>
                 </div>
