@@ -10,7 +10,7 @@ import { getProductById } from '../store/client/productSlice'
 const initialState = {
     clientId: '',
     itemId: '',
-    originalItemId: '', 
+    originalItemId: '',
     productId: '',
     quantity: 1,
     size: '',
@@ -34,6 +34,7 @@ const Product = () => {
     const tableName = storeTableName || urlTableName
     const clientId = storeClientId || localStorage.getItem('clientId')
 
+    console.log(formData)
     const handleOrder = () => {
         if (isEditMode) {
             socket.emit('cart:updateItem', {
@@ -264,8 +265,12 @@ const Product = () => {
                             }}
                         >
                             {isEditMode ? 'Cập nhật' : 'Thêm vào giỏ'} +
-                            {(
-                                (product.basePrice || 0) * formData.quantity
+                            {(formData.size === 'L'
+                                ? (product.basePrice +
+                                      (product.sizes.find((s) => s.name === 'L')
+                                          ?.price || 0)) *
+                                  formData.quantity
+                                : (product.basePrice || 0) * formData.quantity
                             ).toLocaleString()}
                         </button>
                     </div>
