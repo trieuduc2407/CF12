@@ -12,10 +12,14 @@ export const getActiveCart = async (req, res) => {
         }
 
         const cart = await cartService.getActiveCartByTable(tableName)
+
         if (!cart) {
             return res.json({
-                success: false,
-                message: 'Không tìm thấy giỏ hàng hoạt động cho bàn này',
+                success: true,
+                data: {
+                    currentCart: null,
+                    previousOrders: [],
+                },
             })
         }
 
@@ -29,7 +33,7 @@ export const getActiveCart = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log(error)
+        console.log('❌ Get cart error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -46,12 +50,18 @@ export const addItem = async (req, res) => {
 
         const io = req.app.locals.io
         if (io) {
-            const cart = await cartService.getActiveCartByTable(tableName)
-            io.to(tableName).emit('cart:updated', {
-                cart,
-                action: 'add',
-                tableName,
-            })
+            try {
+                const cart = await cartService.getActiveCartByTable(tableName)
+                if (cart) {
+                    io.to(tableName).emit('cart:updated', {
+                        cart,
+                        action: 'add',
+                        tableName,
+                    })
+                }
+            } catch (socketError) {
+                console.log('Socket emit error:', socketError)
+            }
         }
 
         return res.json({
@@ -59,7 +69,6 @@ export const addItem = async (req, res) => {
             message: 'Thêm sản phẩm vào giỏ hàng thành công',
         })
     } catch (error) {
-        console.log(error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -73,16 +82,22 @@ export const updateItem = async (req, res) => {
         const clientId = req.headers['x-client-id']
         const data = req.body
 
-        await cartService.updateItem(tableName, clientId, data)
-
+        await cartService.updateItem(tableName, clientId, data) // Emit socket event cho clients cùng bàn
         const io = req.app.locals.io
         if (io) {
-            const cart = await cartService.getActiveCartByTable(tableName)
-            io.to(tableName).emit('cart:updated', {
-                cart,
-                action: 'update',
-                tableName,
-            })
+            try {
+                const cart = await cartService.getActiveCartByTable(tableName)
+                if (cart) {
+                    io.to(tableName).emit('cart:updated', {
+                        cart,
+                        action: 'update',
+                        tableName,
+                    })
+                }
+            } catch (socketError) {
+                console.log('Socket emit error:', socketError)
+                // Không throw error, vì việc update đã thành công
+            }
         }
 
         return res.json({
@@ -90,7 +105,6 @@ export const updateItem = async (req, res) => {
             message: 'Cập nhật sản phẩm trong giỏ hàng thành công',
         })
     } catch (error) {
-        console.log(error)
         return res.json({
             success: false,
             message: error.message || 'Server error',

@@ -14,10 +14,11 @@ const CartItem = ({ item }) => {
 
     const handleEdit = () => {
         if (isLockedByOther) {
-            return  
+            return
         }
 
-        socket.emit('cart:lockItem', {
+        // Emit lock event (backend listens to 'lockItem')
+        socket.emit('lockItem', {
             tableName,
             clientId,
             itemId: item.itemId,

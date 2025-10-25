@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client'
 import { v4 as uuidv4 } from 'uuid'
 
-const URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+const URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
 
 const clientId = localStorage.getItem('clientId') || uuidv4()
 localStorage.setItem('clientId', clientId)

@@ -50,19 +50,12 @@ export const socketHandler = (io, app) => {
                 typeof tableName !== 'string' ||
                 !/^[a-zA-Z0-9_-]+$/.test(tableName)
             ) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log(
-                        `Invalid tableName received from socket ${socket.id}:`,
-                        tableName
-                    )
-                }
                 socket.emit('error', { message: 'Invalid table name.' })
                 return
             }
+
             socket.join(tableName)
-            if (process.env.NODE_ENV === 'development') {
-                console.log(`Socket ${socket.id} joined table: ${tableName}`)
-            }
+            socket.emit('joinedTable', { tableName })
         })
 
         socket.on('leaveTable', (tableName) => {

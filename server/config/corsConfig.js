@@ -14,6 +14,7 @@ export const corsOptions = {
         'Cache-Control',
         'Expires',
         'Pragma',
+        'x-client-id', // For cart operations
     ],
     credentials: true,
 }

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import QuantityInput from '../components/QuantityInput'
 import socket from '../socket/socket'
+import { addToCart, getCart, updateCartItem } from '../store/client/cartSlice'
 import { getProductById } from '../store/client/productSlice'
 
 const initialState = {
@@ -34,27 +35,42 @@ const Product = () => {
     const tableName = storeTableName || urlTableName
     const clientId = storeClientId || localStorage.getItem('clientId')
 
-    console.log(formData)
-    const handleOrder = () => {
+    const handleOrder = async () => {
         if (isEditMode) {
-            socket.emit('cart:updateItem', {
-                tableName,
-                clientId,
-                originalItemId: formData.originalItemId || itemId,
-                itemId: formData.itemId,
-                productId: formData.productId,
-                quantity: formData.quantity,
-                selectedSize: formData.size,
-                selectedTemperature: formData.temperature,
-            })
-            socket.emit('cart:unlockItem', {
+            // Update item
+            await dispatch(
+                updateCartItem({
+                    tableName,
+                    clientId,
+                    data: {
+                        originalItemId: formData.originalItemId || itemId,
+                        itemId: formData.itemId,
+                        productId: formData.productId,
+                        quantity: formData.quantity,
+                        selectedSize: formData.size,
+                        selectedTemperature: formData.temperature,
+                    },
+                })
+            )
+            // Unlock item (backend listens to 'unlockItem')
+            socket.emit('unlockItem', {
                 tableName,
                 clientId,
                 itemId: formData.originalItemId || itemId,
             })
+            // Refresh cart
+            await dispatch(getCart(tableName))
             navigate(`/tables/${tableName}/cart`)
         } else {
-            socket.emit('cart:addItem', formData)
+            // Add item
+            await dispatch(
+                addToCart({
+                    tableName,
+                    data: formData,
+                })
+            )
+            // Refresh cart
+            await dispatch(getCart(tableName))
             navigate(`/tables/${tableName}/menu`)
         }
     }
@@ -112,7 +128,8 @@ const Product = () => {
 
         return () => {
             if (editMode && itemId) {
-                socket.emit('cart:unlockItem', {
+                // Unlock on unmount (backend listens to 'unlockItem')
+                socket.emit('unlockItem', {
                     tableName,
                     clientId,
                     itemId,

@@ -22,6 +22,89 @@ export const getActiveCartByTable = async (tableName) => {
     }
 }
 
+export const addItem = async (tableName, data) => {
+    try {
+        const table = await tableModel.findOne({ tableName })
+        if (!table) throw new Error('Bàn không tồn tại')
+
+        let cart = await cartModel.findOne({
+            tableId: table._id,
+            status: 'active',
+        })
+        if (!cart) {
+            cart = await cartModel.create({
+                tableId: table._id,
+                clients: data.clientId ? [{ clientId: data.clientId }] : [],
+                items: [],
+                totalPrice: 0,
+            })
+        } else {
+            // Add client if not exists
+            if (
+                data.clientId &&
+                !cart.clients.some((c) => c.clientId === data.clientId)
+            ) {
+                cart.clients.push({ clientId: data.clientId })
+            }
+        }
+
+        const product = await productModel.findById(data.productId)
+        if (!product) throw new Error('Sản phẩm không tồn tại')
+        if (!product.available) throw new Error('Sản phẩm hiện không khả dụng')
+
+        const existingItem = cart.items.find((i) => i.itemId === data.itemId)
+        if (existingItem) {
+            // Merge: increase quantity
+            const newQuantity = existingItem.quantity + (data.quantity || 1)
+            const subTotal = calculateItemSubTotal(product, {
+                ...existingItem,
+                quantity: newQuantity,
+            })
+            await cartModel.findOneAndUpdate(
+                { _id: cart._id, 'items.itemId': data.itemId },
+                {
+                    $set: {
+                        'items.$.quantity': newQuantity,
+                        'items.$.subTotal': subTotal,
+                    },
+                }
+            )
+            cart.totalPrice += subTotal - existingItem.subTotal
+        } else {
+            // Add new item
+            const subTotal = calculateItemSubTotal(product, data)
+            cart.items.push({
+                itemId: data.itemId,
+                productId: data.productId,
+                quantity: data.quantity || 1,
+                selectedSize: data.size || data.selectedSize,
+                selectedTemperature:
+                    data.temperature || data.selectedTemperature,
+                subTotal,
+                locked: false,
+                lockedBy: null,
+            })
+            cart.totalPrice += subTotal
+        }
+
+        cart.version += 1
+        await cart.save()
+
+        const populatedCart = await cartModel
+            .findById(cart._id)
+            .populate('items.productId', 'name basePrice imageUrl sizes')
+
+        return transformCartResponse(populatedCart)
+    } catch (error) {
+        console.log(error)
+        throw new Error(
+            `Xảy ra lỗi khi thêm sản phẩm vào giỏ hàng: ${error.message}`
+        )
+    }
+}
+
+// This function is used by socket handler (cartSocket.js) for realtime add via WebSocket
+// Different signature: receives { tableName, clientId, data } as single object
 export const addItemViaSocket = async ({ tableName, clientId, data }) => {
     try {
         const table = await tableModel.findOne({ tableName })
