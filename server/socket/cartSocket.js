@@ -105,4 +105,52 @@ export const cartSocket = (io, socket) => {
             })
         }
     })
+
+    socket.on('cart:requestLockStatus', async (payload) => {
+        try {
+            if (!payload || typeof payload !== 'object') return
+            const { tableName } = payload
+
+            const cart = await cartService.getActiveCartByTable(tableName)
+            if (cart && cart.items) {
+                // Send current lock status for all items
+                cart.items.forEach((item) => {
+                    if (item.locked && item.lockedBy) {
+                        socket.emit('cart:itemLocked', {
+                            itemId: item.itemId,
+                            lockedBy: item.lockedBy,
+                        })
+                    }
+                })
+            }
+        } catch (err) {
+            console.error('cart:requestLockStatus error', err)
+        }
+    })
+
+    socket.on('cart:requestLatestData', async (payload) => {
+        try {
+            if (!payload || typeof payload !== 'object') return
+            const { tableName } = payload
+
+            console.log(
+                '🔄 Client requesting latest cart data for table:',
+                tableName
+            )
+            const cart = await cartService.getActiveCartByTable(tableName)
+            if (cart) {
+                console.log('📤 Sending latest cart data to client:', socket.id)
+                // Send latest cart data to ensure sync
+                socket.emit('cart:updated', {
+                    cart,
+                    action: 'sync',
+                    tableName,
+                })
+            } else {
+                console.log('❌ No cart found for table:', tableName)
+            }
+        } catch (err) {
+            console.error('cart:requestLatestData error', err)
+        }
+    })
 }

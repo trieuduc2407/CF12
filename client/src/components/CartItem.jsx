@@ -1,10 +1,12 @@
 import { Lock } from 'lucide-react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import socket from '../socket/socket'
+import { lockItem } from '../store/client/cartSlice'
 
 const CartItem = ({ item }) => {
+    const dispatch = useDispatch()
     const navigate = useNavigate()
     const { tableName } = useParams()
 
@@ -17,8 +19,11 @@ const CartItem = ({ item }) => {
             return
         }
 
-        // Emit lock event (backend listens to 'lockItem')
-        socket.emit('lockItem', {
+        // Update local state immediately
+        dispatch(lockItem({ itemId: item.itemId, lockedBy: clientId }))
+
+        // Emit lock event to notify other clients
+        socket.emit('cart:lockItem', {
             tableName,
             clientId,
             itemId: item.itemId,

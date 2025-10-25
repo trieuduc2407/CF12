@@ -5,7 +5,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import QuantityInput from '../components/QuantityInput'
 import socket from '../socket/socket'
-import { addToCart, getCart, updateCartItem } from '../store/client/cartSlice'
+import {
+    addToCart,
+    getCart,
+    unlockItem,
+    updateCartItem,
+} from '../store/client/cartSlice'
 import { getProductById } from '../store/client/productSlice'
 
 const initialState = {
@@ -31,6 +36,7 @@ const Product = () => {
     const [product, setProduct] = useState({})
     const [formData, setFormData] = useState(initialState)
     const [isEditMode, setIsEditMode] = useState(false)
+    const [hasUpdated, setHasUpdated] = useState(false)
 
     const tableName = storeTableName || urlTableName
     const clientId = storeClientId || localStorage.getItem('clientId')
@@ -52,12 +58,9 @@ const Product = () => {
                     },
                 })
             )
-            // Unlock item (backend listens to 'unlockItem')
-            socket.emit('unlockItem', {
-                tableName,
-                clientId,
-                itemId: formData.originalItemId || itemId,
-            })
+            // Mark as updated to prevent cleanup unlock
+            setHasUpdated(true)
+            // Note: updateCartItem already unlocks the item, no need to unlock again
             // Refresh cart
             await dispatch(getCart(tableName))
             navigate(`/tables/${tableName}/cart`)
@@ -127,9 +130,11 @@ const Product = () => {
         })
 
         return () => {
-            if (editMode && itemId) {
-                // Unlock on unmount (backend listens to 'unlockItem')
-                socket.emit('unlockItem', {
+            if (editMode && itemId && !hasUpdated) {
+                // Only unlock if user leaves without updating
+                // If user updated, the item is already unlocked by updateCartItem
+                dispatch(unlockItem({ itemId }))
+                socket.emit('cart:unlockItem', {
                     tableName,
                     clientId,
                     itemId,
@@ -142,7 +147,11 @@ const Product = () => {
         <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">
             <button
                 className="btn-circle fixed left-4 top-4 z-10 text-white xl:bg-gray-400"
-                onClick={() => navigate(`/tables/${tableName}/menu`)}
+                onClick={() =>
+                    isEditMode
+                        ? navigate(`/tables/${tableName}/cart`)
+                        : navigate(`/tables/${tableName}/menu`)
+                }
             >
                 <ChevronLeft />
             </button>

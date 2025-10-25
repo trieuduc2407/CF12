@@ -71,51 +71,6 @@ export const socketHandler = (io, app) => {
             }
         })
 
-        socket.on('lockItem', ({ tableName, itemId, clientId }) => {
-            if (
-                typeof tableName !== 'string' ||
-                !/^[a-zA-Z0-9_-]+$/.test(tableName) ||
-                typeof itemId !== 'string' ||
-                !/^[a-zA-Z0-9_-]+$/.test(itemId) ||
-                typeof clientId !== 'string' ||
-                !clientId.trim()
-            ) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log(`Invalid lockItem payload from ${socket.id}:`, {
-                        tableName,
-                        itemId,
-                        clientId,
-                    })
-                }
-                socket.emit('error', {
-                    message: 'Invalid lockItem parameters.',
-                })
-                return
-            }
-            socket.to(tableName).emit('itemLocked', { itemId, clientId })
-        })
-
-        socket.on('unlockItem', ({ tableName, itemId }) => {
-            if (
-                typeof tableName !== 'string' ||
-                !/^[a-zA-Z0-9_-]+$/.test(tableName) ||
-                typeof itemId !== 'string' ||
-                !/^[a-zA-Z0-9_-]+$/.test(itemId)
-            ) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log(
-                        `Invalid unlockItem params from socket ${socket.id}:`,
-                        { tableName, itemId }
-                    )
-                }
-                socket.emit('error', {
-                    message: 'Invalid unlockItem parameters.',
-                })
-                return
-            }
-            socket.to(tableName).emit('itemUnlocked', { itemId })
-        })
-
         socket.on('updateCart', ({ tableName, cart }) => {
             if (
                 typeof tableName !== 'string' ||

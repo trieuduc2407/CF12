@@ -82,7 +82,9 @@ export const updateItem = async (req, res) => {
         const clientId = req.headers['x-client-id']
         const data = req.body
 
-        await cartService.updateItem(tableName, clientId, data) // Emit socket event cho clients cùng bàn
+        await cartService.updateItem(tableName, clientId, data)
+
+        // Emit socket event cho clients cùng bàn
         const io = req.app.locals.io
         if (io) {
             try {
@@ -95,8 +97,7 @@ export const updateItem = async (req, res) => {
                     })
                 }
             } catch (socketError) {
-                console.log('Socket emit error:', socketError)
-                // Không throw error, vì việc update đã thành công
+                console.error('Socket emit error:', socketError)
             }
         }
 

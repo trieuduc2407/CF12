@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
@@ -14,26 +14,42 @@ import { lockItem, unlockItem, updateCart } from './store/client/cartSlice'
 
 const SocketManager = () => {
     const location = useLocation()
+    const currentTableRef = useRef(null)
+
+    useEffect(() => {
+        // Handle socket reconnection - rejoin room if needed
+        const handleReconnect = () => {
+            if (currentTableRef.current) {
+                socket.emit('joinTable', currentTableRef.current)
+            }
+        }
+
+        socket.on('connect', handleReconnect)
+
+        return () => {
+            socket.off('connect', handleReconnect)
+        }
+    }, [])
 
     useEffect(() => {
         // Extract tableName from URL path like /tables/T01/...
         const match = location.pathname.match(/^\/tables\/([^/]+)/)
         const tableName = match ? match[1] : null
 
-        if (tableName) {
-            console.log(
-                '🔌 Attempting to join room:',
-                tableName,
-                'Socket connected:',
-                socket.connected
-            )
+        // If changing tables, leave old table first
+        if (currentTableRef.current && currentTableRef.current !== tableName) {
+            socket.emit('leaveTable', currentTableRef.current)
+        }
 
-            const handleJoinConfirmation = (data) => {
-                console.log('✅ Confirmed joined room:', data.tableName)
+        if (tableName && tableName !== currentTableRef.current) {
+            currentTableRef.current = tableName
+
+            const handleJoinConfirmation = () => {
+                // Room joined successfully
             }
 
             const handleSocketError = (error) => {
-                console.error('❌ Socket error:', error)
+                console.error('Socket error:', error)
             }
 
             socket.on('joinedTable', handleJoinConfirmation)
@@ -43,22 +59,19 @@ const SocketManager = () => {
             if (socket.connected) {
                 socket.emit('joinTable', tableName)
             } else {
-                console.log('⏳ Socket not connected yet, waiting...')
                 socket.once('connect', () => {
-                    console.log(
-                        '✅ Socket connected, now joining room:',
-                        tableName
-                    )
                     socket.emit('joinTable', tableName)
                 })
             }
 
             return () => {
-                socket.emit('leaveTable', tableName)
-                console.log('🔌 Left socket room:', tableName)
                 socket.off('joinedTable', handleJoinConfirmation)
                 socket.off('error', handleSocketError)
             }
+        } else if (!tableName && currentTableRef.current) {
+            // User left table area completely
+            socket.emit('leaveTable', currentTableRef.current)
+            currentTableRef.current = null
         }
     }, [location.pathname])
 
@@ -74,18 +87,18 @@ const App = () => {
             dispatch(updateCart(data))
         })
 
-        socket.on('itemLocked', ({ itemId, clientId }) => {
-            dispatch(lockItem({ itemId, lockedBy: clientId }))
+        socket.on('cart:itemLocked', ({ itemId, lockedBy }) => {
+            dispatch(lockItem({ itemId, lockedBy }))
         })
 
-        socket.on('itemUnlocked', ({ itemId }) => {
+        socket.on('cart:itemUnlocked', ({ itemId }) => {
             dispatch(unlockItem({ itemId }))
         })
 
         return () => {
             socket.off('cart:updated')
-            socket.off('itemLocked')
-            socket.off('itemUnlocked')
+            socket.off('cart:itemLocked')
+            socket.off('cart:itemUnlocked')
         }
     }, [dispatch])
 

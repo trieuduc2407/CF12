@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import CartItem from '../components/CartItem'
-import { getCart } from '../store/client/cartSlice'
+import socket from '../socket/socket'
+import { getCart, updateCart } from '../store/client/cartSlice'
 import { setSession } from '../store/client/sessionSlice'
 
 const Cart = () => {
@@ -37,7 +38,56 @@ const Cart = () => {
 
     useEffect(() => {
         if (tableName) {
+            // Always fetch fresh cart data when entering Cart page
             dispatch(getCart(tableName))
+
+            // Request current lock status from server
+            socket.emit('cart:requestLockStatus', { tableName })
+
+            // Request latest cart data to ensure sync
+            socket.emit('cart:requestLatestData', { tableName })
+        }
+    }, [dispatch, tableName])
+
+    // Listen for socket cart updates to override API data
+    useEffect(() => {
+        if (!tableName) return
+
+        const handleCartUpdate = (data) => {
+            // Socket updates have priority over API calls
+            dispatch(updateCart(data))
+        }
+
+        socket.on('cart:updated', handleCartUpdate)
+
+        return () => {
+            socket.off('cart:updated', handleCartUpdate)
+        }
+    }, [dispatch, tableName])
+
+    // Refetch cart when page becomes visible (user switches tabs)
+    useEffect(() => {
+        if (!tableName) return
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                dispatch(getCart(tableName))
+            }
+        }
+
+        const handleFocus = () => {
+            dispatch(getCart(tableName))
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        window.addEventListener('focus', handleFocus)
+
+        return () => {
+            document.removeEventListener(
+                'visibilitychange',
+                handleVisibilityChange
+            )
+            window.removeEventListener('focus', handleFocus)
         }
     }, [dispatch, tableName])
 

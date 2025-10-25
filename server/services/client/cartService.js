@@ -323,7 +323,12 @@ export const unlockItem = async (tableName, clientId, itemId) => {
         if (!cart) throw new Error('Giỏ hàng không tồn tại')
 
         const item = cart.items.find((i) => i.itemId === itemId)
-        if (!item) throw new Error('Sản phẩm không tồn tại trong giỏ hàng')
+
+        // Nếu item không tồn tại (đã bị xóa/update), trả về success để tránh lỗi
+        if (!item) {
+            console.log('⚠️ Item không tồn tại, bỏ qua unlock:', itemId)
+            return { itemId, locked: false, lockedBy: null }
+        }
 
         if (item.lockedBy && item.lockedBy !== clientId) {
             throw new Error('Bạn không có quyền mở khóa sản phẩm này')
