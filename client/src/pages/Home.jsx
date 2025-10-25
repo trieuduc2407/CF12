@@ -1,9 +1,8 @@
 import { ShoppingBag } from 'lucide-react'
 import React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
 
 import socket from '../socket/socket'
 import { setSession } from '../store/client/sessionSlice'
@@ -12,34 +11,34 @@ const Home = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const { tableName } = useParams()
-    const [clientId, setClientId] = useState(null)
+    const clientId = localStorage.getItem('clientId')
 
     useEffect(() => {
-        let storedClientId = localStorage.getItem('clientId')
-        if (!storedClientId) {
-            storedClientId = uuidv4()
-            localStorage.setItem('clientId', storedClientId)
+        if (!clientId || !tableName) return
+
+        const handleConnect = () => {
+            socket.emit('registerClient', { clientId, tableName })
         }
-        setClientId(storedClientId)
-    }, [])
+
+        socket.on('connect', handleConnect)
+        if (socket.connected) handleConnect()
+
+        return () => {
+            socket.off('connect', handleConnect)
+        }
+    }, [clientId, tableName])
 
     useEffect(() => {
         if (clientId && tableName) {
             dispatch(setSession({ tableName, clientId }))
         }
-    }, [clientId, tableName, dispatch])
 
-    useEffect(() => {
-        if (!tableName) return
-
-        // Join table room
         socket.emit('joinTable', tableName)
 
-        // Cleanup: leave room and remove listeners
         return () => {
             socket.emit('leaveTable', tableName)
         }
-    }, [tableName])
+    }, [clientId, tableName, dispatch])
 
     return (
         <>

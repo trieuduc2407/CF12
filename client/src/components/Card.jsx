@@ -1,16 +1,26 @@
 import { CirclePlus } from 'lucide-react'
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import formatNumber from '../utils/formatNumber'
 
 const Card = ({ product }) => {
     const { isLoading } = useSelector((state) => state.clientProduct)
-    const { tableName } = useSelector((state) => state.clientSession)
+    const { tableName: storeTableName } = useSelector(
+        (state) => state.clientSession
+    )
+    const { tableName: urlTableName } = useParams()
     const navigate = useNavigate()
 
+    // Ưu tiên tableName từ store, nếu không có thì lấy từ URL
+    const tableName = storeTableName || urlTableName
+
     const handleAddToCart = (productId) => {
+        if (!tableName) {
+            console.error('Table name is not available')
+            return
+        }
         navigate(`/tables/${tableName}/product/${productId}`)
     }
 

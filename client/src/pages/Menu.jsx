@@ -1,9 +1,13 @@
 import { ReceiptText, Search, ShoppingBasket } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import Card from '../components/Card'
+import socket from '../socket/socket'
+import { getCart, updateCart } from '../store/client/cartSlice'
 import { getAllProducts } from '../store/client/productSlice'
+import { setSession } from '../store/client/sessionSlice'
 
 const navbarItems = [
     { value: 'new', label: 'Món mới' },
@@ -23,8 +27,18 @@ const categoryItems = [
 
 const Menu = () => {
     const dispatch = useDispatch()
+    const { tableName: urlTableName } = useParams()
     const { products = [] } = useSelector((state) => state.clientProduct)
+    const { tableName: storeTableName } = useSelector(
+        (state) => state.clientSession
+    )
+    const { items: cartItems, totalPrice } = useSelector(
+        (state) => state.clientCart
+    )
 
+    const tableName = urlTableName || storeTableName
+
+    const navigate = useNavigate()
     const latestProducts = products
         .filter((product) => product.createdAt)
         .slice(-4)
@@ -34,6 +48,36 @@ const Menu = () => {
 
     const [activeCategory, setActiveCategory] = useState(navbarItems[0].value)
     const [isScrolled, setIsScrolled] = useState(false)
+
+    useEffect(() => {
+        if (urlTableName && urlTableName !== storeTableName) {
+            const storedClientId = localStorage.getItem('clientId')
+            if (storedClientId) {
+                dispatch(
+                    setSession({
+                        tableName: urlTableName,
+                        clientId: storedClientId,
+                    })
+                )
+            }
+        }
+    }, [dispatch, urlTableName, storeTableName])
+
+    useEffect(() => {
+        if (tableName) {
+            dispatch(getCart(tableName))
+        }
+    }, [dispatch, tableName])
+
+    useEffect(() => {
+        socket.on('cart:updated', (updatedCart) => {
+            dispatch(updateCart(updatedCart))
+        })
+
+        return () => {
+            socket.off('cart:updated')
+        }
+    }, [dispatch])
 
     useEffect(() => {
         const sectionIds = navbarItems.map((item) => item.value)
@@ -92,7 +136,8 @@ const Menu = () => {
 
     useEffect(() => {
         dispatch(getAllProducts())
-    }, [dispatch])
+        dispatch(getCart(tableName))
+    }, [dispatch, tableName])
 
     return (
         <>
@@ -235,11 +280,53 @@ const Menu = () => {
                         ))}
                     </div>
                 </div>
-                <div className="hidden h-80 flex-col items-center justify-center rounded-lg bg-white md:flex">
-                    <img src="./icon_cart_blank.svg" alt="" />
-                    <p className="py-5 text-center text-gray-500">
-                        Chưa có sản phẩm <br /> trong giỏ hàng
-                    </p>
+                <div className="sticky top-0 hidden h-80 flex-col items-center justify-center rounded-lg bg-white md:flex">
+                    {cartItems.length === 0 ? (
+                        <>
+                            <img src="./icon_cart_blank.svg" alt="" />
+                            <p className="py-5 text-center text-gray-500">
+                                Chưa có sản phẩm <br /> trong giỏ hàng
+                            </p>
+                        </>
+                    ) : (
+                        <div className="flex w-full flex-col p-4">
+                            <h3 className="mb-4 text-lg font-semibold">
+                                Giỏ hàng
+                            </h3>
+                            <div className="flex-1 space-y-2">
+                                {cartItems.map((item) => (
+                                    <div
+                                        key={item.itemId}
+                                        className="flex justify-between text-sm"
+                                    >
+                                        <span>
+                                            {item.productId?.name} x{' '}
+                                            {item.quantity}
+                                        </span>
+                                        <span>
+                                            {item.subTotal?.toLocaleString()} đ
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-4 border-t pt-2">
+                                <div className="flex justify-between font-semibold">
+                                    <span>Tổng:</span>
+                                    <span className="text-amber-500">
+                                        {totalPrice.toLocaleString()} đ
+                                    </span>
+                                </div>
+                            </div>
+                            <button
+                                className="btn btn-primary mt-4 w-full rounded-lg border-0 text-white"
+                                onClick={() =>
+                                    navigate(`/tables/${tableName}/cart`)
+                                }
+                            >
+                                Tiếp tục
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="fixed bottom-0 mb-[var(--safe-bottom)] flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">

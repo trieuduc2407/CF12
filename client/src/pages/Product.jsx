@@ -1,14 +1,17 @@
-import { ChevronLeft, Minus, Plus } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import React from 'react'
 import { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import QuantityInput from '../components/QuantityInput'
+import socket from '../socket/socket'
 import { getProductById } from '../store/client/productSlice'
 import formatNumber from '../utils/formatNumber'
 
 const initialState = {
+    clientId: '',
+    itemId: '',
     productId: '',
     quantity: 1,
     size: '',
@@ -16,47 +19,65 @@ const initialState = {
 }
 
 const Product = () => {
-    const productId = useParams().id
-    const tableName = useParams().tableName
+    const { id: productId, tableName: urlTableName } = useParams()
     const [product, setProduct] = useState({})
     const [formData, setFormData] = useState(initialState)
+
+    const { clientId: storeClientId, tableName: storeTableName } = useSelector(
+        (state) => state.clientSession
+    )
+
+    const tableName = storeTableName || urlTableName
+    const clientId = storeClientId || localStorage.getItem('clientId')
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
     const handleOrder = () => {
-        console.log(formData)
+        socket.emit('cart:addItem', formData)
     }
 
     useEffect(() => {
+        if (!clientId || !tableName) return
+
         dispatch(getProductById(productId)).then((data) => {
             setProduct(data.payload.data)
-            setFormData((f) => ({
-                ...f,
-                productId: productId,
-                size: 'M',
-            }))
 
+            let defaultTemp = 'hot'
             if (
                 Array.isArray(data.payload.data.temperature) &&
                 data.payload.data.temperature.length > 0
             ) {
-                const defaultTemp =
+                const tempObj =
                     data.payload.data.temperature.find((t) => t.isDefault) ||
                     data.payload.data.temperature[0]
-                setFormData((f) => ({
-                    ...f,
-                    temperature: defaultTemp.type,
-                }))
+                defaultTemp = tempObj.type
             }
+
+            const size = 'M'
+            setFormData({
+                clientId: clientId,
+                tableName: tableName,
+                productId: productId,
+                quantity: 1,
+                size: size,
+                temperature: defaultTemp,
+                itemId: `${productId}_${size}_${defaultTemp}`,
+            })
         })
-    }, [dispatch, productId])
+    }, [dispatch, productId, clientId, tableName])
 
     return (
         <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">
             <button
                 className="btn-circle fixed left-4 top-4 z-10 text-white xl:bg-gray-400"
-                onClick={() => navigate(`/tables/${tableName}/menu`)}
+                onClick={() => {
+                    if (!tableName) {
+                        console.error('Table name is not available')
+                        return
+                    }
+                    navigate(`/tables/${tableName}/menu`)
+                }}
             >
                 <ChevronLeft />
             </button>
@@ -116,6 +137,7 @@ const Product = () => {
                                                         ...formData,
                                                         size: event.target
                                                             .value,
+                                                        itemId: `${productId}_${event.target.value}_${formData.temperature}`,
                                                     })
                                                 }
                                             />
@@ -154,6 +176,7 @@ const Product = () => {
                                                         ...formData,
                                                         temperature:
                                                             event.target.value,
+                                                        itemId: `${productId}_${formData.size}_${event.target.value}`,
                                                     })
                                                 }
                                             />

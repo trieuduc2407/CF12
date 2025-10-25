@@ -16,6 +16,7 @@ const cartSchema = new mongoose.Schema(
         ],
         items: [
             {
+                itemId: { type: String, required: true, unique: false },
                 productId: {
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'product',
@@ -24,6 +25,7 @@ const cartSchema = new mongoose.Schema(
                 selectedSize: { type: String },
                 selectedTemperature: { type: String, enum: ['hot', 'ice'] },
                 quantity: { type: Number, required: true, min: 1 },
+                subTotal: { type: Number, required: true, min: 0 },
                 locked: { type: Boolean, default: false },
                 lockedBy: { type: String },
             },

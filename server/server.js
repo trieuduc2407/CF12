@@ -13,7 +13,7 @@ const startServer = async () => {
 
     const io = initSocket(server)
 
-    socketHandler(io)
+    socketHandler(io, app)
 
     server.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`)

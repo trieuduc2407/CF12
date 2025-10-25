@@ -1,8 +1,50 @@
-export const socketHandler = (io) => {
+import { cartSocket } from './cartSocket.js'
+
+const connectedUsers = new Map()
+
+export const socketHandler = (io, app) => {
+    // Store connectedUsers in app.locals for REST API access
+    if (app) {
+        app.locals.connectedUsers = connectedUsers
+    }
+
     io.on('connection', (socket) => {
+        const uuid = socket.handshake.query.uuid
         if (process.env.NODE_ENV === 'development') {
-            console.log('A user connected:', socket.id)
+            console.log('A user connected:', socket.id, 'UUID:', uuid)
         }
+
+        if (uuid) {
+            connectedUsers.set(uuid, socket.id)
+        }
+
+        // attach cart-related handlers for this socket
+        try {
+            cartSocket(io, socket)
+        } catch (err) {
+            console.error('Failed to attach cartSocket handlers', err)
+        }
+
+        socket.on('registerClient', ({ clientId, tableName }) => {
+            const oldClient = connectedUsers.get(clientId)
+
+            if (oldClient && oldClient !== socket.id) {
+                console.log(
+                    `Client ${clientId} reconnected, force-disconnecting old socket ${oldClient}`
+                )
+                const oldSocket = io.sockets.sockets.get(oldClient)
+                if (oldSocket) {
+                    oldSocket.leave(tableName)
+                    oldSocket.disconnect(true)
+                }
+            }
+
+            connectedUsers.set(clientId, socket.id)
+            socket.join(tableName)
+            console.log(
+                `Client ${clientId} registered and joined table ${tableName}`
+            )
+        })
 
         socket.on('joinTable', (tableName) => {
             if (
@@ -21,6 +63,19 @@ export const socketHandler = (io) => {
             socket.join(tableName)
             if (process.env.NODE_ENV === 'development') {
                 console.log(`Socket ${socket.id} joined table: ${tableName}`)
+            }
+        })
+
+        socket.on('leaveTable', (tableName) => {
+            if (
+                typeof tableName !== 'string' ||
+                !/^[a-zA-Z0-9_-]+$/.test(tableName)
+            ) {
+                return
+            }
+            socket.leave(tableName)
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`Socket ${socket.id} left table: ${tableName}`)
             }
         })
 
@@ -110,8 +165,15 @@ export const socketHandler = (io) => {
         })
 
         socket.on('disconnect', () => {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('A user disconnected:', socket.id)
+            for (const [clientId, socketId] of connectedUsers.entries()) {
+                if (socketId === socket.id) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log('A user disconnected:', socket.id)
+                    }
+                    // remove mapping for this clientId
+                    connectedUsers.delete(clientId)
+                    break
+                }
             }
         })
     })
