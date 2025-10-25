@@ -1,29 +1,8 @@
 import { calculateItemSubTotal } from '../../helpers/client/calculateItemSubtotal.js'
+import { transformCartResponse } from '../../helpers/client/transformCartResponse.js'
 import { cartModel } from '../../models/cartModel.js'
 import { productModel } from '../../models/productModel.js'
 import { tableModel } from '../../models/tableModel.js'
-
-/**
- * Transform cart response để đổi productId → product khi đã populate
- * Giúp frontend dễ hiểu: "product" (object) thay vì "productId" (confusing)
- */
-const transformCartResponse = (cart) => {
-    if (!cart) return null
-
-    const cartObj = cart.toObject()
-
-    if (cartObj.items && Array.isArray(cartObj.items)) {
-        cartObj.items = cartObj.items.map((item) => {
-            const { productId, ...rest } = item
-            return {
-                ...rest,
-                product: productId,
-            }
-        })
-    }
-
-    return cartObj
-}
 
 export const getActiveCartByTable = async (tableName) => {
     try {
@@ -119,9 +98,12 @@ export const updateItem = async (tableName, clientId, data) => {
         })
         if (!cart) throw new Error('Giỏ hàng không tồn tại')
 
-        const item = await cart.items.find((i) => i.itemId === data.itemId)
-        if (!item) throw new Error('Sản phẩm không tồn tại trong giỏ hàng')
+        const searchItemId = data.originalItemId || data.itemId
+        const itemIndex = cart.items.findIndex((i) => i.itemId === searchItemId)
+        if (itemIndex === -1)
+            throw new Error('Sản phẩm không tồn tại trong giỏ hàng')
 
+        const item = cart.items[itemIndex]
         const product = await productModel.findById(item.productId)
         if (!product) throw new Error('Sản phẩm không tồn tại')
 
@@ -129,36 +111,72 @@ export const updateItem = async (tableName, clientId, data) => {
             throw new Error('Sản phẩm đang được người khác chỉnh sửa')
         }
 
-        if (data.quantity !== undefined) {
-            item.quantity = data.quantity
-        }
-        if (data.selectedSize !== undefined) {
-            item.selectedSize = data.selectedSize
-        }
-        if (data.selectedTemperature !== undefined) {
-            item.selectedTemperature = data.selectedTemperature
+        const updatedQuantity = data.quantity ?? item.quantity
+        const updatedSize = data.selectedSize ?? item.selectedSize
+        const updatedTemp = data.selectedTemperature ?? item.selectedTemperature
+
+        const newItemId =
+            data.itemId || `${item.productId}_${updatedSize}_${updatedTemp}`
+
+        const existingItemIndex = cart.items.findIndex(
+            (i, idx) => i.itemId === newItemId && idx !== itemIndex
+        )
+
+        if (existingItemIndex !== -1) {
+            const existingItem = cart.items[existingItemIndex]
+
+            const mergedQuantity = existingItem.quantity + updatedQuantity
+
+            const mergedSubTotal = calculateItemSubTotal(product, {
+                ...existingItem,
+                quantity: mergedQuantity,
+            })
+
+            await cartModel.findOneAndUpdate(
+                { _id: cart._id, 'items.itemId': newItemId },
+                {
+                    $set: {
+                        'items.$.quantity': mergedQuantity,
+                        'items.$.subTotal': mergedSubTotal,
+                    },
+                }
+            )
+
+            await cartModel.findByIdAndUpdate(cart._id, {
+                $pull: { items: { itemId: searchItemId } },
+                $inc: { version: 1 },
+            })
+        } else {
+            const subTotal = calculateItemSubTotal(product, {
+                ...item,
+                quantity: updatedQuantity,
+                selectedSize: updatedSize,
+                selectedTemperature: updatedTemp,
+            })
+
+            await cartModel.findOneAndUpdate(
+                { _id: cart._id, 'items.itemId': searchItemId },
+                {
+                    $set: {
+                        'items.$.itemId': newItemId,
+                        'items.$.quantity': updatedQuantity,
+                        'items.$.selectedSize': updatedSize,
+                        'items.$.selectedTemperature': updatedTemp,
+                        'items.$.subTotal': subTotal,
+                        'items.$.locked': false,
+                        'items.$.lockedBy': null,
+                    },
+                    $inc: { version: 1 },
+                }
+            )
         }
 
-        const subTotal = calculateItemSubTotal(product, item)
-        await cartModel.findOneAndUpdate(
-            { _id: cart._id, 'items.itemId': data.itemId },
-            {
-                $set: {
-                    'items.$.quantity': item.quantity,
-                    'items.$.selectedSize': item.selectedSize,
-                    'items.$.selectedTemperature': item.selectedTemperature,
-                    'items.$.subTotal': subTotal,
-                    'items.$.locked': false,
-                    'items.$.lockedBy': null,
-                },
-                $inc: { version: 1 },
-            }
-        )
-        cart.totalPrice = cart.items.reduce(
+        const updatedCart = await cartModel.findById(cart._id)
+        updatedCart.totalPrice = updatedCart.items.reduce(
             (acc, curr) => acc + curr.subTotal,
             0
         )
-        await cart.save()
+        await updatedCart.save()
 
         const populatedCart = await cartModel
             .findById(cart._id)
@@ -184,7 +202,7 @@ export const lockItem = async (tableName, clientId, itemId) => {
         })
         if (!cart) throw new Error('Giỏ hàng không tồn tại')
 
-        const item = await cart.items.find((i) => i.itemId === itemId)
+        const item = cart.items.find((i) => i.itemId === itemId)
         if (!item) throw new Error('Sản phẩm không tồn tại trong giỏ hàng')
 
         if (item.locked && item.lockedBy !== clientId) {
@@ -200,7 +218,7 @@ export const lockItem = async (tableName, clientId, itemId) => {
                 },
             }
         )
-        await cart.save()
+
         return { itemId, locked: true, lockedBy: clientId }
     } catch (error) {
         console.log(error)
@@ -221,10 +239,10 @@ export const unlockItem = async (tableName, clientId, itemId) => {
         })
         if (!cart) throw new Error('Giỏ hàng không tồn tại')
 
-        const item = await cart.items.find((i) => i.itemId === itemId)
+        const item = cart.items.find((i) => i.itemId === itemId)
         if (!item) throw new Error('Sản phẩm không tồn tại trong giỏ hàng')
 
-        if (item.lockedBy !== clientId) {
+        if (item.lockedBy && item.lockedBy !== clientId) {
             throw new Error('Bạn không có quyền mở khóa sản phẩm này')
         }
 
@@ -237,7 +255,7 @@ export const unlockItem = async (tableName, clientId, itemId) => {
                 },
             }
         )
-        await cart.save()
+
         return { itemId, locked: false, lockedBy: null }
     } catch (error) {
         console.log(error)

@@ -46,6 +46,22 @@ const cartSlice = createSlice({
             state.version = 0
             state.error = null
         },
+        lockItem: (state, action) => {
+            const { itemId, lockedBy } = action.payload
+            const item = state.items.find((i) => i.itemId === itemId)
+            if (item) {
+                item.locked = true
+                item.lockedBy = lockedBy
+            }
+        },
+        unlockItem: (state, action) => {
+            const { itemId } = action.payload
+            const item = state.items.find((i) => i.itemId === itemId)
+            if (item) {
+                item.locked = false
+                item.lockedBy = null
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -68,5 +84,5 @@ const cartSlice = createSlice({
     },
 })
 
-export const { updateCart, clearCart } = cartSlice.actions
+export const { updateCart, clearCart, lockItem, unlockItem } = cartSlice.actions
 export default cartSlice.reducer

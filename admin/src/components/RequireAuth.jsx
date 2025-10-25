@@ -18,7 +18,6 @@ const RequireAuth = ({ children }) => {
             return
         }
 
-        // Chỉ gọi getMe nếu có token
         dispatch(getMe())
             .unwrap()
             .then(() => {

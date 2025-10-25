@@ -18,19 +18,16 @@ export const getProductById = async (req, res) => {
             })
         }
 
-        // Expand temperature options cho client
         let temperatureOptions = []
         if (Array.isArray(product.temperature)) {
             product.temperature.forEach((temp) => {
                 if (temp.type === 'hot_ice') {
-                    // Expand hot_ice thành 2 tuỳ chọn, sử dụng defaultTemp để xác định mặc định
-                    const defaultTemp = temp.defaultTemp || 'hot' // fallback to 'hot' nếu không có
+                    const defaultTemp = temp.defaultTemp || 'hot'
                     temperatureOptions.push(
                         { type: 'hot', isDefault: defaultTemp === 'hot' },
                         { type: 'ice', isDefault: defaultTemp === 'ice' }
                     )
                 } else {
-                    // hot hoặc ice riêng lẻ, luôn là mặc định (vì chỉ có 1 tuỳ chọn)
                     temperatureOptions.push({
                         type: temp.type,
                         isDefault: true,

@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken'
 const roles = ['employee', 'staff', 'admin']
 
 const staffAuthMiddleware = (req, res, next) => {
-    // Đọc token từ Authorization header thay vì cookie
     const authHeader = req.headers.authorization
     const token =
         authHeader && authHeader.startsWith('Bearer ')

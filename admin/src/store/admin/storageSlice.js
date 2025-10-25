@@ -34,7 +34,6 @@ export const deleteIngredient = createAsyncThunk(
     crudHelpers.delete(ENDPOINT)
 )
 
-// Custom search với query param khác (q thay vì query)
 export const searchIngredient = createAsyncThunk(
     '/adminStorage/searchIngredient',
     async (q) => {

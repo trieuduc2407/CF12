@@ -6,7 +6,6 @@ const RedirectIfAuth = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
 
     useEffect(() => {
-        // Chỉ kiểm tra token trong localStorage
         const token = localStorage.getItem('adminToken')
         setIsLoggedIn(!!token)
         setIsLoading(false)

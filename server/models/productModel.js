@@ -24,7 +24,6 @@ const productSchema = new mongoose.Schema({
             defaultTemp: {
                 type: String,
                 enum: ['hot', 'ice'],
-                // Chỉ bắt buộc khi type là 'hot_ice'
                 required: function () {
                     return this.type === 'hot_ice'
                 },

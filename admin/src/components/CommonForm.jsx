@@ -428,7 +428,6 @@ const CommonForm = ({
             )}
             <form
                 onSubmit={async (event) => {
-                    // Luôn preventDefault để tránh Safari mobile submit form theo cách mặc định
                     event.preventDefault()
                     event.stopPropagation()
 

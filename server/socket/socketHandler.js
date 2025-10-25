@@ -3,7 +3,6 @@ import { cartSocket } from './cartSocket.js'
 const connectedUsers = new Map()
 
 export const socketHandler = (io, app) => {
-    // Store connectedUsers in app.locals for REST API access
     if (app) {
         app.locals.connectedUsers = connectedUsers
     }
@@ -18,7 +17,6 @@ export const socketHandler = (io, app) => {
             connectedUsers.set(uuid, socket.id)
         }
 
-        // attach cart-related handlers for this socket
         try {
             cartSocket(io, socket)
         } catch (err) {
@@ -170,7 +168,6 @@ export const socketHandler = (io, app) => {
                     if (process.env.NODE_ENV === 'development') {
                         console.log('A user disconnected:', socket.id)
                     }
-                    // remove mapping for this clientId
                     connectedUsers.delete(clientId)
                     break
                 }

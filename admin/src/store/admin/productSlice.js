@@ -39,7 +39,6 @@ export const searchProduct = createAsyncThunk(
     crudHelpers.search(ENDPOINT)
 )
 
-// Custom action không có trong CRUD helpers
 export const toggleSignature = createAsyncThunk(
     '/adminProduct/toggleSignature',
     async (id) => {

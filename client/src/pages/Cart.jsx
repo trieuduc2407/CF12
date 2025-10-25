@@ -5,7 +5,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import CartItem from '../components/CartItem'
 import socket from '../socket/socket'
-import { getCart, updateCart } from '../store/client/cartSlice'
+import {
+    getCart,
+    lockItem,
+    unlockItem,
+    updateCart,
+} from '../store/client/cartSlice'
 import { setSession } from '../store/client/sessionSlice'
 
 const Cart = () => {
@@ -39,6 +44,13 @@ const Cart = () => {
     useEffect(() => {
         if (tableName) {
             dispatch(getCart(tableName))
+            socket.emit('joinTable', tableName)
+        }
+
+        return () => {
+            if (tableName) {
+                socket.emit('leaveTable', tableName)
+            }
         }
     }, [dispatch, tableName])
 
@@ -47,8 +59,18 @@ const Cart = () => {
             dispatch(updateCart(updatedCart))
         })
 
+        socket.on('cart:itemLocked', ({ itemId, lockedBy }) => {
+            dispatch(lockItem({ itemId, lockedBy }))
+        })
+
+        socket.on('cart:itemUnlocked', ({ itemId }) => {
+            dispatch(unlockItem({ itemId }))
+        })
+
         return () => {
             socket.off('cart:updated')
+            socket.off('cart:itemLocked')
+            socket.off('cart:itemUnlocked')
         }
     }, [dispatch])
 

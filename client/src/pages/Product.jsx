@@ -10,6 +10,7 @@ import { getProductById } from '../store/client/productSlice'
 const initialState = {
     clientId: '',
     itemId: '',
+    originalItemId: '', 
     productId: '',
     quantity: 1,
     size: '',
@@ -35,7 +36,21 @@ const Product = () => {
 
     const handleOrder = () => {
         if (isEditMode) {
-            socket.emit('cart:updateItem', formData)
+            socket.emit('cart:updateItem', {
+                tableName,
+                clientId,
+                originalItemId: formData.originalItemId || itemId,
+                itemId: formData.itemId,
+                productId: formData.productId,
+                quantity: formData.quantity,
+                selectedSize: formData.size,
+                selectedTemperature: formData.temperature,
+            })
+            socket.emit('cart:unlockItem', {
+                tableName,
+                clientId,
+                itemId: formData.originalItemId || itemId,
+            })
             navigate(`/tables/${tableName}/cart`)
         } else {
             socket.emit('cart:addItem', formData)
@@ -65,6 +80,7 @@ const Product = () => {
                         size: cartItem.selectedSize,
                         temperature: cartItem.selectedTemperature,
                         itemId: cartItem.itemId,
+                        originalItemId: cartItem.itemId,
                     })
                     return
                 }
@@ -92,6 +108,16 @@ const Product = () => {
                 itemId: `${productId}_${size}_${defaultTemp}`,
             })
         })
+
+        return () => {
+            if (editMode && itemId) {
+                socket.emit('cart:unlockItem', {
+                    tableName,
+                    clientId,
+                    itemId,
+                })
+            }
+        }
     }, [dispatch, productId, clientId, tableName, itemId, cartItems])
 
     return (

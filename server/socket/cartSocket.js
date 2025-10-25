@@ -1,7 +1,6 @@
 import * as cartService from '../services/client/cartService.js'
 
 export const cartSocket = (io, socket) => {
-    // Add item via socket payload: { tableName, clientId, itemId, productId, quantity, size, temperature }
     socket.on('cart:addItem', async (payload) => {
         try {
             if (!payload || typeof payload !== 'object') return
@@ -31,6 +30,79 @@ export const cartSocket = (io, socket) => {
         } catch (err) {
             console.error('cart:addItem error', err)
             socket.emit('error', { message: err.message })
+        }
+    })
+
+    socket.on('cart:lockItem', async (payload) => {
+        try {
+            if (!payload || typeof payload !== 'object') return
+            const { tableName, clientId, itemId } = payload
+
+            const result = await cartService.lockItem(
+                tableName,
+                clientId,
+                itemId
+            )
+
+            if (tableName) {
+                io.to(tableName).emit('cart:itemLocked', {
+                    itemId,
+                    locked: true,
+                    lockedBy: clientId,
+                })
+            }
+        } catch (err) {
+            console.error('cart:lockItem error', err)
+            socket.emit('cart:lockError', {
+                itemId: payload.itemId,
+                message: err.message,
+            })
+        }
+    })
+
+    socket.on('cart:unlockItem', async (payload) => {
+        try {
+            if (!payload || typeof payload !== 'object') return
+            const { tableName, clientId, itemId } = payload
+
+            await cartService.unlockItem(tableName, clientId, itemId)
+
+            if (tableName) {
+                io.to(tableName).emit('cart:itemUnlocked', {
+                    itemId,
+                    locked: false,
+                    lockedBy: null,
+                })
+            }
+        } catch (err) {
+            console.error('cart:unlockItem error', err)
+            socket.emit('cart:unlockError', {
+                itemId: payload.itemId,
+                message: err.message,
+            })
+        }
+    })
+
+    socket.on('cart:updateItem', async (payload) => {
+        try {
+            if (!payload || typeof payload !== 'object') return
+            const { tableName, clientId, ...data } = payload
+
+            const updatedCart = await cartService.updateItem(
+                tableName,
+                clientId,
+                data
+            )
+
+            if (tableName) {
+                io.to(tableName).emit('cart:updated', updatedCart)
+            }
+        } catch (err) {
+            console.error('cart:updateItem error', err)
+            socket.emit('cart:updateError', {
+                itemId: payload.itemId,
+                message: err.message,
+            })
         }
     })
 }

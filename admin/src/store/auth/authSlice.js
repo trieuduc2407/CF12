@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-// Cấu hình axios để tự động thêm token vào header
 axios.interceptors.request.use((config) => {
     const token = localStorage.getItem('adminToken')
     if (token) {
@@ -23,7 +22,6 @@ export const loginStaff = createAsyncThunk(
             import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/login',
             formData
         )
-        // Lưu token vào localStorage
         if (response?.data?.success && response?.data?.token) {
             localStorage.setItem('adminToken', response.data.token)
         }
@@ -36,7 +34,6 @@ export const logoutStaff = createAsyncThunk('/auth/logoutStaff', async () => {
         import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/logout/',
         {}
     )
-    // Xóa token khỏi localStorage
     localStorage.removeItem('adminToken')
     return response?.data
 })
@@ -59,7 +56,6 @@ export const changePassword = createAsyncThunk(
                 headers: { 'Content-Type': 'application/json' },
             }
         )
-        // Xóa token khi đổi mật khẩu
         localStorage.removeItem('adminToken')
         return response?.data
     }
