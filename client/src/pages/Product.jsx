@@ -7,7 +7,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import QuantityInput from '../components/QuantityInput'
 import socket from '../socket/socket'
 import { getProductById } from '../store/client/productSlice'
-import formatNumber from '../utils/formatNumber'
 
 const initialState = {
     clientId: '',
@@ -19,13 +18,15 @@ const initialState = {
 }
 
 const Product = () => {
-    const { id: productId, tableName: urlTableName } = useParams()
+    const { id: productId, tableName: urlTableName, itemId } = useParams()
     const [product, setProduct] = useState({})
     const [formData, setFormData] = useState(initialState)
+    const [isEditMode, setIsEditMode] = useState(false)
 
     const { clientId: storeClientId, tableName: storeTableName } = useSelector(
         (state) => state.clientSession
     )
+    const { items: cartItems } = useSelector((state) => state.clientCart)
 
     const tableName = storeTableName || urlTableName
     const clientId = storeClientId || localStorage.getItem('clientId')
@@ -34,15 +35,47 @@ const Product = () => {
     const dispatch = useDispatch()
 
     const handleOrder = () => {
-        socket.emit('cart:addItem', formData)
+        if (isEditMode) {
+            // Edit mode: emit update event
+            socket.emit('cart:updateItem', formData)
+            navigate(`/tables/${tableName}/cart`)
+        } else {
+            // Add mode: emit add event
+            socket.emit('cart:addItem', formData)
+            navigate(`/tables/${tableName}/menu`)
+        }
     }
 
     useEffect(() => {
         if (!clientId || !tableName) return
 
+        // Check if edit mode (có itemId trong URL)
+        const editMode = !!itemId
+        setIsEditMode(editMode)
+
         dispatch(getProductById(productId)).then((data) => {
             setProduct(data.payload.data)
 
+            if (editMode) {
+                // EDIT MODE: Pre-fill với data từ cart
+                const cartItem = cartItems.find(
+                    (item) => item.itemId === itemId
+                )
+                if (cartItem) {
+                    setFormData({
+                        clientId: clientId,
+                        tableName: tableName,
+                        productId: productId,
+                        quantity: cartItem.quantity,
+                        size: cartItem.selectedSize,
+                        temperature: cartItem.selectedTemperature,
+                        itemId: cartItem.itemId,
+                    })
+                    return
+                }
+            }
+
+            // ADD MODE: Default values
             let defaultTemp = 'hot'
             if (
                 Array.isArray(data.payload.data.temperature) &&
@@ -65,7 +98,7 @@ const Product = () => {
                 itemId: `${productId}_${size}_${defaultTemp}`,
             })
         })
-    }, [dispatch, productId, clientId, tableName])
+    }, [dispatch, productId, clientId, tableName, itemId, cartItems])
 
     return (
         <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">
@@ -94,7 +127,7 @@ const Product = () => {
                                 {product.name}
                             </p>
                             <p className="text-md text-primary font-semibold">
-                                Giá: {formatNumber(product.basePrice)}đ
+                                Giá: {product.basePrice.toLocaleString()}đ
                             </p>
                         </div>
                     </div>
@@ -104,7 +137,7 @@ const Product = () => {
                     <div className="mx-5 mt-2.5 flex justify-between gap-2.5 pb-2.5 xl:m-0 xl:hidden">
                         <p className="text-xl font-semibold">{product.name}</p>
                         <p className="text-xl font-semibold">
-                            {formatNumber(product.basePrice)}đ
+                            {product.basePrice.toLocaleString()}đ
                         </p>
                     </div>
                     <form
@@ -129,8 +162,8 @@ const Product = () => {
                                                 type="radio"
                                                 name="radio-size"
                                                 value={size.name}
-                                                defaultChecked={
-                                                    size.name === 'M'
+                                                checked={
+                                                    formData.size === size.name
                                                 }
                                                 onChange={(event) =>
                                                     setFormData({
@@ -145,7 +178,7 @@ const Product = () => {
                                         </div>
                                         <p>
                                             {size.price
-                                                ? `+ ${formatNumber(size.price)}đ`
+                                                ? `+ ${size.price.toLocaleString()}đ`
                                                 : null}
                                         </p>
                                     </div>
@@ -170,7 +203,10 @@ const Product = () => {
                                                 type="radio"
                                                 name="radio-temp"
                                                 value={temp.type}
-                                                defaultChecked={temp.isDefault}
+                                                checked={
+                                                    formData.temperature ===
+                                                    temp.type
+                                                }
                                                 onChange={(event) =>
                                                     setFormData({
                                                         ...formData,
@@ -212,10 +248,10 @@ const Product = () => {
                                 handleOrder()
                             }}
                         >
-                            Thêm vào giỏ +
-                            {formatNumber(
+                            {isEditMode ? 'Cập nhật' : 'Thêm vào giỏ'} +
+                            {(
                                 (product.basePrice || 0) * formData.quantity
-                            )}
+                            ).toLocaleString()}
                         </button>
                     </div>
                 </div>

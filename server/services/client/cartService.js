@@ -1,8 +1,29 @@
+import { calculateItemSubTotal } from '../../helpers/client/calculateItemSubtotal.js'
 import { cartModel } from '../../models/cartModel.js'
 import { productModel } from '../../models/productModel.js'
 import { tableModel } from '../../models/tableModel.js'
 
-import { calculateItemSubTotal } from '../../helpers/client/calculateItemSubtotal.js'
+/**
+ * Transform cart response để đổi productId → product khi đã populate
+ * Giúp frontend dễ hiểu: "product" (object) thay vì "productId" (confusing)
+ */
+const transformCartResponse = (cart) => {
+    if (!cart) return null
+
+    const cartObj = cart.toObject()
+
+    if (cartObj.items && Array.isArray(cartObj.items)) {
+        cartObj.items = cartObj.items.map((item) => {
+            const { productId, ...rest } = item
+            return {
+                ...rest,
+                product: productId,
+            }
+        })
+    }
+
+    return cartObj
+}
 
 export const getActiveCartByTable = async (tableName) => {
     try {
@@ -15,7 +36,8 @@ export const getActiveCartByTable = async (tableName) => {
                 status: 'active',
             })
             .populate('items.productId', 'name basePrice imageUrl')
-        return cart
+
+        return transformCartResponse(cart)
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi lấy giỏ hàng: ${error.message}`)
     }
@@ -72,7 +94,12 @@ export const addItemViaSocket = async ({ tableName, clientId, data }) => {
         }
 
         await cart.save()
-        return cart
+
+        const populatedCart = await cartModel
+            .findById(cart._id)
+            .populate('items.productId', 'name basePrice imageUrl sizes')
+
+        return transformCartResponse(populatedCart)
     } catch (error) {
         console.log(error)
         throw new Error(
@@ -132,7 +159,12 @@ export const updateItem = async (tableName, clientId, data) => {
             0
         )
         await cart.save()
-        return cart
+
+        const populatedCart = await cartModel
+            .findById(cart._id)
+            .populate('items.productId', 'name basePrice imageUrl sizes')
+
+        return transformCartResponse(populatedCart)
     } catch (error) {
         console.log(error)
         throw new Error(

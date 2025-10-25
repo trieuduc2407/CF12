@@ -300,7 +300,7 @@ const Menu = () => {
                                         className="flex justify-between text-sm"
                                     >
                                         <span>
-                                            {item.productId?.name} x{' '}
+                                            {item.product?.name} x{' '}
                                             {item.quantity}
                                         </span>
                                         <span>
@@ -334,10 +334,13 @@ const Menu = () => {
                     <ReceiptText className="text-amber-500" />
                     <p className="font-medium text-black"> Đơn hàng</p>
                 </button>
-                <button className="btn btn-sm rounded-md border-0 bg-amber-500 py-5 text-white">
+                <button
+                    className="btn btn-sm rounded-md border-0 bg-amber-500 py-5 text-white"
+                    onClick={() => navigate(`/tables/${tableName}/cart`)}
+                >
                     <ShoppingBasket />
                     <p>Giỏ hàng</p>
-                    <p></p>
+                    <p>({cartItems.length})</p>
                 </button>
             </div>
         </>

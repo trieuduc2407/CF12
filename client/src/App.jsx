@@ -19,6 +19,10 @@ const App = () => {
                 </Route>
                 <Route path="/tables/:tableName">
                     <Route path="product/:id" element={<Product />} />
+                    <Route
+                        path="product/:id/edit/:itemId"
+                        element={<Product />}
+                    />
                     <Route path="cart" element={<Cart />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

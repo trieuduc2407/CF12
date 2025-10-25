@@ -3,8 +3,6 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import formatNumber from '../utils/formatNumber'
-
 const Card = ({ product }) => {
     const { isLoading } = useSelector((state) => state.clientProduct)
     const { tableName: storeTableName } = useSelector(
@@ -13,7 +11,6 @@ const Card = ({ product }) => {
     const { tableName: urlTableName } = useParams()
     const navigate = useNavigate()
 
-    // Ưu tiên tableName từ store, nếu không có thì lấy từ URL
     const tableName = storeTableName || urlTableName
 
     const handleAddToCart = (productId) => {
@@ -46,7 +43,7 @@ const Card = ({ product }) => {
                 <div>
                     <p className="card-title text-sm">{product.name}</p>
                     <p className="font-medium">
-                        {formatNumber(product.basePrice)} VND
+                        {product.basePrice.toLocaleString()} VND
                     </p>
                 </div>
                 <div className="card-actions items-end">
