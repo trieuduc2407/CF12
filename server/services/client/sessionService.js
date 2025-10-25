@@ -2,18 +2,13 @@ import { orderModel } from '../../models/orderModel.js'
 import { sessionModel } from '../../models/sessionModel.js'
 import { tableModel } from '../../models/tableModel.js'
 
-/**
- * Tạo session mới cho bàn
- */
 export const createSession = async (tableName) => {
     try {
-        // Check xem bàn có tồn tại không
         const table = await tableModel.findOne({ tableName })
         if (!table) {
             throw new Error('Bàn không tồn tại')
         }
 
-        // Check xem bàn đã có session active chưa
         const existingSession = await sessionModel.findOne({
             tableName,
             status: 'active',
@@ -23,7 +18,6 @@ export const createSession = async (tableName) => {
             return existingSession
         }
 
-        // Tạo session mới
         const newSession = new sessionModel({
             tableName,
             startTime: new Date(),
@@ -32,7 +26,6 @@ export const createSession = async (tableName) => {
 
         await newSession.save()
 
-        // Update table với sessionId
         table.currentSessionId = newSession._id
         table.status = 'occupied'
         await table.save()
@@ -43,9 +36,6 @@ export const createSession = async (tableName) => {
     }
 }
 
-/**
- * Lấy session hiện tại của bàn
- */
 export const getActiveSession = async (tableName) => {
     try {
         const session = await sessionModel
@@ -61,9 +51,6 @@ export const getActiveSession = async (tableName) => {
     }
 }
 
-/**
- * Lấy chi tiết session với tất cả orders
- */
 export const getSessionDetails = async (sessionId) => {
     try {
         const session = await sessionModel.findById(sessionId).populate({
@@ -81,9 +68,6 @@ export const getSessionDetails = async (sessionId) => {
     }
 }
 
-/**
- * Thêm order vào session
- */
 export const addOrderToSession = async (sessionId, orderId) => {
     try {
         const session = await sessionModel.findById(sessionId)
@@ -96,10 +80,8 @@ export const addOrderToSession = async (sessionId, orderId) => {
             throw new Error('Session đã kết thúc')
         }
 
-        // Thêm orderId vào session.orders
         session.orders.push(orderId)
 
-        // Cập nhật totalAmount
         const order = await orderModel.findById(orderId)
         session.totalAmount += order.totalPrice
 
@@ -111,9 +93,6 @@ export const addOrderToSession = async (sessionId, orderId) => {
     }
 }
 
-/**
- * Kết thúc session (thanh toán)
- */
 export const completeSession = async (sessionId, paymentData) => {
     try {
         const session = await sessionModel.findById(sessionId)
@@ -126,12 +105,10 @@ export const completeSession = async (sessionId, paymentData) => {
             throw new Error('Session đã kết thúc')
         }
 
-        // Update session
         session.status = 'completed'
         session.endTime = new Date()
         await session.save()
 
-        // Update table status
         const table = await tableModel.findOne({ tableName: session.tableName })
         if (table) {
             table.status = 'available'
@@ -146,9 +123,6 @@ export const completeSession = async (sessionId, paymentData) => {
     }
 }
 
-/**
- * Hủy session
- */
 export const cancelSession = async (sessionId) => {
     try {
         const session = await sessionModel.findById(sessionId)
@@ -157,18 +131,15 @@ export const cancelSession = async (sessionId) => {
             throw new Error('Session không tồn tại')
         }
 
-        // Cancel tất cả orders trong session
         await orderModel.updateMany(
             { sessionId: session._id, status: { $ne: 'served' } },
             { status: 'cancelled' }
         )
 
-        // Update session
         session.status = 'cancelled'
         session.endTime = new Date()
         await session.save()
 
-        // Update table
         const table = await tableModel.findOne({ tableName: session.tableName })
         if (table) {
             table.status = 'available'
@@ -183,9 +154,6 @@ export const cancelSession = async (sessionId) => {
     }
 }
 
-/**
- * Lấy tất cả sessions (cho admin)
- */
 export const getAllSessions = async (filters = {}) => {
     try {
         const { status, tableName, startDate, endDate } = filters

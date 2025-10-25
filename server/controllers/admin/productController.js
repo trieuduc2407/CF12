@@ -136,6 +136,16 @@ export const updateProduct = async (req, res) => {
             imagePublicId: result ? result.public_id : product.imagePublicId,
             updatedAt: Date.now(),
         })
+
+        const io = req.app.locals.io
+        if (io && updatedProduct.available !== product.available) {
+            io.emit('product:availabilityChanged', {
+                productId: updatedProduct._id,
+                productName: updatedProduct.name,
+                available: updatedProduct.available,
+            })
+        }
+
         return res.json({
             success: true,
             message: 'Cập nhật sản phẩm thành công',

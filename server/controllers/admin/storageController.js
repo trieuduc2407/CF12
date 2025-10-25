@@ -94,6 +94,15 @@ export const updateIngredient = async (req, res) => {
             unit,
             threshold,
         })
+
+        const io = req.app.locals.io
+        if (io && updatedIngredient.quantity <= updatedIngredient.threshold) {
+            io.emit('storage:warning', {
+                ingredient: updatedIngredient,
+                message: `Nguyên liệu "${updatedIngredient.name}" sắp hết (${updatedIngredient.quantity} ${updatedIngredient.unit})`,
+            })
+        }
+
         return res.json({
             success: true,
             message: 'Cập nhật nguyên liệu thành công',

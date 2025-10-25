@@ -93,6 +93,15 @@ export const updateTable = async (req, res) => {
             tableName,
             status,
         })
+
+        const io = req.app.locals.io
+        if (io) {
+            io.emit('table:updated', {
+                table: updatedTable,
+                action: 'statusChanged',
+            })
+        }
+
         return res.json({
             success: true,
             data: updatedTable,

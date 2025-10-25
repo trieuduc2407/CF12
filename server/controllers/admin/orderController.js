@@ -62,7 +62,7 @@ export const updateOrderStatus = async (req, res) => {
     try {
         const { orderId } = req.params
         const { status } = req.body
-        const staffId = req.staff?._id // Từ auth middleware
+        const staffId = req.staff?._id 
 
         if (!status) {
             return res.status(400).json({
@@ -77,7 +77,6 @@ export const updateOrderStatus = async (req, res) => {
             staffId
         )
 
-        // Emit socket event cho client
         const io = req.app.locals.io
         if (io) {
             io.to(order.tableName).emit('order:statusUpdated', {

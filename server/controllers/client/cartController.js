@@ -11,7 +11,6 @@ export const getActiveCart = async (req, res) => {
             })
         }
 
-        // Lấy cart hiện tại
         const cart = await cartService.getActiveCartByTable(tableName)
         if (!cart) {
             return res.json({
@@ -20,7 +19,6 @@ export const getActiveCart = async (req, res) => {
             })
         }
 
-        // Lấy các orders đã gửi trong session (previous orders)
         const previousOrders = await orderService.getOrdersByTable(tableName)
 
         return res.json({
@@ -45,6 +43,17 @@ export const addItem = async (req, res) => {
         const data = req.body
 
         await cartService.addItem(tableName, data)
+
+        const io = req.app.locals.io
+        if (io) {
+            const cart = await cartService.getActiveCartByTable(tableName)
+            io.to(tableName).emit('cart:updated', {
+                cart,
+                action: 'add',
+                tableName,
+            })
+        }
+
         return res.json({
             success: true,
             message: 'Thêm sản phẩm vào giỏ hàng thành công',
@@ -65,6 +74,17 @@ export const updateItem = async (req, res) => {
         const data = req.body
 
         await cartService.updateItem(tableName, clientId, data)
+
+        const io = req.app.locals.io
+        if (io) {
+            const cart = await cartService.getActiveCartByTable(tableName)
+            io.to(tableName).emit('cart:updated', {
+                cart,
+                action: 'update',
+                tableName,
+            })
+        }
+
         return res.json({
             success: true,
             message: 'Cập nhật sản phẩm trong giỏ hàng thành công',

@@ -5,16 +5,12 @@ import { sessionModel } from '../../models/sessionModel.js'
 import { storageModel } from '../../models/storageModel.js'
 import * as sessionService from './sessionService.js'
 
-/**
- * Tạo order từ cart hiện tại
- */
 export const createOrderFromCart = async (
     tableName,
     userId = null,
     notes = ''
 ) => {
     try {
-        // 1. Lấy cart hiện tại của bàn
         const cart = await cartModel.findOne({
             tableName,
             status: 'active',
@@ -24,13 +20,11 @@ export const createOrderFromCart = async (
             throw new Error('Giỏ hàng trống')
         }
 
-        // 2. Kiểm tra hoặc tạo session cho bàn
         let session = await sessionService.getActiveSession(tableName)
         if (!session) {
             session = await sessionService.createSession(tableName)
         }
 
-        // 3. Tạo order từ cart
         const newOrder = new orderModel({
             sessionId: session._id,
             tableName,
@@ -43,7 +37,7 @@ export const createOrderFromCart = async (
                 selectedSize: item.selectedSize,
                 selectedTemperature: item.selectedTemperature,
                 quantity: item.quantity,
-                price: item.subTotal / item.quantity, // Price per item
+                price: item.subTotal / item.quantity, 
                 subTotal: item.subTotal,
             })),
             totalPrice: cart.totalPrice,
@@ -53,41 +47,44 @@ export const createOrderFromCart = async (
 
         await newOrder.save()
 
-        // 4. Trừ nguyên liệu trong storage
+        const storageWarnings = []
         for (const item of cart.items) {
             const product = await productModel.findById(item.productId)
             if (product && product.ingredients) {
                 for (const ingredient of product.ingredients) {
-                    await storageModel.findByIdAndUpdate(
+                    const storage = await storageModel.findByIdAndUpdate(
                         ingredient.ingredientId,
                         {
                             $inc: {
                                 quantity: -ingredient.quantity * item.quantity,
                             },
-                        }
+                        },
+                        { new: true }
                     )
+
+                    if (storage && storage.quantity <= storage.threshold) {
+                        storageWarnings.push({
+                            ingredient: storage,
+                            message: `Nguyên liệu "${storage.name}" sắp hết (${storage.quantity} ${storage.unit})`,
+                        })
+                    }
                 }
             }
         }
 
-        // 5. Thêm order vào session
         await sessionService.addOrderToSession(session._id, newOrder._id)
 
-        // 6. Clear cart (tạo cart mới hoặc reset items)
         cart.items = []
         cart.totalPrice = 0
         cart.version += 1
         await cart.save()
 
-        return newOrder
+        return { order: newOrder, storageWarnings }
     } catch (error) {
         throw error
     }
 }
 
-/**
- * Lấy tất cả orders của 1 session (cho client xem history)
- */
 export const getOrdersBySession = async (sessionId) => {
     try {
         const orders = await orderModel
@@ -100,9 +97,6 @@ export const getOrdersBySession = async (sessionId) => {
     }
 }
 
-/**
- * Lấy tất cả orders của 1 bàn (dựa vào session active)
- */
 export const getOrdersByTable = async (tableName) => {
     try {
         const session = await sessionService.getActiveSession(tableName)
@@ -121,9 +115,6 @@ export const getOrdersByTable = async (tableName) => {
     }
 }
 
-/**
- * Cập nhật trạng thái order (dành cho admin/staff)
- */
 export const updateOrderStatus = async (orderId, status, staffId = null) => {
     try {
         const validStatuses = [
@@ -157,9 +148,6 @@ export const updateOrderStatus = async (orderId, status, staffId = null) => {
     }
 }
 
-/**
- * Lấy chi tiết 1 order
- */
 export const getOrderById = async (orderId) => {
     try {
         const order = await orderModel
@@ -177,9 +165,6 @@ export const getOrderById = async (orderId) => {
     }
 }
 
-/**
- * Lấy tất cả orders (cho admin)
- */
 export const getAllOrders = async (filters = {}) => {
     try {
         const { status, tableName, startDate, endDate, sessionId } = filters
@@ -220,9 +205,6 @@ export const getAllOrders = async (filters = {}) => {
     }
 }
 
-/**
- * Hủy order (chỉ khi status = pending)
- */
 export const cancelOrder = async (orderId) => {
     try {
         const order = await orderModel.findById(orderId)
@@ -235,7 +217,6 @@ export const cancelOrder = async (orderId) => {
             throw new Error('Chỉ có thể hủy order đang chờ xử lý')
         }
 
-        // Hoàn trả nguyên liệu
         for (const item of order.items) {
             const product = await productModel.findById(item.productId)
             if (product && product.ingredients) {
@@ -255,7 +236,6 @@ export const cancelOrder = async (orderId) => {
         order.status = 'cancelled'
         await order.save()
 
-        // Update session totalAmount
         const session = await sessionModel.findById(order.sessionId)
         if (session) {
             session.totalAmount -= order.totalPrice

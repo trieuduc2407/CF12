@@ -15,13 +15,13 @@ export const createOrder = async (req, res) => {
             })
         }
 
-        const order = await orderService.createOrderFromCart(
-            tableName,
-            userId || null,
-            notes || ''
-        )
+        const { order, storageWarnings } =
+            await orderService.createOrderFromCart(
+                tableName,
+                userId || null,
+                notes || ''
+            )
 
-        // Emit socket event cho admin
         const io = req.app.locals.io
         if (io) {
             io.emit('order:new', {
@@ -30,10 +30,15 @@ export const createOrder = async (req, res) => {
             })
         }
 
-        // Emit socket event cho client ở cùng bàn
         if (io) {
             io.to(tableName).emit('order:created', {
                 order,
+            })
+        }
+
+        if (io && storageWarnings && storageWarnings.length > 0) {
+            storageWarnings.forEach((warning) => {
+                io.emit('storage:warning', warning)
             })
         }
 
