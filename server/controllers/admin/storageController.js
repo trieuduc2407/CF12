@@ -1,8 +1,8 @@
 import * as storageService from '../../services/admin/storageService.js'
 
 export const addIngredient = async (req, res) => {
-    const { name, quantity, unit, threshold } = req.body
     try {
+        const { name, quantity, unit, threshold } = req.body
         if (!name || quantity === null || !unit || threshold === null) {
             return res.json({
                 success: false,
@@ -16,14 +16,14 @@ export const addIngredient = async (req, res) => {
             unit,
             threshold,
         })
-        res.json({
+        return res.json({
             success: true,
             message: 'Thêm nguyên liệu thành công',
             data: newIngredient,
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -31,8 +31,8 @@ export const addIngredient = async (req, res) => {
 }
 
 export const getIngredientById = async (req, res) => {
-    const { id } = req.params
     try {
+        const { id } = req.params
         if (!id) {
             return res.json({
                 success: false,
@@ -47,13 +47,14 @@ export const getIngredientById = async (req, res) => {
                 message: 'Nguyên liệu không tồn tại',
             })
         }
-        res.json({
+
+        return res.json({
             success: true,
             data: ingredient,
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -63,13 +64,13 @@ export const getIngredientById = async (req, res) => {
 export const getAllIngredients = async (req, res) => {
     try {
         const ingredients = await storageService.getAllIngredients()
-        res.json({
+        return res.json({
             success: true,
             data: ingredients,
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -77,9 +78,9 @@ export const getAllIngredients = async (req, res) => {
 }
 
 export const updateIngredient = async (req, res) => {
-    const { id } = req.params
-    const { name, quantity, unit, threshold } = req.body
     try {
+        const { id } = req.params
+        const { name, quantity, unit, threshold } = req.body
         if (!id || !name || quantity === null || !unit || threshold === null) {
             return res.json({
                 success: false,
@@ -93,14 +94,14 @@ export const updateIngredient = async (req, res) => {
             unit,
             threshold,
         })
-        res.json({
+        return res.json({
             success: true,
             message: 'Cập nhật nguyên liệu thành công',
             data: updatedIngredient,
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -108,8 +109,8 @@ export const updateIngredient = async (req, res) => {
 }
 
 export const deleteIngredient = async (req, res) => {
-    const { id } = req.params
     try {
+        const { id } = req.params
         if (!id) {
             return res.json({
                 success: false,
@@ -118,14 +119,13 @@ export const deleteIngredient = async (req, res) => {
         }
 
         await storageService.deleteIngredient(id)
-        res.json({
+        return res.json({
             success: true,
             message: 'Xóa nguyên liệu thành công',
         })
     } catch (error) {
         console.log(error)
-
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -133,8 +133,8 @@ export const deleteIngredient = async (req, res) => {
 }
 
 export const searchIngredient = async (req, res) => {
-    const { query } = req.query
     try {
+        const { query } = req.query
         if (!query) {
             return res.json({
                 success: false,
@@ -143,13 +143,13 @@ export const searchIngredient = async (req, res) => {
         }
 
         const ingredients = await storageService.searchIngredient(query)
-        res.json({
+        return res.json({
             success: true,
             data: ingredients,
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })

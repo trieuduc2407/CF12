@@ -20,7 +20,7 @@ const me = async (req, res) => {
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             data: {
                 name: staff.name,
@@ -29,16 +29,17 @@ const me = async (req, res) => {
             },
         })
     } catch (error) {
-        res.json({
+        console.log(error)
+        return res.json({
             success: false,
-            message: 'Server error',
+            message: error.message || 'Server error',
         })
     }
 }
 
 const loginStaff = async (req, res) => {
-    const { username, password } = req.body
     try {
+        const { username, password } = req.body
         const checkStaff = await staffModel.findOne({ username })
         if (!checkStaff) {
             return res.json({
@@ -69,7 +70,7 @@ const loginStaff = async (req, res) => {
             }
         )
 
-        res.json({
+        return res.json({
             success: true,
             message: 'Đăng nhập thành công',
             token: token,
@@ -81,32 +82,33 @@ const loginStaff = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
-            message: 'Server error',
+            message: error.message || 'Server error',
         })
     }
 }
 
 const logoutStaff = async (req, res) => {
     try {
-        res.json({
+        return res.json({
             success: true,
             message: 'Đăng xuất thành công',
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
-            message: 'Server error',
+            message: error.message || 'Server error',
         })
     }
 }
 
 const changePassword = async (req, res) => {
-    const { id } = req.params
-    const { password, newPassword } = req.body
     try {
+        const { id } = req.params
+        const { password, newPassword } = req.body
+
         const staff = await staffModel.findById(id)
         if (!staff) {
             return res.json({
@@ -126,15 +128,15 @@ const changePassword = async (req, res) => {
         const newPasswordHash = await bcrypt.hash(newPassword, 10)
         staff.passwordHash = newPasswordHash
         await staff.save()
-        res.json({
+        return res.json({
             success: true,
             message: 'Đổi mật khẩu thành công',
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
-            message: 'Server error',
+            message: error.message || 'Server error',
         })
     }
 }

@@ -1,15 +1,15 @@
 import * as cartService from '../../services/client/cartService.js'
 
 export const getActiveCart = async (req, res) => {
-    const { tableName } = req.params
-    if (!tableName) {
-        return res.json({
-            success: false,
-            message: 'Vui lòng cung cấp tên bàn',
-        })
-    }
-
     try {
+        const { tableName } = req.params
+        if (!tableName) {
+            return res.json({
+                success: false,
+                message: 'Vui lòng cung cấp tên bàn',
+            })
+        }
+
         const cart = await cartService.getActiveCartByTable(tableName)
         if (!cart) {
             return res.json({
@@ -18,13 +18,13 @@ export const getActiveCart = async (req, res) => {
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             data: cart,
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -32,18 +32,18 @@ export const getActiveCart = async (req, res) => {
 }
 
 export const addItem = async (req, res) => {
-    const { tableName } = req.params
-    const data = req.body
-
     try {
+        const { tableName } = req.params
+        const data = req.body
+
         await cartService.addItem(tableName, data)
-        res.json({
+        return res.json({
             success: true,
             message: 'Thêm sản phẩm vào giỏ hàng thành công',
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -51,18 +51,19 @@ export const addItem = async (req, res) => {
 }
 
 export const updateItem = async (req, res) => {
-    const { tableName } = req.params
-    const clientId = req.headers['x-client-id']
-    const data = req.body
     try {
+        const { tableName } = req.params
+        const clientId = req.headers['x-client-id']
+        const data = req.body
+
         await cartService.updateItem(tableName, clientId, data)
-        res.json({
+        return res.json({
             success: true,
             message: 'Cập nhật sản phẩm trong giỏ hàng thành công',
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -70,17 +71,18 @@ export const updateItem = async (req, res) => {
 }
 
 export const lockItem = async (req, res) => {
-    const { tableName, itemId } = req.params
-    const clientId = req.headers['x-client-id']
     try {
+        const { tableName, itemId } = req.params
+        const clientId = req.headers['x-client-id']
+
         await cartService.lockItem(tableName, clientId, itemId)
-        res.json({
+        return res.json({
             success: true,
             message: 'Khóa sản phẩm trong giỏ hàng thành công',
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -88,17 +90,18 @@ export const lockItem = async (req, res) => {
 }
 
 export const unlockItem = async (req, res) => {
-    const { tableName, itemId } = req.params
-    const clientId = req.headers['x-client-id']
     try {
+        const { tableName, itemId } = req.params
+        const clientId = req.headers['x-client-id']
+
         await cartService.unlockItem(tableName, clientId, itemId)
-        res.json({
+        return res.json({
             success: true,
             message: 'Mở khóa sản phẩm trong giỏ hàng thành công',
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })

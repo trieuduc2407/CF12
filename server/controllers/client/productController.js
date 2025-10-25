@@ -1,15 +1,15 @@
 import * as productService from '../../services/client/productService.js'
 
 export const getProductById = async (req, res) => {
-    const { id } = req.params
-    if (!id) {
-        return res.json({
-            success: false,
-            message: 'Thiếu ID sản phẩm',
-        })
-    }
-
     try {
+        const { id } = req.params
+        if (!id) {
+            return res.json({
+                success: false,
+                message: 'Thiếu ID sản phẩm',
+            })
+        }
+
         const product = await productService.getProductById(id)
         if (!product) {
             return res.json({
@@ -36,7 +36,7 @@ export const getProductById = async (req, res) => {
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             data: {
                 name: product.name,
@@ -49,7 +49,7 @@ export const getProductById = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
             message: error.message || 'Server error',
         })
@@ -60,7 +60,7 @@ export const getAllProducts = async (req, res) => {
     try {
         const products = await productService.getAllProducts()
 
-        res.json({
+        return res.json({
             success: true,
             data: products.map((product) => ({
                 available: product.available,
@@ -77,9 +77,9 @@ export const getAllProducts = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        res.json({
+        return res.json({
             success: false,
-            message: 'Server error',
+            message: error.message || 'Server error',
         })
     }
 }
