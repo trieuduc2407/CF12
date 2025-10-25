@@ -1,34 +1,99 @@
 import mongoose from 'mongoose'
 
-const orderSchema = new mongoose.Schema({
-    tableId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'table',
-        required: true,
-    },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
-    items: [
-        {
-            productId: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
-            name: String,
-            selectedSize: { type: String, enum: ['small', 'medium', 'large'] },
-            selectedTemperature: { type: String, enum: ['hot', 'ice'] },
-            quantity: Number,
-            price: Number,
+const orderSchema = new mongoose.Schema(
+    {
+        orderNumber: {
+            type: String,
+            required: true,
         },
-    ],
-    subtotal: { type: Number, required: true },
-    discount: { type: Number, default: 0 },
-    total: { type: Number, required: true },
-    paymentMethod: { type: String, enum: ['cash', 'banking'] },
-    paymentStatus: {
-        type: String,
-        enum: ['pending', 'paid', 'cancelled'],
-        default: 'pending',
+        sessionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'session',
+            required: true,
+        },
+        tableName: {
+            type: String,
+            required: true,
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user',
+            default: null,
+        },
+        items: [
+            {
+                itemId: String,
+                productId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'product',
+                    required: true,
+                },
+                productName: {
+                    type: String,
+                    required: true,
+                },
+                productImage: String,
+                selectedSize: {
+                    type: String,
+                    required: true,
+                },
+                selectedTemperature: {
+                    type: String,
+                    required: true,
+                },
+                quantity: {
+                    type: Number,
+                    required: true,
+                    min: 1,
+                },
+                price: {
+                    type: Number,
+                    required: true,
+                },
+                subTotal: {
+                    type: Number,
+                    required: true,
+                },
+            },
+        ],
+        totalPrice: {
+            type: Number,
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'preparing', 'ready', 'served', 'cancelled'],
+            default: 'pending',
+        },
+        notes: {
+            type: String,
+            default: '',
+        },
+        staffId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'staff',
+            default: null,
+        },
     },
-    staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'staff' },
-    createdAt: { type: Date, default: Date.now },
-    paidAt: { type: Date },
+    { timestamps: true }
+)
+
+orderSchema.index({ orderNumber: 1 }, { unique: true })
+orderSchema.index({ sessionId: 1 })
+orderSchema.index({ tableName: 1, status: 1 })
+orderSchema.index({ status: 1 })
+orderSchema.index({ createdAt: -1 })
+
+orderSchema.pre('save', async function (next) {
+    if (this.isNew && !this.orderNumber) {
+        const count = await mongoose.models.order.countDocuments()
+        const datePrefix = new Date()
+            .toISOString()
+            .slice(0, 10)
+            .replace(/-/g, '')
+        this.orderNumber = `ORD${datePrefix}${String(count + 1).padStart(4, '0')}`
+    }
+    next()
 })
 
 const orderModel = mongoose.models.order || mongoose.model('order', orderSchema)

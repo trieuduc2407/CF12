@@ -10,49 +10,18 @@ const router = express.Router()
 const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
-router.post(
-    '/add',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin'),
-    upload.single('image'),
-    productController.addProduct
-)
-router.get(
-    '/get/:id',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin'),
-    productController.getProductById
-)
-router.get(
-    '/all',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin'),
-    productController.getAllProducts
-)
-router.get(
-    '/search',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin'),
-    productController.searchProduct
-)
+router.use(staffAuthMiddleware)
+router.use(requireRoleMiddleware('admin'))
+router.post('/add', upload.single('image'), productController.addProduct)
+router.get('/get/:id', productController.getProductById)
+router.get('/all', productController.getAllProducts)
+router.get('/search', productController.searchProduct)
 router.put(
     '/update/:id',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin'),
     upload.single('image'),
     productController.updateProduct
 )
-router.delete(
-    '/delete/:id',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin'),
-    productController.deleteProduct
-)
-router.put(
-    '/signature/:id',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin'),
-    productController.toggleSignature
-)
+router.delete('/delete/:id', productController.deleteProduct)
+router.put('/signature/:id', productController.toggleSignature)
 
 export { router }

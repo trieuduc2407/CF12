@@ -39,12 +39,30 @@ const productSchema = new mongoose.Schema({
             amount: Number,
         },
     ],
-    imageUrl: { type: String, required: true },
-    imagePublicId: { type: String, required: true },
-    available: { type: Boolean, default: true },
-    signature: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
+    imageUrl: {
+        type: String,
+        required: true,
+    },
+    imagePublicId: {
+        type: String,
+        required: true,
+    },
+    available: {
+        type: Boolean,
+        default: true,
+    },
+    signature: {
+        type: Boolean,
+        default: false,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now,
+    },
 })
 
 const productModel =

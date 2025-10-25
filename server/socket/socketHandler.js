@@ -5,6 +5,8 @@ const connectedUsers = new Map()
 export const socketHandler = (io, app) => {
     if (app) {
         app.locals.connectedUsers = connectedUsers
+        // Expose io để controllers có thể emit events
+        app.locals.io = io
     }
 
     io.on('connection', (socket) => {

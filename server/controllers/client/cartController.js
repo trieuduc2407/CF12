@@ -1,4 +1,5 @@
 import * as cartService from '../../services/client/cartService.js'
+import * as orderService from '../../services/client/orderService.js'
 
 export const getActiveCart = async (req, res) => {
     try {
@@ -10,6 +11,7 @@ export const getActiveCart = async (req, res) => {
             })
         }
 
+        // Lấy cart hiện tại
         const cart = await cartService.getActiveCartByTable(tableName)
         if (!cart) {
             return res.json({
@@ -18,9 +20,15 @@ export const getActiveCart = async (req, res) => {
             })
         }
 
+        // Lấy các orders đã gửi trong session (previous orders)
+        const previousOrders = await orderService.getOrdersByTable(tableName)
+
         return res.json({
             success: true,
-            data: cart,
+            data: {
+                currentCart: cart,
+                previousOrders: previousOrders || [],
+            },
         })
     } catch (error) {
         console.log(error)

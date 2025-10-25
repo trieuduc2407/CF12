@@ -6,41 +6,13 @@ import { staffAuthMiddleware } from '../../middleware/staffAuthMiddleware.js'
 
 const router = express.Router()
 
-router.post(
-    '/add',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin', 'staff'),
-    tableController.addTable
-)
-router.get(
-    '/all',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin', 'staff'),
-    tableController.getAllTables
-)
-router.get(
-    '/get/:id',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin', 'staff'),
-    tableController.getTableById
-)
-router.put(
-    '/update/:id',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin', 'staff'),
-    tableController.updateTable
-)
-router.delete(
-    '/delete/:id',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin', 'staff'),
-    tableController.deleteTable
-)
-router.put(
-    '/update-active-cart/:tableName',
-    staffAuthMiddleware,
-    requireRoleMiddleware('admin', 'staff'),
-    tableController.updateActiveCartId
-)
+router.use(staffAuthMiddleware)
+router.use(requireRoleMiddleware('admin', 'staff'))
+router.post('/add', tableController.addTable)
+router.get('/all', tableController.getAllTables)
+router.get('/get/:id', tableController.getTableById)
+router.put('/update/:id', tableController.updateTable)
+router.delete('/delete/:id', tableController.deleteTable)
+router.put('/update-active-cart/:tableName', tableController.updateActiveCartId)
 
 export { router }
