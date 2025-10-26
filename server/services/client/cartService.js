@@ -380,6 +380,74 @@ export const unlockItem = async (tableName, clientId, itemId) => {
     }
 }
 
+export const unlockAllItemsByClient = async (clientId) => {
+    try {
+        if (!clientId) return
+
+        console.log(
+            `🔓 [cartService] Unlocking all items for client: ${clientId}`
+        )
+
+        // Find all active carts that have items locked by this client
+        const carts = await cartModel.find({
+            status: 'active',
+            'items.lockedBy': clientId,
+        })
+
+        if (!carts || carts.length === 0) {
+            console.log(
+                `✅ [cartService] No locked items found for ${clientId}`
+            )
+            return []
+        }
+
+        const unlockedItems = []
+
+        for (const cart of carts) {
+            const itemsToUnlock = cart.items.filter(
+                (item) => item.lockedBy === clientId && item.locked
+            )
+
+            if (itemsToUnlock.length > 0) {
+                // Unlock all items belonging to this client
+                await cartModel.updateOne(
+                    { _id: cart._id },
+                    {
+                        $set: {
+                            'items.$[elem].locked': false,
+                            'items.$[elem].lockedBy': null,
+                        },
+                    },
+                    {
+                        arrayFilters: [{ 'elem.lockedBy': clientId }],
+                    }
+                )
+
+                // Get table info for broadcasting
+                const table = await tableModel.findById(cart.tableId)
+                itemsToUnlock.forEach((item) => {
+                    unlockedItems.push({
+                        tableName: table?.tableName,
+                        itemId: item.itemId,
+                    })
+                })
+
+                console.log(
+                    `✅ [cartService] Unlocked ${itemsToUnlock.length} items in cart ${cart._id}`
+                )
+            }
+        }
+
+        return unlockedItems
+    } catch (error) {
+        console.error(
+            `❌ [cartService] Error unlocking items for client ${clientId}:`,
+            error
+        )
+        return []
+    }
+}
+
 export const deleteItem = async (tableName, clientId, itemId) => {
     try {
         const table = await tableModel.findOne({ tableName })

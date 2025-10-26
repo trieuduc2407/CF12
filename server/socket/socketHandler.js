@@ -1,3 +1,4 @@
+import * as cartService from '../services/client/cartService.js'
 import { cartSocket } from './cartSocket.js'
 
 const connectedUsers = new Map()
@@ -105,14 +106,48 @@ export const socketHandler = (io, app) => {
             socket.to(tableName).emit('cartUpdated', { cart })
         })
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', async () => {
+            let disconnectedClientId = null
+
             for (const [clientId, socketId] of connectedUsers.entries()) {
                 if (socketId === socket.id) {
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log('A user disconnected:', socket.id)
-                    }
+                    disconnectedClientId = clientId
                     connectedUsers.delete(clientId)
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log(
+                            `A user disconnected: ${socket.id}, clientId: ${clientId}`
+                        )
+                    }
                     break
+                }
+            }
+
+            // Unlock all items locked by this client
+            if (disconnectedClientId) {
+                try {
+                    const unlockedItems =
+                        await cartService.unlockAllItemsByClient(
+                            disconnectedClientId
+                        )
+
+                    // Broadcast unlock events to all affected tables
+                    unlockedItems.forEach(({ tableName, itemId }) => {
+                        if (tableName) {
+                            console.log(
+                                `📤 [socketHandler] Broadcasting unlock for ${itemId} in ${tableName}`
+                            )
+                            io.to(tableName).emit('cart:itemUnlocked', {
+                                itemId,
+                                locked: false,
+                                lockedBy: null,
+                            })
+                        }
+                    })
+                } catch (error) {
+                    console.error(
+                        '❌ [socketHandler] Error unlocking items on disconnect:',
+                        error
+                    )
                 }
             }
         })
