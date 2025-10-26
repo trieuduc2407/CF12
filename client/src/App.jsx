@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound'
 import Product from './pages/Product'
 import socket from './socket/socket'
 import { lockItem, unlockItem, updateCart } from './store/client/cartSlice'
+import { addOrder, updateOrder } from './store/client/orderSlice'
 
 const SocketManager = () => {
     const location = useLocation()
@@ -103,11 +104,40 @@ const App = () => {
             alert(message)
         })
 
+        // Order events
+        socket.on('order:created', ({ order }) => {
+            console.log('📦 [App] Received order:created event:', order)
+            dispatch(addOrder(order))
+        })
+
+        socket.on('order:updated', ({ order }) => {
+            console.log('🔄 [App] Received order:updated event:', order)
+            dispatch(updateOrder(order))
+            // Show notification if order is ready
+            if (order.status === 'ready') {
+                alert(`Món của bạn đã sẵn sàng! (${order.items.length} món)`)
+            }
+        })
+
+        socket.on('order:cancelSuccess', () => {
+            console.log('✅ [App] Order cancelled successfully')
+            alert('Đã hủy order thành công')
+        })
+
+        socket.on('order:cancelError', ({ message }) => {
+            console.error('❌ [App] Received order:cancelError:', message)
+            alert(message)
+        })
+
         return () => {
             socket.off('cart:updated')
             socket.off('cart:itemLocked')
             socket.off('cart:itemUnlocked')
             socket.off('cart:deleteError')
+            socket.off('order:created')
+            socket.off('order:updated')
+            socket.off('order:cancelSuccess')
+            socket.off('order:cancelError')
         }
     }, [dispatch])
 

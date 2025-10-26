@@ -3,6 +3,7 @@ import { orderModel } from '../../models/orderModel.js'
 import { productModel } from '../../models/productModel.js'
 import { sessionModel } from '../../models/sessionModel.js'
 import { storageModel } from '../../models/storageModel.js'
+import { tableModel } from '../../models/tableModel.js'
 import * as sessionService from './sessionService.js'
 
 export const createOrderFromCart = async (
@@ -11,10 +12,18 @@ export const createOrderFromCart = async (
     notes = ''
 ) => {
     try {
-        const cart = await cartModel.findOne({
-            tableName,
-            status: 'active',
-        })
+        // Find table first to get tableId
+        const table = await tableModel.findOne({ tableName })
+        if (!table) {
+            throw new Error('Bàn không tồn tại')
+        }
+
+        const cart = await cartModel
+            .findOne({
+                tableId: table._id,
+                status: 'active',
+            })
+            .populate('items.productId', 'name basePrice imageUrl')
 
         if (!cart || cart.items.length === 0) {
             throw new Error('Giỏ hàng trống')
@@ -25,21 +34,27 @@ export const createOrderFromCart = async (
             session = await sessionService.createSession(tableName)
         }
 
+        // Prepare order items with product info
+        const orderItems = cart.items.map((item) => {
+            const product = item.productId // Already populated
+            return {
+                itemId: item.itemId,
+                productId: product._id,
+                productName: product.name,
+                productImage: product.imageUrl,
+                selectedSize: item.selectedSize,
+                selectedTemperature: item.selectedTemperature,
+                quantity: item.quantity,
+                price: item.subTotal / item.quantity,
+                subTotal: item.subTotal,
+            }
+        })
+
         const newOrder = new orderModel({
             sessionId: session._id,
             tableName,
             userId,
-            items: cart.items.map((item) => ({
-                itemId: item.itemId,
-                productId: item.productId,
-                productName: item.productName,
-                productImage: item.productImage,
-                selectedSize: item.selectedSize,
-                selectedTemperature: item.selectedTemperature,
-                quantity: item.quantity,
-                price: item.subTotal / item.quantity, 
-                subTotal: item.subTotal,
-            })),
+            items: orderItems,
             totalPrice: cart.totalPrice,
             status: 'pending',
             notes,
@@ -49,14 +64,35 @@ export const createOrderFromCart = async (
 
         const storageWarnings = []
         for (const item of cart.items) {
-            const product = await productModel.findById(item.productId)
-            if (product && product.ingredients) {
+            // productId is already populated, need to use _id
+            const productId = item.productId._id || item.productId
+            const product = await productModel.findById(productId)
+
+            if (
+                product &&
+                product.ingredients &&
+                Array.isArray(product.ingredients)
+            ) {
                 for (const ingredient of product.ingredients) {
+                    if (!ingredient.ingredientId || !ingredient.quantity) {
+                        console.warn('⚠️ Invalid ingredient data:', ingredient)
+                        continue
+                    }
+
+                    const decrementAmount = ingredient.quantity * item.quantity
+
+                    if (isNaN(decrementAmount)) {
+                        console.error(
+                            `❌ NaN detected: ingredient.quantity=${ingredient.quantity}, item.quantity=${item.quantity}`
+                        )
+                        continue
+                    }
+
                     const storage = await storageModel.findByIdAndUpdate(
                         ingredient.ingredientId,
                         {
                             $inc: {
-                                quantity: -ingredient.quantity * item.quantity,
+                                quantity: -decrementAmount,
                             },
                         },
                         { new: true }

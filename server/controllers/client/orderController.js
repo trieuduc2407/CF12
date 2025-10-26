@@ -15,6 +15,10 @@ export const createOrder = async (req, res) => {
             })
         }
 
+        console.log(
+            `📝 [orderController] Creating order: table=${tableName}, user=${userId || 'guest'}`
+        )
+
         const { order, storageWarnings } =
             await orderService.createOrderFromCart(
                 tableName,
@@ -24,21 +28,44 @@ export const createOrder = async (req, res) => {
 
         const io = req.app.locals.io
         if (io) {
+            // Broadcast new order to admin panel
+            console.log(
+                `📤 [orderController] Broadcasting order:new to admin panel`
+            )
             io.emit('order:new', {
                 order,
                 tableName,
             })
-        }
 
-        if (io) {
+            // Broadcast order created confirmation to the table
+            console.log(
+                `📤 [orderController] Broadcasting order:created to table ${tableName}`
+            )
             io.to(tableName).emit('order:created', {
                 order,
             })
-        }
 
-        if (io && storageWarnings && storageWarnings.length > 0) {
-            storageWarnings.forEach((warning) => {
-                io.emit('storage:warning', warning)
+            // Broadcast storage warnings if any
+            if (storageWarnings && storageWarnings.length > 0) {
+                console.log(
+                    `⚠️ [orderController] Broadcasting ${storageWarnings.length} storage warnings`
+                )
+                storageWarnings.forEach((warning) => {
+                    io.emit('storage:warning', warning)
+                })
+            }
+
+            // Broadcast cart cleared event to table
+            console.log(
+                `📤 [orderController] Broadcasting cart:cleared to table ${tableName}`
+            )
+            io.to(tableName).emit('cart:updated', {
+                cart: {
+                    items: [],
+                    totalPrice: 0,
+                },
+                action: 'cleared',
+                tableName,
             })
         }
 
@@ -48,7 +75,7 @@ export const createOrder = async (req, res) => {
             data: order,
         })
     } catch (error) {
-        console.log(error)
+        console.error('❌ [orderController] createOrder error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi tạo order',
@@ -117,7 +144,31 @@ export const cancelOrder = async (req, res) => {
     try {
         const { orderId } = req.params
 
+        console.log(`🚫 [orderController] Cancelling order: ${orderId}`)
+
         const order = await orderService.cancelOrder(orderId)
+
+        const io = req.app.locals.io
+        if (io) {
+            // Broadcast to admin panel
+            console.log(
+                `📤 [orderController] Broadcasting order:cancelled to admin`
+            )
+            io.emit('order:cancelled', {
+                order,
+            })
+
+            // Broadcast to table
+            if (order.tableName) {
+                console.log(
+                    `📤 [orderController] Broadcasting order:updated to table ${order.tableName}`
+                )
+                io.to(order.tableName).emit('order:updated', {
+                    order,
+                    tableName: order.tableName,
+                })
+            }
+        }
 
         return res.status(200).json({
             success: true,
@@ -125,7 +176,7 @@ export const cancelOrder = async (req, res) => {
             data: order,
         })
     } catch (error) {
-        console.log(error)
+        console.error('❌ [orderController] cancelOrder error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi hủy order',

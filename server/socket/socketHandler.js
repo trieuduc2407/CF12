@@ -1,5 +1,6 @@
 import * as cartService from '../services/client/cartService.js'
 import { cartSocket } from './cartSocket.js'
+import { orderSocket } from './orderSocket.js'
 
 const connectedUsers = new Map()
 
@@ -23,6 +24,12 @@ export const socketHandler = (io, app) => {
             cartSocket(io, socket)
         } catch (err) {
             console.error('Failed to attach cartSocket handlers', err)
+        }
+
+        try {
+            orderSocket(io, socket)
+        } catch (err) {
+            console.error('Failed to attach orderSocket handlers', err)
         }
 
         socket.on('registerClient', ({ clientId, tableName }) => {
