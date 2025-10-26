@@ -252,6 +252,17 @@ export const updateItem = async (tableName, clientId, data) => {
                     $inc: { version: 1 },
                 }
             )
+
+            // Broadcast unlock event for this specific item only
+            await cartModel.findOneAndUpdate(
+                { _id: cart._id, 'items.itemId': newItemId },
+                {
+                    $set: {
+                        'items.$.locked': false,
+                        'items.$.lockedBy': null,
+                    },
+                }
+            )
         }
 
         const updatedCart = await cartModel.findById(cart._id)
@@ -265,7 +276,19 @@ export const updateItem = async (tableName, clientId, data) => {
             .findById(cart._id)
             .populate('items.productId', 'name basePrice imageUrl sizes')
 
-        return transformCartResponse(populatedCart)
+        console.log(
+            `📦 [cartService] updateItem result - items lock status:`,
+            JSON.stringify(
+                populatedCart.items.map((i) => ({
+                    itemId: i.itemId,
+                    locked: i.locked,
+                    lockedBy: i.lockedBy,
+                }))
+            )
+        )
+
+        // Strip lock state from response - lock management is done via separate events
+        return transformCartResponse(populatedCart, true)
     } catch (error) {
         console.log(error)
         throw new Error(
@@ -292,6 +315,8 @@ export const lockItem = async (tableName, clientId, itemId) => {
             throw new Error('Sản phẩm đang được người khác chỉnh sửa')
         }
 
+        console.log(`🔒 [cartService] Locking item ${itemId} by ${clientId}`)
+
         await cartModel.findOneAndUpdate(
             { _id: cart._id, 'items.itemId': itemId },
             {
@@ -301,6 +326,8 @@ export const lockItem = async (tableName, clientId, itemId) => {
                 },
             }
         )
+
+        console.log(`✅ [cartService] Item ${itemId} locked in DB`)
 
         return { itemId, locked: true, lockedBy: clientId }
     } catch (error) {

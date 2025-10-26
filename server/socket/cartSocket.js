@@ -38,6 +38,10 @@ export const cartSocket = (io, socket) => {
             if (!payload || typeof payload !== 'object') return
             const { tableName, clientId, itemId } = payload
 
+            console.log(
+                `🔒 [cartSocket] Lock request: item=${itemId}, client=${clientId}, table=${tableName}`
+            )
+
             const result = await cartService.lockItem(
                 tableName,
                 clientId,
@@ -45,6 +49,9 @@ export const cartSocket = (io, socket) => {
             )
 
             if (tableName) {
+                console.log(
+                    `📤 [cartSocket] Broadcasting cart:itemLocked for ${itemId}`
+                )
                 io.to(tableName).emit('cart:itemLocked', {
                     itemId,
                     locked: true,
@@ -88,14 +95,42 @@ export const cartSocket = (io, socket) => {
             if (!payload || typeof payload !== 'object') return
             const { tableName, clientId, ...data } = payload
 
+            console.log(
+                `✏️ [cartSocket] Update request: item=${data.itemId || data.originalItemId}, client=${clientId}`
+            )
+
             const updatedCart = await cartService.updateItem(
                 tableName,
                 clientId,
                 data
             )
 
+            console.log(
+                `📦 [cartSocket] Updated cart items:`,
+                JSON.stringify(
+                    updatedCart.items?.map((i) => ({
+                        itemId: i.itemId,
+                        locked: i.locked,
+                        lockedBy: i.lockedBy,
+                    }))
+                )
+            )
+
             if (tableName) {
+                console.log(
+                    `📤 [cartSocket] Broadcasting cart:updated to table ${tableName}`
+                )
                 io.to(tableName).emit('cart:updated', updatedCart)
+
+                const updatedItemId = data.itemId || data.originalItemId
+                console.log(
+                    `📤 [cartSocket] Broadcasting cart:itemUnlocked for ${updatedItemId}`
+                )
+                io.to(tableName).emit('cart:itemUnlocked', {
+                    itemId: updatedItemId,
+                    locked: false,
+                    lockedBy: null,
+                })
             }
         } catch (err) {
             console.error('cart:updateItem error', err)

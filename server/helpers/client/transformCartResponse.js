@@ -1,8 +1,10 @@
 /**
  * Transform cart response để đổi productId → product khi đã populate
  * Giúp frontend dễ hiểu: "product" (object) thay vì "productId" (confusing)
+ * @param {Object} cart - Cart document from DB
+ * @param {Boolean} stripLockState - If true, remove locked/lockedBy fields (for broadcast events)
  */
-const transformCartResponse = (cart) => {
+const transformCartResponse = (cart, stripLockState = false) => {
     if (!cart) return null
 
     const cartObj = cart.toObject()
@@ -10,6 +12,16 @@ const transformCartResponse = (cart) => {
     if (cartObj.items && Array.isArray(cartObj.items)) {
         cartObj.items = cartObj.items.map((item) => {
             const { productId, ...rest } = item
+
+            // Strip lock state for broadcast events to prevent overwriting client-side locks
+            if (stripLockState) {
+                const { locked, lockedBy, ...itemWithoutLock } = rest
+                return {
+                    ...itemWithoutLock,
+                    product: productId,
+                }
+            }
+
             return {
                 ...rest,
                 product: productId,

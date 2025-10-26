@@ -81,9 +81,12 @@ export const updateItem = async (req, res) => {
         const clientId = req.headers['x-client-id']
         const data = req.body
 
+        console.log(
+            `✏️ [cartController] updateItem called: item=${data.itemId || data.originalItemId}, client=${clientId}`
+        )
+
         await cartService.updateItem(tableName, clientId, data)
 
-        // Emit socket event cho clients cùng bàn
         const io = req.app.locals.io
         if (io) {
             try {
@@ -93,6 +96,17 @@ export const updateItem = async (req, res) => {
                         cart,
                         action: 'update',
                         tableName,
+                    })
+
+                    // Broadcast unlock event for the updated item
+                    const updatedItemId = data.itemId || data.originalItemId
+                    console.log(
+                        `🔓 [cartController] Broadcasting cart:itemUnlocked for ${updatedItemId}`
+                    )
+                    io.to(tableName).emit('cart:itemUnlocked', {
+                        itemId: updatedItemId,
+                        locked: false,
+                        lockedBy: null,
                     })
                 }
             } catch (socketError) {

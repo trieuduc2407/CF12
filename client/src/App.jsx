@@ -82,18 +82,24 @@ const App = () => {
 
     useEffect(() => {
         socket.on('cart:updated', (data) => {
+            console.log('📦 [App] Received cart:updated event:', data)
             dispatch(updateCart(data))
         })
 
         socket.on('cart:itemLocked', ({ itemId, lockedBy }) => {
+            console.log(
+                `🔒 [App] Received cart:itemLocked event: ${itemId} by ${lockedBy}`
+            )
             dispatch(lockItem({ itemId, lockedBy }))
         })
 
         socket.on('cart:itemUnlocked', ({ itemId }) => {
+            console.log(`🔓 [App] Received cart:itemUnlocked event: ${itemId}`)
             dispatch(unlockItem({ itemId }))
         })
 
         socket.on('cart:deleteError', ({ message }) => {
+            console.error('❌ [App] Received cart:deleteError:', message)
             alert(message)
         })
 

@@ -142,7 +142,7 @@ const Product = () => {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch, productId, clientId, tableName, itemId, cartItems])
+    }, [dispatch, productId, clientId, tableName, itemId])
 
     return (
         <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">
