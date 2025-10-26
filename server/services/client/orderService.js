@@ -158,6 +158,7 @@ export const updateOrderStatus = async (orderId, status, staffId = null) => {
             'preparing',
             'ready',
             'served',
+            'paid',
             'cancelled',
         ]
 
@@ -177,6 +178,9 @@ export const updateOrderStatus = async (orderId, status, staffId = null) => {
         }
 
         await order.save()
+
+        // Populate sessionId để có thông tin tableName
+        await order.populate('sessionId')
 
         return order
     } catch (error) {

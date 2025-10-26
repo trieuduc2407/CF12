@@ -4,6 +4,15 @@ import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import Navbar from './Navbar'
 
+const title = {
+    '/admin/dashboard': 'Tổng quan',
+    '/admin/products': 'Danh sách sản phẩm',
+    '/admin/orders': 'Danh sách đơn hàng',
+    '/admin/staffs': 'Danh sách nhân viên',
+    '/admin/storage': 'Danh sách kho',
+    '/admin/rooms': 'Danh sách bàn',
+}
+
 const Layout = () => {
     return (
         <div className="flex h-screen w-full flex-row">
@@ -16,6 +25,9 @@ const Layout = () => {
                 <div className="drawer-content flex flex-col overflow-hidden">
                     <Header />
                     <main className="scrollbar-hide flex flex-1 flex-col overflow-y-auto p-4">
+                        <p className="my-5 text-center text-lg font-semibold">
+                            {title[window.location.pathname]}
+                        </p>
                         <Outlet />
                     </main>
                 </div>

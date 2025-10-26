@@ -1,21 +1,21 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+import applyFilters from '../../helpers/applyFilters.js'
+
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
 
 const initialState = {
     orders: [],
     filteredOrders: [],
     filters: {
-        status: 'all', // 'all' | 'pending' | 'preparing' | 'ready' | 'served' | 'cancelled'
-        tableName: '',
+        status: 'all', 
         date: null,
     },
     loading: false,
     error: null,
 }
 
-// Get all orders with filters
 export const getAllOrders = createAsyncThunk(
     'adminOrder/getAllOrders',
     async (filters = {}, { rejectWithValue }) => {
@@ -51,7 +51,6 @@ export const getAllOrders = createAsyncThunk(
     }
 )
 
-// Update order status (REST fallback)
 export const updateOrderStatus = createAsyncThunk(
     'adminOrder/updateOrderStatus',
     async ({ orderId, status, staffId }, { rejectWithValue }) => {
@@ -77,13 +76,11 @@ const orderSlice = createSlice({
     name: 'adminOrder',
     initialState,
     reducers: {
-        // Realtime: Add new order when receiving order:new event
         addNewOrder: (state, action) => {
             console.log('🆕 [orderSlice] Adding new order:', action.payload)
             state.orders.unshift(action.payload)
             applyFilters(state)
         },
-        // Realtime: Update order when receiving order:statusChanged event
         updateOrderInList: (state, action) => {
             console.log('🔄 [orderSlice] Updating order:', action.payload)
             const updatedOrder = action.payload
@@ -95,12 +92,10 @@ const orderSlice = createSlice({
             }
             applyFilters(state)
         },
-        // Set filters
         setFilters: (state, action) => {
             state.filters = { ...state.filters, ...action.payload }
             applyFilters(state)
         },
-        // Clear filters
         clearFilters: (state) => {
             state.filters = {
                 status: 'all',
@@ -112,7 +107,6 @@ const orderSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Get all orders
             .addCase(getAllOrders.pending, (state) => {
                 state.loading = true
                 state.error = null
@@ -126,7 +120,6 @@ const orderSlice = createSlice({
                 state.loading = false
                 state.error = action.payload
             })
-            // Update order status
             .addCase(updateOrderStatus.pending, (state) => {
                 state.loading = true
                 state.error = null
@@ -148,38 +141,6 @@ const orderSlice = createSlice({
             })
     },
 })
-
-// Helper function to apply filters
-const applyFilters = (state) => {
-    let filtered = [...state.orders]
-
-    // Filter by status
-    if (state.filters.status && state.filters.status !== 'all') {
-        filtered = filtered.filter(
-            (order) => order.status === state.filters.status
-        )
-    }
-
-    // Filter by table name
-    if (state.filters.tableName) {
-        filtered = filtered.filter((order) =>
-            order.tableName
-                .toLowerCase()
-                .includes(state.filters.tableName.toLowerCase())
-        )
-    }
-
-    // Filter by date
-    if (state.filters.date) {
-        const filterDate = new Date(state.filters.date)
-        filtered = filtered.filter((order) => {
-            const orderDate = new Date(order.createdAt)
-            return orderDate.toDateString() === filterDate.toDateString()
-        })
-    }
-
-    state.filteredOrders = filtered
-}
 
 export const { addNewOrder, updateOrderInList, setFilters, clearFilters } =
     orderSlice.actions

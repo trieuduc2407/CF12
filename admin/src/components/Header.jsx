@@ -17,6 +17,7 @@ const Header = () => {
             >
                 <TextAlignJustify />
             </button>
+
             <div className="dropdown-end flex flex-1 justify-end">
                 <button
                     className="mr-2"

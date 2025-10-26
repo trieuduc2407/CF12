@@ -22,42 +22,30 @@ const App = () => {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        // Listen for new orders from clients
         socket.on('order:new', ({ order, tableName }) => {
             console.log('🆕 [Admin] New order from table:', tableName)
             dispatch(addNewOrder(order))
 
-            // Show browser notification if permission granted
             if (Notification.permission === 'granted') {
                 new Notification('Đơn mới!', {
                     body: `Bàn ${tableName} - ${order.items.length} món - ${order.totalPrice.toLocaleString()}đ`,
                     icon: '/logo.png',
                 })
             }
-
-            // Play sound (optional)
-            const audio = new Audio('/notification.mp3')
-            audio.play().catch(() => {
-                // Ignore if audio fails
-            })
         })
 
-        // Listen for order status changes
         socket.on('order:statusChanged', ({ order }) => {
             console.log('🔄 [Admin] Order status changed:', order._id)
             dispatch(updateOrderInList(order))
         })
 
-        // Listen for cancelled orders
         socket.on('order:cancelled', ({ order }) => {
             console.log('🚫 [Admin] Order cancelled:', order._id)
             dispatch(updateOrderInList(order))
         })
 
-        // Listen for storage warnings
         socket.on('storage:warning', ({ message }) => {
             console.warn('⚠️ [Admin] Storage warning:', message)
-            // Show notification
             if (Notification.permission === 'granted') {
                 new Notification('Cảnh báo nguyên liệu!', {
                     body: message,
@@ -66,7 +54,6 @@ const App = () => {
             }
         })
 
-        // Request notification permission on load
         if (Notification.permission === 'default') {
             Notification.requestPermission()
         }
