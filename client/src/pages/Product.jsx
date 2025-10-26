@@ -141,6 +141,7 @@ const Product = () => {
                 })
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, productId, clientId, tableName, itemId, cartItems])
 
     return (

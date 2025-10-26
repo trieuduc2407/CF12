@@ -133,24 +133,69 @@ export const cartSocket = (io, socket) => {
             if (!payload || typeof payload !== 'object') return
             const { tableName } = payload
 
-            console.log(
-                '🔄 Client requesting latest cart data for table:',
-                tableName
-            )
             const cart = await cartService.getActiveCartByTable(tableName)
             if (cart) {
-                console.log('📤 Sending latest cart data to client:', socket.id)
-                // Send latest cart data to ensure sync
                 socket.emit('cart:updated', {
                     cart,
                     action: 'sync',
                     tableName,
                 })
-            } else {
-                console.log('❌ No cart found for table:', tableName)
             }
         } catch (err) {
             console.error('cart:requestLatestData error', err)
+        }
+    })
+
+    socket.on('cart:deleteItem', async (payload) => {
+        try {
+            if (!payload || typeof payload !== 'object') return
+            const { tableName, clientId, itemId } = payload
+
+            const cart = await cartService.getActiveCartByTable(tableName)
+            const item = cart?.items?.find((i) => i.itemId === itemId)
+
+            if (!item) {
+                socket.emit('cart:deleteError', {
+                    itemId,
+                    message: 'Sản phẩm không tồn tại trong giỏ hàng',
+                })
+                return
+            }
+
+            if (!item.locked) {
+                await cartService.lockItem(tableName, clientId, itemId)
+                io.to(tableName).emit('cart:itemLocked', {
+                    itemId,
+                    locked: true,
+                    lockedBy: clientId,
+                })
+            } else if (item.lockedBy !== clientId) {
+                socket.emit('cart:deleteError', {
+                    itemId,
+                    message: 'Sản phẩm đang được người khác chỉnh sửa',
+                })
+                return
+            }
+
+            const updatedCart = await cartService.deleteItem(
+                tableName,
+                clientId,
+                itemId
+            )
+
+            if (tableName) {
+                io.to(tableName).emit('cart:updated', {
+                    cart: updatedCart,
+                    action: 'delete',
+                    tableName,
+                })
+            }
+        } catch (err) {
+            console.error('cart:deleteItem error', err)
+            socket.emit('cart:deleteError', {
+                itemId: payload.itemId,
+                message: err.message,
+            })
         }
     })
 }

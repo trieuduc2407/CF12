@@ -4,8 +4,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import CartItem from '../components/CartItem'
+import sortItem from '../helpers/sortItem'
 import socket from '../socket/socket'
-import { getCart, updateCart } from '../store/client/cartSlice'
+import { getCart } from '../store/client/cartSlice'
 import { setSession } from '../store/client/sessionSlice'
 
 const Cart = () => {
@@ -38,34 +39,14 @@ const Cart = () => {
 
     useEffect(() => {
         if (tableName) {
-            // Always fetch fresh cart data when entering Cart page
             dispatch(getCart(tableName))
 
-            // Request current lock status from server
             socket.emit('cart:requestLockStatus', { tableName })
 
-            // Request latest cart data to ensure sync
             socket.emit('cart:requestLatestData', { tableName })
         }
     }, [dispatch, tableName])
 
-    // Listen for socket cart updates to override API data
-    useEffect(() => {
-        if (!tableName) return
-
-        const handleCartUpdate = (data) => {
-            // Socket updates have priority over API calls
-            dispatch(updateCart(data))
-        }
-
-        socket.on('cart:updated', handleCartUpdate)
-
-        return () => {
-            socket.off('cart:updated', handleCartUpdate)
-        }
-    }, [dispatch, tableName])
-
-    // Refetch cart when page becomes visible (user switches tabs)
     useEffect(() => {
         if (!tableName) return
 
@@ -105,24 +86,9 @@ const Cart = () => {
             <div className="mx-5 my-4 flex flex-1 flex-col">
                 <div className="flex flex-1 flex-col gap-2.5">
                     {cartItems.length > 0 ? (
-                        [...cartItems]
-                            .sort((a, b) => {
-                                const nameCompare =
-                                    a.product.name.localeCompare(b.product.name)
-                                if (nameCompare !== 0) return nameCompare
-
-                                const sizeA = a.selectedSize || ''
-                                const sizeB = b.selectedSize || ''
-                                const sizeCompare = sizeA.localeCompare(sizeB)
-                                if (sizeCompare !== 0) return sizeCompare
-
-                                const tempA = a.selectedTemperature || ''
-                                const tempB = b.selectedTemperature || ''
-                                return tempA.localeCompare(tempB)
-                            })
-                            .map((item) => (
-                                <CartItem key={item.itemId} item={item} />
-                            ))
+                        sortItem(cartItems).map((item) => (
+                            <CartItem key={item.itemId} item={item} />
+                        ))
                     ) : (
                         <p>Chưa có món nào trong giỏ</p>
                     )}

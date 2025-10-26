@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import Card from '../components/Card'
-import socket from '../socket/socket'
-import { getCart, updateCart } from '../store/client/cartSlice'
+import sortItem from '../helpers/sortItem'
+import { getCart } from '../store/client/cartSlice'
 import { getAllProducts } from '../store/client/productSlice'
 import { setSession } from '../store/client/sessionSlice'
 
@@ -79,16 +79,6 @@ const Menu = () => {
             dispatch(getCart(tableName))
         }
     }, [dispatch, tableName])
-
-    useEffect(() => {
-        socket.on('cart:updated', (updatedCart) => {
-            dispatch(updateCart(updatedCart))
-        })
-
-        return () => {
-            socket.off('cart:updated')
-        }
-    }, [dispatch])
 
     useEffect(() => {
         const sectionIds = navbarItems.map((item) => item.value)
@@ -292,7 +282,7 @@ const Menu = () => {
                                 Giỏ hàng
                             </h3>
                             <div className="flex-1 space-y-2">
-                                {cartItems.map((item) => (
+                                {sortItem(cartItems).map((item) => (
                                     <div
                                         key={item.itemId}
                                         className="flex justify-between text-sm"

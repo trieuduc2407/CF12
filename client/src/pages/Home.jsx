@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import socket from '../socket/socket'
 import { setSession } from '../store/client/sessionSlice'
 
 const Home = () => {
@@ -14,29 +13,8 @@ const Home = () => {
     const clientId = localStorage.getItem('clientId')
 
     useEffect(() => {
-        if (!clientId || !tableName) return
-
-        const handleConnect = () => {
-            socket.emit('registerClient', { clientId, tableName })
-        }
-
-        socket.on('connect', handleConnect)
-        if (socket.connected) handleConnect()
-
-        return () => {
-            socket.off('connect', handleConnect)
-        }
-    }, [clientId, tableName])
-
-    useEffect(() => {
         if (clientId && tableName) {
             dispatch(setSession({ tableName, clientId }))
-        }
-
-        socket.emit('joinTable', tableName)
-
-        return () => {
-            socket.emit('leaveTable', tableName)
         }
     }, [clientId, tableName, dispatch])
 

@@ -15,12 +15,15 @@ import { lockItem, unlockItem, updateCart } from './store/client/cartSlice'
 const SocketManager = () => {
     const location = useLocation()
     const currentTableRef = useRef(null)
+    const clientId = localStorage.getItem('clientId')
 
     useEffect(() => {
-        // Handle socket reconnection - rejoin room if needed
         const handleReconnect = () => {
-            if (currentTableRef.current) {
-                socket.emit('joinTable', currentTableRef.current)
+            if (currentTableRef.current && clientId) {
+                socket.emit('registerClient', {
+                    clientId,
+                    tableName: currentTableRef.current,
+                })
             }
         }
 
@@ -29,14 +32,12 @@ const SocketManager = () => {
         return () => {
             socket.off('connect', handleReconnect)
         }
-    }, [])
+    }, [clientId])
 
     useEffect(() => {
-        // Extract tableName from URL path like /tables/T01/...
         const match = location.pathname.match(/^\/tables\/([^/]+)/)
         const tableName = match ? match[1] : null
 
-        // If changing tables, leave old table first
         if (currentTableRef.current && currentTableRef.current !== tableName) {
             socket.emit('leaveTable', currentTableRef.current)
         }
@@ -44,9 +45,7 @@ const SocketManager = () => {
         if (tableName && tableName !== currentTableRef.current) {
             currentTableRef.current = tableName
 
-            const handleJoinConfirmation = () => {
-                // Room joined successfully
-            }
+            const handleJoinConfirmation = () => {}
 
             const handleSocketError = (error) => {
                 console.error('Socket error:', error)
@@ -55,12 +54,13 @@ const SocketManager = () => {
             socket.on('joinedTable', handleJoinConfirmation)
             socket.on('error', handleSocketError)
 
-            // Join room
-            if (socket.connected) {
-                socket.emit('joinTable', tableName)
+            if (socket.connected && clientId) {
+                socket.emit('registerClient', { clientId, tableName })
             } else {
                 socket.once('connect', () => {
-                    socket.emit('joinTable', tableName)
+                    if (clientId) {
+                        socket.emit('registerClient', { clientId, tableName })
+                    }
                 })
             }
 
@@ -69,11 +69,10 @@ const SocketManager = () => {
                 socket.off('error', handleSocketError)
             }
         } else if (!tableName && currentTableRef.current) {
-            // User left table area completely
             socket.emit('leaveTable', currentTableRef.current)
             currentTableRef.current = null
         }
-    }, [location.pathname])
+    }, [location.pathname, clientId])
 
     return null
 }
@@ -82,7 +81,6 @@ const App = () => {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        // Global socket listeners for cart realtime updates
         socket.on('cart:updated', (data) => {
             dispatch(updateCart(data))
         })
@@ -95,10 +93,15 @@ const App = () => {
             dispatch(unlockItem({ itemId }))
         })
 
+        socket.on('cart:deleteError', ({ message }) => {
+            alert(message)
+        })
+
         return () => {
             socket.off('cart:updated')
             socket.off('cart:itemLocked')
             socket.off('cart:itemUnlocked')
+            socket.off('cart:deleteError')
         }
     }, [dispatch])
 

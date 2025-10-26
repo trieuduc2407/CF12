@@ -352,3 +352,50 @@ export const unlockItem = async (tableName, clientId, itemId) => {
         )
     }
 }
+
+export const deleteItem = async (tableName, clientId, itemId) => {
+    try {
+        const table = await tableModel.findOne({ tableName })
+        if (!table) throw new Error('Bàn không tồn tại')
+
+        const cart = await cartModel.findOne({
+            tableId: table._id,
+            status: 'active',
+        })
+        if (!cart) throw new Error('Giỏ hàng không tồn tại')
+
+        const item = cart.items.find((i) => i.itemId === itemId)
+        if (!item) throw new Error('Sản phẩm không tồn tại trong giỏ hàng')
+
+        // Kiểm tra lock: chỉ cho phép xóa nếu item không bị lock hoặc bị lock bởi chính client này
+        if (item.locked && item.lockedBy !== clientId) {
+            throw new Error('Sản phẩm đang được người khác chỉnh sửa')
+        }
+
+        // Xóa item khỏi cart
+        await cartModel.findByIdAndUpdate(cart._id, {
+            $pull: { items: { itemId } },
+            $inc: { version: 1 },
+        })
+
+        // Tính lại totalPrice
+        const updatedCart = await cartModel.findById(cart._id)
+        updatedCart.totalPrice = updatedCart.items.reduce(
+            (acc, curr) => acc + curr.subTotal,
+            0
+        )
+        await updatedCart.save()
+
+        // Populate và trả về cart mới
+        const populatedCart = await cartModel
+            .findById(cart._id)
+            .populate('items.productId', 'name basePrice imageUrl sizes')
+
+        return transformCartResponse(populatedCart)
+    } catch (error) {
+        console.log(error)
+        throw new Error(
+            `Xảy ra lỗi khi xóa sản phẩm khỏi giỏ hàng: ${error.message}`
+        )
+    }
+}

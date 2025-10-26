@@ -110,6 +110,15 @@ const cartSlice = createSlice({
                 item.lockedBy = null
             }
         },
+        removeItem: (state, action) => {
+            const { itemId } = action.payload
+            state.items = state.items.filter((i) => i.itemId !== itemId)
+            // Recalculate totalPrice
+            state.totalPrice = state.items.reduce(
+                (acc, item) => acc + item.subTotal,
+                0
+            )
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -163,5 +172,6 @@ const cartSlice = createSlice({
     },
 })
 
-export const { updateCart, clearCart, lockItem, unlockItem } = cartSlice.actions
+export const { updateCart, clearCart, lockItem, unlockItem, removeItem } =
+    cartSlice.actions
 export default cartSlice.reducer

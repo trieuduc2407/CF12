@@ -33,7 +33,6 @@ export const getActiveCart = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log('❌ Get cart error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -124,7 +123,6 @@ export const lockItem = async (req, res) => {
             message: 'Khóa sản phẩm trong giỏ hàng thành công',
         })
     } catch (error) {
-        console.log(error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -143,7 +141,6 @@ export const unlockItem = async (req, res) => {
             message: 'Mở khóa sản phẩm trong giỏ hàng thành công',
         })
     } catch (error) {
-        console.log(error)
         return res.json({
             success: false,
             message: error.message || 'Server error',

@@ -28,9 +28,6 @@ export const socketHandler = (io, app) => {
             const oldClient = connectedUsers.get(clientId)
 
             if (oldClient && oldClient !== socket.id) {
-                console.log(
-                    `Client ${clientId} reconnected, force-disconnecting old socket ${oldClient}`
-                )
                 const oldSocket = io.sockets.sockets.get(oldClient)
                 if (oldSocket) {
                     oldSocket.leave(tableName)
@@ -40,9 +37,6 @@ export const socketHandler = (io, app) => {
 
             connectedUsers.set(clientId, socket.id)
             socket.join(tableName)
-            console.log(
-                `Client ${clientId} registered and joined table ${tableName}`
-            )
         })
 
         socket.on('joinTable', (tableName) => {
