@@ -12,6 +12,7 @@ import { router as clientCartRoutes } from './routes/client/cartRoutes.js'
 import { router as clientOrderRoutes } from './routes/client/orderRoutes.js'
 import { router as clientProductRoutes } from './routes/client/productRoutes.js'
 import { router as clientSessionRoutes } from './routes/client/sessionRoutes.js'
+import { router as clientUserRoutes } from './routes/client/userRoutes.js'
 
 export const createApp = async () => {
     const app = express()
@@ -31,6 +32,7 @@ export const createApp = async () => {
     app.use('/api/client/cart', clientCartRoutes)
     app.use('/api/client/orders', clientOrderRoutes)
     app.use('/api/client/session', clientSessionRoutes)
+    app.use('/api/client/user', clientUserRoutes)
 
     return app
 }
