@@ -28,7 +28,7 @@ const categoryItems = [
 const Menu = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const { tableName: urlTableName } = useParams()
+    const { tableName } = useParams() // Đơn giản hóa - useParams luôn có giá trị trong route này
 
     const { products = [] } = useSelector((state) => state.clientProduct)
     const { tableName: storeTableName } = useSelector(
@@ -40,8 +40,6 @@ const Menu = () => {
 
     const [activeCategory, setActiveCategory] = useState(navbarItems[0].value)
     const [isScrolled, setIsScrolled] = useState(false)
-
-    const tableName = urlTableName || storeTableName
     const latestProducts = products
         .filter((product) => product.createdAt)
         .slice(-4)
@@ -57,18 +55,18 @@ const Menu = () => {
     }
 
     useEffect(() => {
-        if (urlTableName && urlTableName !== storeTableName) {
+        if (tableName && tableName !== storeTableName) {
             const storedClientId = localStorage.getItem('clientId')
             if (storedClientId) {
                 dispatch(
                     setSession({
-                        tableName: urlTableName,
+                        tableName: tableName,
                         clientId: storedClientId,
                     })
                 )
             }
         }
-    }, [dispatch, urlTableName, storeTableName])
+    }, [dispatch, tableName, storeTableName])
 
     useEffect(() => {
         dispatch(getAllProducts())

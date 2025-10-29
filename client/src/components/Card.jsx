@@ -4,13 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 const Card = ({ product }) => {
     const { isLoading } = useSelector((state) => state.clientProduct)
-    const { tableName: storeTableName } = useSelector(
-        (state) => state.clientSession
-    )
-    const { tableName: urlTableName } = useParams()
+    const { tableName } = useParams()
     const navigate = useNavigate()
-
-    const tableName = storeTableName || urlTableName
 
     const handleAddToCart = (productId) => {
         navigate(`/tables/${tableName}/product/${productId}`)

@@ -13,7 +13,7 @@ import { setSession } from '../store/client/sessionSlice'
 const Cart = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const { tableName: urlTableName } = useParams()
+    const { tableName } = useParams()
 
     const [notes, setNotes] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -25,8 +25,6 @@ const Cart = () => {
         (state) => state.clientSession
     )
     const { loading: orderLoading } = useSelector((state) => state.clientOrder)
-
-    const tableName = storeTableName || urlTableName
 
     const handleCreateOrder = async () => {
         if (cartItems.length === 0) {
@@ -64,18 +62,18 @@ const Cart = () => {
     }
 
     useEffect(() => {
-        if (urlTableName && urlTableName !== storeTableName) {
+        if (tableName && tableName !== storeTableName) {
             const storedClientId = localStorage.getItem('clientId')
             if (storedClientId) {
                 dispatch(
                     setSession({
-                        tableName: urlTableName,
+                        tableName,
                         clientId: storedClientId,
                     })
                 )
             }
         }
-    }, [dispatch, urlTableName, storeTableName])
+    }, [dispatch, tableName, storeTableName])
 
     useEffect(() => {
         if (tableName) {

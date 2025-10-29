@@ -12,6 +12,7 @@ import {
     updateCartItem,
 } from '../store/client/cartSlice'
 import { getProductById } from '../store/client/productSlice'
+import { setSession } from '../store/client/sessionSlice'
 
 const initialState = {
     clientId: '',
@@ -26,7 +27,7 @@ const initialState = {
 const Product = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const { id: productId, tableName: urlTableName, itemId } = useParams()
+    const { id: productId, tableName, itemId } = useParams()
 
     const { clientId: storeClientId, tableName: storeTableName } = useSelector(
         (state) => state.clientSession
@@ -38,12 +39,24 @@ const Product = () => {
     const [isEditMode, setIsEditMode] = useState(false)
     const [hasUpdated, setHasUpdated] = useState(false)
 
-    const tableName = storeTableName || urlTableName
     const clientId = storeClientId || localStorage.getItem('clientId')
+
+    useEffect(() => {
+        if (tableName && tableName !== storeTableName) {
+            const storedClientId = localStorage.getItem('clientId')
+            if (storedClientId) {
+                dispatch(
+                    setSession({
+                        tableName,
+                        clientId: storedClientId,
+                    })
+                )
+            }
+        }
+    }, [dispatch, tableName, storeTableName])
 
     const handleOrder = async () => {
         if (isEditMode) {
-            // Update item
             await dispatch(
                 updateCartItem({
                     tableName,
@@ -58,21 +71,16 @@ const Product = () => {
                     },
                 })
             )
-            // Mark as updated to prevent cleanup unlock
             setHasUpdated(true)
-            // Note: updateCartItem already unlocks the item, no need to unlock again
-            // Refresh cart
             await dispatch(getCart(tableName))
             navigate(`/tables/${tableName}/cart`)
         } else {
-            // Add item
             await dispatch(
                 addToCart({
                     tableName,
                     data: formData,
                 })
             )
-            // Refresh cart
             await dispatch(getCart(tableName))
             navigate(`/tables/${tableName}/menu`)
         }
@@ -128,11 +136,11 @@ const Product = () => {
                 itemId: `${productId}_${size}_${defaultTemp}`,
             })
         })
+    }, [dispatch, productId, clientId, tableName, itemId, cartItems])
 
+    useEffect(() => {
         return () => {
-            if (editMode && itemId && !hasUpdated) {
-                // Only unlock if user leaves without updating
-                // If user updated, the item is already unlocked by updateCartItem
+            if (isEditMode && itemId && !hasUpdated) {
                 dispatch(unlockItem({ itemId }))
                 socket.emit('cart:unlockItem', {
                     tableName,
@@ -141,8 +149,7 @@ const Product = () => {
                 })
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch, productId, clientId, tableName, itemId])
+    }, [isEditMode, itemId, hasUpdated, dispatch, tableName, clientId])
 
     return (
         <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">

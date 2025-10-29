@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes, useMatch } from 'react-router-dom'
 
+import BaseLayout from './components/BaseLayout'
 import Layout from './components/Layout'
 import SessionProvider from './components/SessionProvider'
 import Cart from './pages/Cart'
 import Home from './pages/Home'
+import Login from './pages/Login'
 import Menu from './pages/Menu'
 import NotFound from './pages/NotFound'
 import Product from './pages/Product'
@@ -14,9 +16,11 @@ import { lockItem, unlockItem, updateCart } from './store/client/cartSlice'
 import { addOrder, updateOrder } from './store/client/orderSlice'
 
 const SocketManager = () => {
-    const location = useLocation()
     const currentTableRef = useRef(null)
     const clientId = localStorage.getItem('clientId')
+
+    const tableMatch = useMatch('/tables/:tableName/*')
+    const tableName = tableMatch?.params?.tableName || null
 
     useEffect(() => {
         const handleReconnect = () => {
@@ -36,9 +40,6 @@ const SocketManager = () => {
     }, [clientId])
 
     useEffect(() => {
-        const match = location.pathname.match(/^\/tables\/([^/]+)/)
-        const tableName = match ? match[1] : null
-
         if (currentTableRef.current && currentTableRef.current !== tableName) {
             socket.emit('leaveTable', currentTableRef.current)
         }
@@ -73,7 +74,7 @@ const SocketManager = () => {
             socket.emit('leaveTable', currentTableRef.current)
             currentTableRef.current = null
         }
-    }, [location.pathname, clientId])
+    }, [tableName, clientId])
 
     return null
 }
@@ -138,7 +139,9 @@ const App = () => {
                     <Route path="" element={<Home />} />
                     <Route path="menu" element={<Menu />} />
                 </Route>
-                <Route path="/tables/:tableName">
+
+                <Route path="/tables/:tableName" element={<BaseLayout />}>
+                    <Route path="login" element={<Login />} />
                     <Route path="product/:id" element={<Product />} />
                     <Route
                         path="product/:id/edit/:itemId"
@@ -146,6 +149,7 @@ const App = () => {
                     />
                     <Route path="cart" element={<Cart />} />
                 </Route>
+
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </SessionProvider>

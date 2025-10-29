@@ -1,14 +1,13 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
 
+import BaseLayout from './BaseLayout'
 import Header from './Header'
 
 const Layout = () => {
     return (
-        <div className="m-auto max-w-7xl">
+        <BaseLayout>
             <Header />
-            <Outlet />
-        </div>
+        </BaseLayout>
     )
 }
 
