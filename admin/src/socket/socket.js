@@ -10,11 +10,9 @@ const socket = io(SOCKET_URL, {
 })
 
 socket.on('connect', () => {
-    console.log('🔌 Admin connected to socket server with id:', socket.id)
 })
 
 socket.on('disconnect', () => {
-    console.log('❌ Admin disconnected from socket server')
 })
 
 socket.on('connect_error', (error) => {

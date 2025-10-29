@@ -45,22 +45,16 @@ const OrderItem = ({ order }) => {
         const payload = {
             orderId: order._id,
             status: newStatus,
-            staffId: staff?.id, 
+            staffId: staff?.id,
         }
-        console.log('📤 [OrderItem] Emitting order:statusUpdate:', payload)
 
         socket.emit('order:statusUpdate', payload)
 
-        socket.once('order:updateSuccess', ({ order: updatedOrder }) => {
-            console.log(
-                '✅ [OrderItem] Order updated successfully:',
-                updatedOrder._id
-            )
+        socket.once('order:updateSuccess', (order) => {
             document.getElementById(`detail_modal_${order._id}`)?.close()
         })
 
         socket.once('order:updateError', ({ message }) => {
-            console.error('❌ [OrderItem] order:updateError:', message)
             alert(`Lỗi cập nhật đơn hàng: ${message}`)
         })
     }

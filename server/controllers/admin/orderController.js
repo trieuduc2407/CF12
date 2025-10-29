@@ -1,10 +1,6 @@
 import * as orderService from '../../services/client/orderService.js'
 import * as sessionService from '../../services/client/sessionService.js'
 
-/**
- * GET /api/admin/orders
- * Lấy tất cả orders với filters
- */
 export const getAllOrders = async (req, res) => {
     try {
         const { status, tableName, startDate, endDate, sessionId } = req.query
@@ -31,10 +27,6 @@ export const getAllOrders = async (req, res) => {
     }
 }
 
-/**
- * GET /api/admin/orders/:orderId
- * Lấy chi tiết order
- */
 export const getOrderById = async (req, res) => {
     try {
         const { orderId } = req.params
@@ -54,10 +46,6 @@ export const getOrderById = async (req, res) => {
     }
 }
 
-/**
- * PATCH /api/admin/orders/:orderId/status
- * Cập nhật trạng thái order
- */
 export const updateOrderStatus = async (req, res) => {
     try {
         const { orderId } = req.params
@@ -100,10 +88,7 @@ export const updateOrderStatus = async (req, res) => {
     }
 }
 
-/**
- * GET /api/admin/sessions
- * Lấy tất cả sessions với filters
- */
+
 export const getAllSessions = async (req, res) => {
     try {
         const { status, tableName, startDate, endDate } = req.query
@@ -129,10 +114,7 @@ export const getAllSessions = async (req, res) => {
     }
 }
 
-/**
- * GET /api/admin/sessions/:sessionId
- * Lấy chi tiết session
- */
+
 export const getSessionById = async (req, res) => {
     try {
         const { sessionId } = req.params
@@ -152,10 +134,6 @@ export const getSessionById = async (req, res) => {
     }
 }
 
-/**
- * PATCH /api/admin/sessions/:sessionId/cancel
- * Hủy session
- */
 export const cancelSession = async (req, res) => {
     try {
         const { sessionId } = req.params

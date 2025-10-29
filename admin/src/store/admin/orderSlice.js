@@ -77,12 +77,10 @@ const orderSlice = createSlice({
     initialState,
     reducers: {
         addNewOrder: (state, action) => {
-            console.log('🆕 [orderSlice] Adding new order:', action.payload)
             state.orders.unshift(action.payload)
             applyFilters(state)
         },
         updateOrderInList: (state, action) => {
-            console.log('🔄 [orderSlice] Updating order:', action.payload)
             const updatedOrder = action.payload
             const index = state.orders.findIndex(
                 (order) => order._id === updatedOrder._id

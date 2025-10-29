@@ -23,7 +23,6 @@ const App = () => {
 
     useEffect(() => {
         socket.on('order:new', ({ order, tableName }) => {
-            console.log('🆕 [Admin] New order from table:', tableName)
             dispatch(addNewOrder(order))
 
             if (Notification.permission === 'granted') {
@@ -35,17 +34,14 @@ const App = () => {
         })
 
         socket.on('order:statusChanged', ({ order }) => {
-            console.log('🔄 [Admin] Order status changed:', order._id)
             dispatch(updateOrderInList(order))
         })
 
         socket.on('order:cancelled', ({ order }) => {
-            console.log('🚫 [Admin] Order cancelled:', order._id)
             dispatch(updateOrderInList(order))
         })
 
         socket.on('storage:warning', ({ message }) => {
-            console.warn('⚠️ [Admin] Storage warning:', message)
             if (Notification.permission === 'granted') {
                 new Notification('Cảnh báo nguyên liệu!', {
                     body: message,

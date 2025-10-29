@@ -4,13 +4,12 @@ import axios from 'axios'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 const initialState = {
-    currentOrder: null, // Order vừa tạo
-    previousOrders: [], // Danh sách orders trong session
+    currentOrder: null,
+    previousOrders: [],
     loading: false,
     error: null,
 }
 
-// Create order from cart
 export const createOrder = createAsyncThunk(
     'clientOrder/createOrder',
     async ({ tableName, userId, notes }, { rejectWithValue }) => {
@@ -60,15 +59,11 @@ const orderSlice = createSlice({
     name: 'clientOrder',
     initialState,
     reducers: {
-        // Realtime: Add order khi nhận event order:created
         addOrder: (state, action) => {
-            console.log('✅ [orderSlice] Adding order:', action.payload)
             state.currentOrder = action.payload
             state.previousOrders.unshift(action.payload)
         },
-        // Realtime: Update order khi nhận event order:updated
         updateOrder: (state, action) => {
-            console.log('🔄 [orderSlice] Updating order:', action.payload)
             const updatedOrder = action.payload
             const index = state.previousOrders.findIndex(
                 (order) => order._id === updatedOrder._id
@@ -80,11 +75,9 @@ const orderSlice = createSlice({
                 state.currentOrder = updatedOrder
             }
         },
-        // Clear current order
         clearCurrentOrder: (state) => {
             state.currentOrder = null
         },
-        // Clear all orders (khi rời bàn)
         clearOrders: (state) => {
             state.currentOrder = null
             state.previousOrders = []
@@ -92,7 +85,6 @@ const orderSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Create order
             .addCase(createOrder.pending, (state) => {
                 state.loading = true
                 state.error = null
@@ -106,7 +98,6 @@ const orderSlice = createSlice({
                 state.loading = false
                 state.error = action.payload
             })
-            // Get orders by table
             .addCase(getOrdersByTable.pending, (state) => {
                 state.loading = true
                 state.error = null
