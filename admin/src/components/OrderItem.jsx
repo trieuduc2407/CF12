@@ -154,24 +154,24 @@ const OrderItem = ({ order }) => {
                                 </p>
                             </div>
                         ))}
-                        {order.notes ? (
+                        {order.notes && (
                             <p>
                                 <span className="font-semibold">Ghi chú:</span>{' '}
                                 {order.notes}
                             </p>
-                        ) : null}
+                        )}
                     </div>
                     <div className="mb-10 mt-5 flex justify-between text-xl font-semibold">
                         <p>Tổng:</p>
                         <p>{order.totalPrice.toLocaleString()}đ</p>
                     </div>
                     <div className="flex justify-between">
-                        {order.status === 'pending' ? (
+                        {order.status === 'pending' && (
                             <button className="btn btn-error btn-sm w-1/3">
                                 Hủy đơn
                             </button>
-                        ) : null}
-                        {order.status in statusButtons ? (
+                        )}
+                        {order.status in statusButtons && (
                             <button
                                 className="btn btn-success btn-sm ml-auto w-1/3"
                                 onClick={() =>
@@ -182,7 +182,7 @@ const OrderItem = ({ order }) => {
                             >
                                 {statusButtons[order.status]}
                             </button>
-                        ) : null}
+                        )}
                     </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">

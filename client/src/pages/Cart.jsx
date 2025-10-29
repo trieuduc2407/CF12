@@ -34,7 +34,6 @@ const Cart = () => {
             return
         }
 
-        // Check if any item is locked
         const lockedItems = cartItems.filter((item) => item.locked)
         if (lockedItems.length > 0) {
             alert(
@@ -48,16 +47,14 @@ const Cart = () => {
             await dispatch(
                 createOrder({
                     tableName,
-                    userId: null, // Guest user
+                    userId: null,
                     notes,
                 })
             ).unwrap()
 
-            // Success - show notification
             alert('Đã gửi yêu cầu gọi món thành công!')
             setNotes('')
 
-            // Refresh cart to clear
             await dispatch(getCart(tableName))
         } catch (error) {
             alert(error || 'Không thể gửi yêu cầu gọi món')

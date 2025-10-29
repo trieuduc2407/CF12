@@ -189,7 +189,7 @@ const Product = () => {
                             e.preventDefault()
                         }}
                     >
-                        {product.sizes && product.sizes.length > 1 ? (
+                        {product.sizes && product.sizes.length > 1 && (
                             <div className="flex flex-col gap-2">
                                 <p className="text-lg font-semibold">
                                     Tuỳ chọn upsize
@@ -220,55 +220,55 @@ const Product = () => {
                                             <p>Size {size.name}</p>
                                         </div>
                                         <p>
-                                            {size.price
-                                                ? `+ ${(size.price || 0).toLocaleString()}đ`
-                                                : null}
+                                            {size.price &&
+                                                `+ ${(size.price || 0).toLocaleString()}đ`}
                                         </p>
                                     </div>
                                 ))}
                             </div>
-                        ) : null}
+                        )}
 
                         {product.temperature &&
-                        product.temperature.length > 1 ? (
-                            <div className="flex flex-col gap-2">
-                                <p className="text-lg font-semibold">
-                                    Tuỳ chọn nhiệt độ
-                                </p>
-                                {product.temperature.map((temp) => {
-                                    return (
-                                        <div
-                                            className="flex gap-5"
-                                            key={temp.type}
-                                        >
-                                            <input
-                                                className="radio radio-primary border"
-                                                type="radio"
-                                                name="radio-temp"
-                                                value={temp.type}
-                                                checked={
-                                                    formData.temperature ===
-                                                    temp.type
-                                                }
-                                                onChange={(event) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        temperature:
-                                                            event.target.value,
-                                                        itemId: `${productId}_${formData.size}_${event.target.value}`,
-                                                    })
-                                                }
-                                            />
-                                            <p>
-                                                {temp.type === 'hot'
-                                                    ? 'Nóng'
-                                                    : 'Lạnh'}
-                                            </p>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        ) : null}
+                            product.temperature.length > 1 && (
+                                <div className="flex flex-col gap-2">
+                                    <p className="text-lg font-semibold">
+                                        Tuỳ chọn nhiệt độ
+                                    </p>
+                                    {product.temperature.map((temp) => {
+                                        return (
+                                            <div
+                                                className="flex gap-5"
+                                                key={temp.type}
+                                            >
+                                                <input
+                                                    className="radio radio-primary border"
+                                                    type="radio"
+                                                    name="radio-temp"
+                                                    value={temp.type}
+                                                    checked={
+                                                        formData.temperature ===
+                                                        temp.type
+                                                    }
+                                                    onChange={(event) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            temperature:
+                                                                event.target
+                                                                    .value,
+                                                            itemId: `${productId}_${formData.size}_${event.target.value}`,
+                                                        })
+                                                    }
+                                                />
+                                                <p>
+                                                    {temp.type === 'hot'
+                                                        ? 'Nóng'
+                                                        : 'Lạnh'}
+                                                </p>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
                         <div className="flex w-full justify-between md:hidden">
                             <p className="text-lg font-semibold">Số lượng</p>
                             <QuantityInput

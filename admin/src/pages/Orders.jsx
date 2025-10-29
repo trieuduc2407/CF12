@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import Calendar from '../components/Calendar'
 import OrderItem from '../components/OrderItem'
+import getTodayDate from '../helpers/getTodayDate'
 import sortOrders from '../helpers/sortOrders'
 import {
     clearFilters,
@@ -18,8 +19,8 @@ const Orders = () => {
     const { filteredOrders, filters } = useSelector((state) => state.adminOrder)
 
     const [showPopover, setShowPopover] = useState(false)
-    const [date, setDate] = useState(null)
-    const calendarRef = useRef(null)
+    const [date, setDate] = useState(getTodayDate())
+    const calendarRef = useRef(new Date())
 
     const handleFilterChange = useCallback(
         (key, value) => {
@@ -27,9 +28,8 @@ const Orders = () => {
         },
         [dispatch]
     )
-
     const handleClearFilters = () => {
-        setDate(null)
+        setDate(getTodayDate())
         dispatch(clearFilters())
     }
 

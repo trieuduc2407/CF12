@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 import applyFilters from '../../helpers/applyFilters.js'
+import getTodayDate from '../../helpers/getTodayDate.js'
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
 
@@ -9,8 +10,8 @@ const initialState = {
     orders: [],
     filteredOrders: [],
     filters: {
-        status: 'all', 
-        date: null,
+        status: 'all',
+        date: getTodayDate(),
     },
     loading: false,
     error: null,
@@ -98,7 +99,7 @@ const orderSlice = createSlice({
             state.filters = {
                 status: 'all',
                 tableName: '',
-                date: null,
+                date: getTodayDate(), // Reset về ngày hiện tại
             }
             applyFilters(state)
         },
