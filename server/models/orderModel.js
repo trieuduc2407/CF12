@@ -60,25 +60,6 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        pointsUsed: {
-            type: Number,
-            default: 0,
-            min: 0,
-        },
-        pointsDiscount: {
-            type: Number,
-            default: 0,
-            min: 0,
-        },
-        finalPrice: {
-            type: Number,
-            required: true,
-        },
-        pointsEarned: {
-            type: Number,
-            default: 0,
-            min: 0,
-        },
         status: {
             type: String,
             enum: [
@@ -118,11 +99,6 @@ orderSchema.pre('save', async function (next) {
             .slice(0, 10)
             .replace(/-/g, '')
         this.orderNumber = `ORD${datePrefix}${String(count + 1).padStart(4, '0')}`
-    }
-
-    // Set finalPrice = totalPrice nếu chưa có (order mới)
-    if (this.isNew && !this.finalPrice) {
-        this.finalPrice = this.totalPrice
     }
 
     next()
