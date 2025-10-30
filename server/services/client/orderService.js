@@ -5,14 +5,10 @@ import { sessionModel } from '../../models/sessionModel.js'
 import { storageModel } from '../../models/storageModel.js'
 import { tableModel } from '../../models/tableModel.js'
 import * as sessionService from './sessionService.js'
+import { findOrCreateUser } from './userService.js'
 
-export const createOrderFromCart = async (
-    tableName,
-    userId = null,
-    notes = ''
-) => {
+export const createOrderFromCart = async (tableName, notes = '') => {
     try {
-        // Find table first to get tableId
         const table = await tableModel.findOne({ tableName })
         if (!table) {
             throw new Error('Bàn không tồn tại')
@@ -34,9 +30,8 @@ export const createOrderFromCart = async (
             session = await sessionService.createSession(tableName)
         }
 
-        // Prepare order items with product info
         const orderItems = cart.items.map((item) => {
-            const product = item.productId // Already populated
+            const product = item.productId
             return {
                 itemId: item.itemId,
                 productId: product._id,
@@ -53,7 +48,7 @@ export const createOrderFromCart = async (
         const newOrder = new orderModel({
             sessionId: session._id,
             tableName,
-            userId,
+            userId: null,
             items: orderItems,
             totalPrice: cart.totalPrice,
             status: 'pending',
@@ -64,7 +59,6 @@ export const createOrderFromCart = async (
 
         const storageWarnings = []
         for (const item of cart.items) {
-            // productId is already populated, need to use _id
             const productId = item.productId._id || item.productId
             const product = await productModel.findById(productId)
 
@@ -182,7 +176,6 @@ export const updateOrderStatus = async (orderId, status, staffId = null) => {
 
         await order.save()
 
-        // Populate sessionId để có thông tin tableName
         await order.populate('sessionId')
 
         return order
@@ -288,5 +281,85 @@ export const cancelOrder = async (orderId) => {
         return order
     } catch (error) {
         throw error
+    }
+}
+
+export const updateOrderToPaid = async (
+    orderId,
+    phone,
+    name,
+    pointsToUse = 0
+) => {
+    try {
+        const order = await orderModel.findById(orderId)
+        if (!order) {
+            throw new Error('Order không tồn tại')
+        }
+
+        if (order.status !== 'served') {
+            throw new Error('Order chưa được phục vụ, không thể thanh toán')
+        }
+
+        const user = await findOrCreateUser({ phone, name })
+
+        // Validate pointsToUse
+        if (pointsToUse < 0) {
+            throw new Error('Số điểm sử dụng không hợp lệ')
+        }
+
+        if (pointsToUse > user.points) {
+            throw new Error(
+                `User chỉ có ${user.points} điểm, không thể sử dụng ${pointsToUse} điểm`
+            )
+        }
+
+        // Tính toán giảm giá từ điểm: 1 điểm = 1,000 VNĐ
+        const pointsDiscount = pointsToUse * 1000
+
+        // Đảm bảo giảm giá không vượt quá tổng tiền
+        const actualDiscount = Math.min(pointsDiscount, order.totalPrice)
+        const actualPointsUsed = Math.floor(actualDiscount / 1000)
+
+        // Tính finalPrice sau khi trừ điểm
+        const finalPrice = order.totalPrice - actualDiscount
+
+        // Tính điểm tích lũy dựa trên finalPrice: 1 điểm cho mỗi 10,000 VNĐ
+        const pointsEarned = Math.floor(finalPrice / 10000)
+
+        // Cập nhật điểm cho user: trừ điểm đã dùng, cộng điểm tích lũy
+        const pointsChange = pointsEarned - actualPointsUsed
+        user.points += pointsChange
+        await user.save()
+
+        // Cập nhật order với thông tin thanh toán
+        order.status = 'paid'
+        order.userId = user._id
+        order.pointsUsed = actualPointsUsed
+        order.pointsDiscount = actualDiscount
+        order.finalPrice = finalPrice
+        order.pointsEarned = pointsEarned
+        await order.save()
+
+        console.log(
+            `[orderService] Order ${orderId} đã thanh toán:
+            - Total: ${order.totalPrice} VNĐ
+            - Dùng: ${actualPointsUsed} điểm (-${actualDiscount} VNĐ)
+            - Final: ${finalPrice} VNĐ
+            - Tích: ${pointsEarned} điểm
+            - User points: ${user.points - pointsChange} → ${user.points}`
+        )
+
+        return {
+            order,
+            pointsUsed: actualPointsUsed,
+            pointsDiscount: actualDiscount,
+            finalPrice,
+            pointsEarned,
+            totalPoints: user.points,
+            pointsChange,
+        }
+    } catch (error) {
+        console.error('[orderService] updateOrderToPaid error:', error)
+        throw new Error(`Lỗi khi cập nhật order sang paid: ${error.message}`)
     }
 }

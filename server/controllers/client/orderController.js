@@ -2,7 +2,7 @@ import * as orderService from '../../services/client/orderService.js'
 
 export const createOrder = async (req, res) => {
     try {
-        const { tableName, userId, notes } = req.body
+        const { tableName, notes } = req.body
         if (!tableName) {
             return res.status(400).json({
                 success: false,
@@ -11,11 +11,7 @@ export const createOrder = async (req, res) => {
         }
 
         const { order, storageWarnings } =
-            await orderService.createOrderFromCart(
-                tableName,
-                userId || null,
-                notes || ''
-            )
+            await orderService.createOrderFromCart(tableName, notes || '')
         const io = req.app.locals.io
         if (io) {
             io.emit('order:new', {

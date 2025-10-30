@@ -1,5 +1,14 @@
 import { userModel } from '../../models/userModel.js'
 
+export const findUserByPhone = async (phone) => {
+    try {
+        const user = await userModel.findOne({ phone })
+        return user
+    } catch (error) {
+        throw new Error('Xảy ra lỗi khi tìm người dùng')
+    }
+}
+
 export const findOrCreateUser = async (userData) => {
     try {
         const { name, phone } = userData
@@ -8,6 +17,6 @@ export const findOrCreateUser = async (userData) => {
 
         return user
     } catch (error) {
-        throw new Error('Xay ra lỗi khi tìm hoặc tạo mới người dùng')
+        throw new Error('Xảy ra lỗi khi tìm hoặc tạo mới người dùng')
     }
 }

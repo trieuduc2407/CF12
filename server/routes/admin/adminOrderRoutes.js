@@ -9,7 +9,12 @@ const router = express.Router()
 router.use(staffAuthMiddleware)
 router.get('/orders', orderController.getAllOrders)
 router.get('/orders/:orderId', orderController.getOrderById)
+router.get(
+    '/orders/:orderId/payment-preview',
+    orderController.getPaymentPreview
+)
 router.patch('/orders/:orderId/status', orderController.updateOrderStatus)
+router.patch('/orders/:orderId/paid', orderController.markOrderAsPaid)
 router.get('/sessions', orderController.getAllSessions)
 router.get('/sessions/:sessionId', orderController.getSessionById)
 router.patch(

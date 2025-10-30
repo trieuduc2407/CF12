@@ -1,5 +1,11 @@
+import {
+    calculatePaymentPreview,
+    getMaxUsablePoints,
+    getPointsForRoundPrice,
+} from '../../helpers/client/calculatePoints.js'
 import * as orderService from '../../services/client/orderService.js'
 import * as sessionService from '../../services/client/sessionService.js'
+import { findUserByPhone } from '../../services/client/userService.js'
 
 export const getAllOrders = async (req, res) => {
     try {
@@ -50,7 +56,7 @@ export const updateOrderStatus = async (req, res) => {
     try {
         const { orderId } = req.params
         const { status } = req.body
-        const staffId = req.staff?._id 
+        const staffId = req.staff?._id
 
         if (!status) {
             return res.status(400).json({
@@ -88,7 +94,6 @@ export const updateOrderStatus = async (req, res) => {
     }
 }
 
-
 export const getAllSessions = async (req, res) => {
     try {
         const { status, tableName, startDate, endDate } = req.query
@@ -113,7 +118,6 @@ export const getAllSessions = async (req, res) => {
         })
     }
 }
-
 
 export const getSessionById = async (req, res) => {
     try {
@@ -150,6 +154,162 @@ export const cancelSession = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi hủy session',
+        })
+    }
+}
+
+export const getPaymentPreview = async (req, res) => {
+    try {
+        const { orderId } = req.params
+        const { phone, pointsToUse = 0 } = req.query
+
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin số điện thoại',
+            })
+        }
+
+        const order = await orderService.getOrderById(orderId)
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order không tồn tại',
+            })
+        }
+
+        // Lấy thông tin user
+        const user = await findUserByPhone(phone)
+
+        if (!user) {
+            return res.status(200).json({
+                success: true,
+                message:
+                    'Số điện thoại chưa đăng ký, sẽ tạo tài khoản mới khi thanh toán',
+                data: {
+                    preview: {
+                        totalPrice: order.totalPrice,
+                        pointsUsed: 0,
+                        pointsDiscount: 0,
+                        finalPrice: order.totalPrice,
+                        pointsEarned: Math.floor(order.totalPrice / 10000),
+                        totalPoints: Math.floor(order.totalPrice / 10000),
+                        pointsChange: Math.floor(order.totalPrice / 10000),
+                    },
+                    suggestions: {
+                        maxPoints: 0,
+                        roundPricePoints: 0,
+                    },
+                },
+            })
+        }
+
+        const preview = calculatePaymentPreview(
+            order.totalPrice,
+            user.points,
+            parseInt(pointsToUse)
+        )
+
+        const maxPoints = getMaxUsablePoints(order.totalPrice, user.points)
+        const roundPricePoints = getPointsForRoundPrice(
+            order.totalPrice,
+            user.points
+        )
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                preview,
+                currentPoints: user.points,
+                suggestions: {
+                    maxPoints,
+                    roundPricePoints,
+                },
+            },
+        })
+    } catch (error) {
+        console.error('[orderController] getPaymentPreview error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi tính toán preview',
+        })
+    }
+}
+
+export const markOrderAsPaid = async (req, res) => {
+    try {
+        const { orderId } = req.params
+        const { phone, name, pointsToUse = 0 } = req.body
+
+        if (!phone || !name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin số điện thoại hoặc tên khách hàng',
+            })
+        }
+
+        const {
+            order,
+            pointsUsed,
+            pointsDiscount,
+            finalPrice,
+            pointsEarned,
+            totalPoints,
+            pointsChange,
+        } = await orderService.updateOrderToPaid(
+            orderId,
+            phone,
+            name,
+            pointsToUse
+        )
+
+        const io = req.app.locals.io
+        if (io) {
+            io.to(order.tableName).emit('order:paid', {
+                orderId: order._id,
+                orderNumber: order.orderNumber,
+                pointsUsed,
+                pointsDiscount,
+                finalPrice,
+                pointsEarned,
+                totalPoints,
+            })
+
+            io.emit('order:statusChanged', {
+                order,
+            })
+        }
+
+        // Tạo message động dựa trên việc dùng điểm
+        let message = 'Đã thanh toán thành công'
+        if (pointsUsed > 0) {
+            message += `, sử dụng ${pointsUsed} điểm (-${pointsDiscount.toLocaleString()} VNĐ)`
+        }
+        if (pointsEarned > 0) {
+            message += `, tích ${pointsEarned} điểm`
+        }
+
+        return res.status(200).json({
+            success: true,
+            message,
+            data: {
+                order,
+                payment: {
+                    totalPrice: order.totalPrice,
+                    pointsUsed,
+                    pointsDiscount,
+                    finalPrice,
+                    pointsEarned,
+                    totalPoints,
+                    pointsChange,
+                },
+            },
+        })
+    } catch (error) {
+        console.error('[orderController] markOrderAsPaid error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi thanh toán order',
         })
     }
 }
