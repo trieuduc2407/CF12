@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import {
@@ -7,6 +8,7 @@ import {
 } from '../helpers/formHelpers'
 import formatNumber from '../utils/formatNumber'
 
+// ===== COMPONENT =====
 const CommonForm = ({
     formControls = [],
     formData = {},
@@ -17,6 +19,7 @@ const CommonForm = ({
     errors = {},
     setErrors,
 }) => {
+    // ===== LOCAL STATE =====
     const [showToast, setShowToast] = useState({
         show: false,
         type: '',
@@ -24,13 +27,7 @@ const CommonForm = ({
     })
     const [touched, setTouched] = useState({})
 
-    useEffect(() => {
-        if (Object.keys(formData).length === 0 || isFormDataEmpty(formData)) {
-            setTouched({})
-            if (typeof setErrors === 'function') setErrors({})
-        }
-    }, [formData, setErrors])
-
+    // ===== CALLBACKS =====
     const getValue = useCallback(
         (controlItem, parentName, index) => {
             if (!parentName) return formData[controlItem.name] ?? ''
@@ -90,6 +87,7 @@ const CommonForm = ({
         setTouched((prev) => ({ ...prev, [key]: true }))
     }, [])
 
+    // ===== RENDER HELPERS =====
     const renderInput = (controlItem, parentName, index) => {
         const value = getValue(controlItem, parentName, index)
         const key = getTouchedKey(controlItem.name, parentName, index)
@@ -417,6 +415,7 @@ const CommonForm = ({
         )
     }
 
+    // ===== EFFECTS =====
     useEffect(() => {
         if (Object.keys(formData).length === 0 || isFormDataEmpty(formData)) {
             setTouched({})
@@ -424,6 +423,7 @@ const CommonForm = ({
         }
     }, [formData, setErrors])
 
+    // ===== RENDER =====
     return (
         <>
             {showToast.show && (
@@ -457,13 +457,9 @@ const CommonForm = ({
                     }
 
                     if (onSubmit) {
-                        try {
-                            await onSubmit(event)
-                            setTouched({})
-                            if (typeof setErrors === 'function') setErrors({})
-                        } catch (error) {
-                            console.error('Form submission error:', error)
-                        }
+                        await onSubmit(event)
+                        setTouched({})
+                        if (typeof setErrors === 'function') setErrors({})
                     }
                 }}
                 autoComplete="off"
@@ -491,4 +487,5 @@ const CommonForm = ({
     )
 }
 
+// ===== EXPORTS =====
 export default CommonForm

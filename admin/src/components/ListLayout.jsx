@@ -1,10 +1,13 @@
+// ===== IMPORTS =====
 import { ChevronDown, ChevronUp, EllipsisVertical } from 'lucide-react'
 import React from 'react'
 
 import formatNumber from '../utils/formatNumber'
 
+// ===== CONSTANTS =====
 const mapList = ['unit', 'role', 'status']
 
+// ===== COMPONENT =====
 const ListLayout = ({
     listLabel,
     listItem,
@@ -15,6 +18,7 @@ const ListLayout = ({
     sortBy,
     sortOrder,
 }) => {
+    // ===== RENDER =====
     return (
         <ul className="list rounded-lg bg-white text-xs md:text-lg">
             <li
@@ -100,4 +104,5 @@ const ListLayout = ({
     )
 }
 
+// ===== EXPORTS =====
 export default ListLayout

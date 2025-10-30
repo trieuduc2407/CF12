@@ -1,7 +1,7 @@
+// ===== IMPORTS =====
 import 'cally'
 import { RefreshCcw } from 'lucide-react'
-import React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Calendar from '../components/Calendar'
@@ -15,25 +15,34 @@ import {
     setFilters,
 } from '../store/admin/orderSlice'
 
+// ===== COMPONENT =====
 const Orders = () => {
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
     const { filteredOrders, filters } = useSelector((state) => state.adminOrder)
 
+    // ===== LOCAL STATE =====
     const [showPopover, setShowPopover] = useState(false)
     const [date, setDate] = useState(getTodayDate())
+
+    // ===== REFS =====
     const calendarRef = useRef(new Date())
 
+    // ===== CALLBACKS =====
     const handleFilterChange = useCallback(
         (key, value) => {
             dispatch(setFilters({ [key]: value }))
         },
         [dispatch]
     )
+
     const handleClearFilters = () => {
         setDate(getTodayDate())
         dispatch(clearFilters())
     }
 
+    // ===== EFFECTS =====
+    // Effect: Load orders and listen to socket events
     useEffect(() => {
         dispatch(getAllOrders())
         const handleSessionStatusChanged = () => {
@@ -47,12 +56,12 @@ const Orders = () => {
         }
     }, [dispatch])
 
+    // Effect: Handle calendar date change
     useEffect(() => {
         const calendar = calendarRef.current
         if (calendar) {
             const handleDateChange = (event) => {
                 const selectedDate = event.target.value
-                console.log('[Orders] Date changed:', selectedDate)
                 setDate(selectedDate)
                 setShowPopover(false)
                 handleFilterChange('date', selectedDate)
@@ -64,6 +73,7 @@ const Orders = () => {
         }
     }, [handleFilterChange])
 
+    // ===== RENDER =====
     return (
         <>
             <div className="mb-5 flex justify-between gap-2.5 rounded-lg bg-white p-2.5">
@@ -112,4 +122,5 @@ const Orders = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Orders

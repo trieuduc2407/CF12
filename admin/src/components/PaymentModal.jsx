@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import React, { useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
@@ -7,9 +8,12 @@ import {
     getSessionPaymentPreview,
 } from '../store/admin/orderSlice'
 
+// ===== COMPONENT =====
 const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
 
+    // ===== LOCAL STATE =====
     const [phone, setPhone] = useState('')
     const [name, setName] = useState('')
     const [pointsToUse, setPointsToUse] = useState(0)
@@ -23,12 +27,12 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
     const [isProcessing, setIsProcessing] = useState(false)
     const [error, setError] = useState('')
     const [isNewUser, setIsNewUser] = useState(false)
-    const [existingUserName, setExistingUserName] = useState('') // Tên user đã có trong DB
+    const [existingUserName, setExistingUserName] = useState('')
 
-    // Debounce phone input (500ms)
+    // ===== CUSTOM HOOKS =====
     const debouncedPhone = useDebounce(phone, 500)
 
-    // Fetch preview khi có phone và pointsToUse thay đổi
+    // ===== CALLBACKS =====
     const fetchPreview = useCallback(
         async (phoneNumber, points) => {
             if (!phoneNumber || phoneNumber.length < 10) {
@@ -57,20 +61,18 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                     setSuggestions(result.data.suggestions)
                     setIsNewUser(result.data.isNewUser || false)
 
-                    // Nếu user đã có tên, set vào state
                     if (result.data.userName) {
                         setExistingUserName(result.data.userName)
-                        setName(result.data.userName) // Pre-fill name input
+                        setName(result.data.userName)
                     } else {
                         setExistingUserName('')
                     }
                 } else {
-                    // User mới (fallback)
                     setIsNewUser(true)
                     setCurrentPoints(0)
                     setSuggestions({ maxPoints: 0, roundPricePoints: 0 })
                     setPointsToUse(0)
-                    setExistingUserName('') // User mới không có tên
+                    setExistingUserName('')
                     setPreview({
                         totalPrice: session.totalAmount,
                         pointsUsed: 0,
@@ -90,38 +92,6 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
         },
         [dispatch, session._id, session.totalAmount]
     )
-
-    // Fetch preview khi debouncedPhone thay đổi
-    useEffect(() => {
-        if (debouncedPhone && debouncedPhone.length >= 10) {
-            fetchPreview(debouncedPhone, pointsToUse)
-        } else if (!debouncedPhone || debouncedPhone.length < 10) {
-            // Reset preview khi phone không hợp lệ
-            setPreview(null)
-            setCurrentPoints(0)
-            setSuggestions({ maxPoints: 0, roundPricePoints: 0 })
-            setIsNewUser(false)
-            setExistingUserName('')
-        }
-    }, [debouncedPhone, fetchPreview, pointsToUse])
-
-    // Fetch lại preview khi pointsToUse thay đổi (không debounce)
-    useEffect(() => {
-        if (phone && phone.length >= 10 && !isNewUser) {
-            fetchPreview(phone, pointsToUse)
-        } else if (phone && phone.length >= 10 && isNewUser) {
-            // User mới - recalculate locally
-            setPreview({
-                totalPrice: session.totalAmount,
-                pointsUsed: 0,
-                pointsDiscount: 0,
-                finalPrice: session.totalAmount,
-                pointsEarned: Math.floor(session.totalAmount / 10000),
-                totalPoints: Math.floor(session.totalAmount / 10000),
-                pointsChange: Math.floor(session.totalAmount / 10000),
-            })
-        }
-    }, [pointsToUse, phone, isNewUser, fetchPreview, session.totalAmount])
 
     const handleQuickAction = (action) => {
         if (isNewUser) return
@@ -149,8 +119,6 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
             return
         }
 
-        // Name không bắt buộc nữa
-
         if (pointsToUse > currentPoints) {
             setError('Số điểm sử dụng vượt quá điểm hiện có')
             return
@@ -164,15 +132,13 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                 checkoutSession({
                     sessionId: session._id,
                     phone,
-                    name: name.trim() || undefined, // Chỉ gửi name nếu có
+                    name: name.trim() || undefined,
                     pointsToUse,
                 })
             ).unwrap()
 
-            // Close modal on success
             document.getElementById(modalId)?.close()
 
-            // Reset form
             setPhone('')
             setName('')
             setPointsToUse(0)
@@ -184,7 +150,6 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
 
             alert('Thanh toán thành công!')
 
-            // Refetch sessions để cập nhật UI
             if (onPaymentSuccess) {
                 onPaymentSuccess()
             }
@@ -196,7 +161,6 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
     }
 
     const handleClose = () => {
-        // Reset form khi đóng modal
         setPhone('')
         setName('')
         setPointsToUse(0)
@@ -208,6 +172,38 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
         setExistingUserName('')
     }
 
+    // ===== EFFECTS =====
+    // Effect: Fetch preview when phone changes
+    useEffect(() => {
+        if (debouncedPhone && debouncedPhone.length >= 10) {
+            fetchPreview(debouncedPhone, pointsToUse)
+        } else if (!debouncedPhone || debouncedPhone.length < 10) {
+            setPreview(null)
+            setCurrentPoints(0)
+            setSuggestions({ maxPoints: 0, roundPricePoints: 0 })
+            setIsNewUser(false)
+            setExistingUserName('')
+        }
+    }, [debouncedPhone, fetchPreview, pointsToUse])
+
+    // Effect: Recalculate preview when points change
+    useEffect(() => {
+        if (phone && phone.length >= 10 && !isNewUser) {
+            fetchPreview(phone, pointsToUse)
+        } else if (phone && phone.length >= 10 && isNewUser) {
+            setPreview({
+                totalPrice: session.totalAmount,
+                pointsUsed: 0,
+                pointsDiscount: 0,
+                finalPrice: session.totalAmount,
+                pointsEarned: Math.floor(session.totalAmount / 10000),
+                totalPoints: Math.floor(session.totalAmount / 10000),
+                pointsChange: Math.floor(session.totalAmount / 10000),
+            })
+        }
+    }, [pointsToUse, phone, isNewUser, fetchPreview, session.totalAmount])
+
+    // ===== RENDER =====
     return (
         <dialog id={modalId} className="modal">
             <div className="modal-box max-w-md bg-white">
@@ -450,4 +446,5 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default PaymentModal

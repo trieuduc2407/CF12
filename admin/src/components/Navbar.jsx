@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import {
     Coffee,
     CreditCard,
@@ -12,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useLogout } from '../hooks/useLogout'
 
+// ===== CONSTANTS =====
 const adminNavbarItems = [
     {
         name: 'dashboard',
@@ -57,10 +59,13 @@ const adminNavbarItems = [
     },
 ]
 
+// ===== COMPONENT =====
 const Navbar = () => {
+    // ===== CUSTOM HOOKS =====
     const navigate = useNavigate()
     const handleLogout = useLogout()
 
+    // ===== RENDER =====
     return (
         <nav className="mt-8">
             {adminNavbarItems.map((item) => (
@@ -87,4 +92,5 @@ const Navbar = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Navbar

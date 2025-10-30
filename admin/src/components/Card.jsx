@@ -1,16 +1,21 @@
+// ===== IMPORTS =====
 import { Star } from 'lucide-react'
 import React from 'react'
 import { useSelector } from 'react-redux'
 
 import formatNumber from '../utils/formatNumber'
 
+// ===== COMPONENT =====
 const Card = ({
     product,
     getProductData,
     handleDelete,
     handleToggleSignature,
 }) => {
+    // ===== REDUX STATE =====
     const { isLoading } = useSelector((state) => state.adminProduct)
+
+    // ===== RENDER =====
 
     return (
         <div className="card relative w-80 bg-white shadow-sm">
@@ -73,4 +78,5 @@ const Card = ({
     )
 }
 
+// ===== EXPORTS =====
 export default Card

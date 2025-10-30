@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -8,17 +9,23 @@ import { loginForm } from '../config/form'
 import { useFormWithToast } from '../hooks/useFormWithToast'
 import { loginStaff } from '../store/auth/authSlice'
 
+// ===== CONSTANTS =====
 const initialState = {
     username: '',
     password: '',
 }
 
+// ===== COMPONENT =====
 const Login = () => {
+    // ===== REDUX STATE =====
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
+    // ===== CUSTOM HOOKS =====
     const { formData, setFormData, resetForm, showToast, showToastMessage } =
         useFormWithToast(initialState)
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
 
+    // ===== HANDLERS =====
     const onSubmit = (event) => {
         event.preventDefault()
 
@@ -34,6 +41,8 @@ const Login = () => {
                 showToastMessage('error', error || 'Đăng nhập thất bại', 3000)
             })
     }
+
+    // ===== RENDER =====
     return (
         <>
             <Toast showToast={showToast} />
@@ -69,4 +78,5 @@ const Login = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Login

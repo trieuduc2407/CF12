@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -8,23 +9,30 @@ import { changePasswordForm } from '../config/form'
 import { useFormWithToast } from '../hooks/useFormWithToast'
 import { changePassword, getMe } from '../store/auth/authSlice'
 
+// ===== CONSTANTS =====
 const initialState = {
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
 }
 
+// ===== COMPONENT =====
 const ChangePassword = () => {
-    const { formData, setFormData, resetForm, showToast, showToastMessage } =
-        useFormWithToast(initialState)
-    const navigate = useNavigate()
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
+    const navigate = useNavigate()
     const { staff } = useSelector((state) => state.adminAuth)
 
+    // ===== CUSTOM HOOKS =====
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
+
+    // ===== EFFECTS =====
     useEffect(() => {
         dispatch(getMe())
     }, [dispatch])
 
+    // ===== HANDLERS =====
     const onSubmit = (event) => {
         event.preventDefault()
         const submitData = {
@@ -52,6 +60,7 @@ const ChangePassword = () => {
         )
     }
 
+    // ===== RENDER =====
     return (
         <>
             <Toast showToast={showToast} />
@@ -86,4 +95,5 @@ const ChangePassword = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default ChangePassword

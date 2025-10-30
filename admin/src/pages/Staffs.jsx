@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { ChevronLeft, RotateCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -16,6 +17,7 @@ import {
     updateStaff,
 } from '../store/admin/staffSlice'
 
+// ===== CONSTANTS =====
 const initialState = {
     name: '',
     username: '',
@@ -34,14 +36,18 @@ const listLabel = [
     { name: 'role', label: 'Chức vụ' },
 ]
 
+// ===== COMPONENT =====
 const Staffs = () => {
-    const [currentUpdateId, setCurrentUpdateId] = useState('')
-
-    const { formData, setFormData, resetForm, showToast, showToastMessage } =
-        useFormWithToast(initialState)
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
     const { staffs = [] } = useSelector((state) => state.adminStaff)
 
+    // ===== LOCAL STATE =====
+    const [currentUpdateId, setCurrentUpdateId] = useState('')
+
+    // ===== CUSTOM HOOKS =====
+    const { formData, setFormData, resetForm, showToast, showToastMessage } =
+        useFormWithToast(initialState)
     const { handleCrudAction } = useCrudHandlers({
         showToastMessage,
         resetForm,
@@ -50,6 +56,12 @@ const Staffs = () => {
         refetch: getAllStaff,
     })
 
+    // ===== EFFECTS =====
+    useEffect(() => {
+        dispatch(getAllStaff())
+    }, [dispatch])
+
+    // ===== HANDLERS =====
     const getStaffData = (id) => {
         dispatch(getStaff(id)).then((data) => {
             if (data?.payload?.success) {
@@ -94,10 +106,7 @@ const Staffs = () => {
         })
     }
 
-    useEffect(() => {
-        dispatch(getAllStaff())
-    }, [dispatch])
-
+    // ===== RENDER =====
     return (
         <>
             <Toast showToast={showToast} />
@@ -192,4 +201,5 @@ const Staffs = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Staffs

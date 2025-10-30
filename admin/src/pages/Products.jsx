@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import {
     ChevronLeft,
     CircleEllipsis,
@@ -29,6 +30,7 @@ import {
 } from '../store/admin/productSlice'
 import { getAllIngredients } from '../store/admin/storageSlice'
 
+// ===== CONSTANTS =====
 const initialState = {
     name: '',
     category: '',
@@ -40,7 +42,14 @@ const initialState = {
     ingredients: [],
 }
 
+// ===== COMPONENT =====
 const Products = () => {
+    // ===== REDUX STATE =====
+    const dispatch = useDispatch()
+    const { ingredients = [] } = useSelector((state) => state.adminStorage)
+    const { products = [] } = useSelector((state) => state.adminProduct)
+
+    // ===== LOCAL STATE =====
     const [currentUpdateId, setCurrentUpdateId] = useState('')
     const [image, setImage] = useState(null)
     const [preview, setPreview] = useState(image || '')
@@ -49,29 +58,58 @@ const Products = () => {
     const [searchResults, setSearchResults] = useState([])
     const [showMobileSearch, setShowMobileSearch] = useState(false)
 
+    // ===== CUSTOM HOOKS =====
     const { formData, setFormData, resetForm, showToast, showToastMessage } =
         useFormWithToast(initialState)
     const debouncedQuery = useDebounce(query, 500)
-    const { ingredients = [] } = useSelector((state) => state.adminStorage)
-    const { products = [] } = useSelector((state) => state.adminProduct)
-    const dispatch = useDispatch()
-
     const { handleCrudAction } = useCrudHandlers({
         showToastMessage,
         dispatch,
         refetch: getAllProducts,
     })
 
+    // ===== DERIVED STATE =====
     const productsList = useMemo(() => {
         const list = Array.isArray(products) ? products : products.data || []
         return list.slice().sort((a, b) => a.name.localeCompare(b.name))
     }, [products])
 
+    const productForm = useMemo(() => {
+        return addProductForm.map((item) => {
+            if (item.name === 'ingredients') {
+                return {
+                    ...item,
+                    fields: item.fields.map((field) => {
+                        if (field.name === 'ingredientId') {
+                            return {
+                                ...field,
+                                options: ingredients
+                                    .slice()
+                                    .sort((a, b) =>
+                                        a.name.localeCompare(b.name)
+                                    )
+                                    .map((ingredient) => ({
+                                        value: ingredient._id,
+                                        label: ingredient.name,
+                                    })),
+                            }
+                        }
+                        return field
+                    }),
+                }
+            }
+            return item
+        })
+    }, [ingredients])
+
+    // ===== EFFECTS =====
+    // Effect: Load initial data
     useEffect(() => {
         dispatch(getAllIngredients())
         dispatch(getAllProducts())
     }, [dispatch])
 
+    // Effect: Search products
     useEffect(() => {
         if (debouncedQuery) {
             dispatch(searchProduct(debouncedQuery)).then((data) => {
@@ -84,31 +122,7 @@ const Products = () => {
         }
     }, [debouncedQuery, dispatch])
 
-    const productForm = addProductForm.map((item) => {
-        if (item.name === 'ingredients') {
-            return {
-                ...item,
-                fields: item.fields.map((field) => {
-                    if (field.name === 'ingredientId') {
-                        return {
-                            ...field,
-                            options: ingredients
-                                .slice()
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((ingredient) => ({
-                                    value: ingredient._id,
-                                    label: ingredient.name,
-                                })),
-                        }
-                    } else {
-                        return field
-                    }
-                }),
-            }
-        }
-        return item
-    })
-
+    // ===== HANDLERS =====
     const onChange = (event) => {
         setQuery(event.target.value)
     }
@@ -240,6 +254,7 @@ const Products = () => {
         })
     }
 
+    // ===== RENDER =====
     return (
         <>
             <Toast showToast={showToast} />
@@ -438,4 +453,5 @@ const Products = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Products

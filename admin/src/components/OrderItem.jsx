@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import React from 'react'
 import { useSelector } from 'react-redux'
 
@@ -5,6 +6,7 @@ import getNextStatus from '../helpers/getNextStatus'
 import socket from '../socket/socket'
 import formatDate from '../utils/formatDate'
 
+// ===== CONSTANTS =====
 const statusMap = {
     pending: 'Chờ xác nhận',
     preparing: 'Đang chuẩn bị',
@@ -26,13 +28,16 @@ const statusButtons = {
     preparing: 'Phục vụ',
 }
 
+// ===== COMPONENT =====
 const OrderItem = ({ order }) => {
+    // ===== REDUX STATE =====
     const { staff } = useSelector((state) => state.adminAuth)
 
+    // ===== DERIVED STATE =====
     const orderNumber = `#${order._id.slice(-6).toUpperCase()}`
-
     const date = formatDate(order.createdAt)
 
+    // ===== HANDLERS =====
     const handleStatusChange = (newStatus) => {
         const payload = {
             orderId: order._id,
@@ -51,6 +56,7 @@ const OrderItem = ({ order }) => {
         })
     }
 
+    // ===== RENDER =====
     return (
         <div className="flex flex-col gap-2.5 rounded-lg bg-white p-2.5">
             <div className="flex justify-between gap-2">
@@ -209,4 +215,5 @@ const OrderItem = ({ order }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default OrderItem

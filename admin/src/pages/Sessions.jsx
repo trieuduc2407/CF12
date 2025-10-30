@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import 'cally'
 import { RefreshCcw } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -8,15 +9,20 @@ import SessionItem from '../components/SessionItem'
 import getTodayDate from '../helpers/getTodayDate'
 import socket from '../socket/socket'
 
+// ===== COMPONENT =====
 const Sessions = () => {
+    // ===== LOCAL STATE =====
     const [filteredSessions, setFilteredSessions] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
     const [statusFilter, setStatusFilter] = useState('all')
     const [dateFilter, setDateFilter] = useState(getTodayDate())
     const [showPopover, setShowPopover] = useState(false)
+
+    // ===== REFS =====
     const calendarRef = useRef(new Date())
 
+    // ===== CALLBACKS =====
     const loadSessions = useCallback(async () => {
         setIsLoading(true)
         setError(null)
@@ -24,13 +30,19 @@ const Sessions = () => {
             const sessions = await fetchSessionsApi(statusFilter, dateFilter)
             setFilteredSessions(sessions)
         } catch (error) {
-            console.error('[Sessions] Error loading sessions:', error)
             setError(error.message)
         } finally {
             setIsLoading(false)
         }
     }, [statusFilter, dateFilter])
 
+    const handleClearFilters = () => {
+        setStatusFilter('all')
+        setDateFilter(getTodayDate())
+    }
+
+    // ===== EFFECTS =====
+    // Effect: Load sessions and listen to socket events
     useEffect(() => {
         loadSessions()
 
@@ -45,12 +57,12 @@ const Sessions = () => {
         }
     }, [loadSessions])
 
+    // Effect: Handle calendar date change
     useEffect(() => {
         const calendar = calendarRef.current
         if (calendar) {
             const handleDateChange = (event) => {
                 const selectedDate = event.target.value
-                console.log('[Sessions] Date changed:', selectedDate)
                 setDateFilter(selectedDate)
                 setShowPopover(false)
             }
@@ -61,11 +73,7 @@ const Sessions = () => {
         }
     }, [])
 
-    const handleClearFilters = () => {
-        setStatusFilter('all')
-        setDateFilter(getTodayDate())
-    }
-
+    // ===== RENDER =====
     return (
         <>
             <div className="mb-5 flex justify-between gap-2.5 rounded-lg bg-white p-2.5">
@@ -124,4 +132,5 @@ const Sessions = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Sessions

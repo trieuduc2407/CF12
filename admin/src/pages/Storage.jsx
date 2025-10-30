@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import {
     ChevronLeft,
     CircleEllipsis,
@@ -26,6 +27,7 @@ import {
 } from '../store/admin/storageSlice'
 import validateFormData from '../utils/validateFormData'
 
+// ===== CONSTANTS =====
 const initialState = {
     name: '',
     quantity: '',
@@ -46,7 +48,13 @@ const listLabel = [
     { name: 'threshold', label: 'Ngưỡng cảnh báo' },
 ]
 
+// ===== COMPONENT =====
 const Storage = () => {
+    // ===== REDUX STATE =====
+    const dispatch = useDispatch()
+    const { ingredients = [] } = useSelector((state) => state.adminStorage)
+
+    // ===== LOCAL STATE =====
     const [currentUpdateId, setCurrentUpdateId] = useState('')
     const [sortBy, setSortBy] = useState('ratio')
     const [sortOrder, setSortOrder] = useState('asc')
@@ -54,13 +62,11 @@ const Storage = () => {
     const [searchResults, setSearchResults] = useState([])
     const [showMobileSearch, setShowMobileSearch] = useState(false)
 
+    // ===== CUSTOM HOOKS =====
     const { formData, setFormData, resetForm, showToast, showToastMessage } =
         useFormWithToast(initialState)
     const debouncedQuery = useDebounce(query, 500)
     const errors = validateFormData(addIngredientForm, formData)
-    const dispatch = useDispatch()
-    const { ingredients = [] } = useSelector((state) => state.adminStorage)
-
     const { handleCrudAction } = useCrudHandlers({
         showToastMessage,
         resetForm,
@@ -69,6 +75,7 @@ const Storage = () => {
         refetch: getAllIngredients,
     })
 
+    // ===== DERIVED STATE =====
     const sortedIngredients = useMemo(() => {
         if (!sortBy) return ingredients
         return [...ingredients].sort((a, b) => {
@@ -88,10 +95,13 @@ const Storage = () => {
         })
     }, [ingredients, sortBy, sortOrder])
 
+    // ===== EFFECTS =====
+    // Effect: Load initial data
     useEffect(() => {
         dispatch(getAllIngredients())
     }, [dispatch])
 
+    // Effect: Search ingredients
     useEffect(() => {
         if (debouncedQuery) {
             dispatch(searchIngredient(debouncedQuery)).then((data) => {
@@ -102,6 +112,7 @@ const Storage = () => {
         }
     }, [debouncedQuery, dispatch])
 
+    // ===== HANDLERS =====
     const handleSort = (column) => {
         if (sortBy === column) {
             setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
@@ -173,6 +184,7 @@ const Storage = () => {
         })
     }
 
+    // ===== RENDER =====
     return (
         <>
             <Toast showToast={showToast} />
@@ -351,4 +363,5 @@ const Storage = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Storage

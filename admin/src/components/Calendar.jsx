@@ -1,11 +1,17 @@
+// ===== IMPORTS =====
 import 'cally'
 import React, { useEffect, useRef, useState } from 'react'
 
+// ===== COMPONENT =====
 const Calendar = ({ showPopover, setShowPopover, date, calendarRef }) => {
+    // ===== REFS =====
     const buttonRef = useRef(null)
     const popoverRef = useRef(null)
+
+    // ===== LOCAL STATE =====
     const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 })
 
+    // ===== EFFECTS =====
     useEffect(() => {
         if (showPopover && buttonRef.current && popoverRef.current) {
             const rect = buttonRef.current.getBoundingClientRect()
@@ -13,23 +19,20 @@ const Calendar = ({ showPopover, setShowPopover, date, calendarRef }) => {
                 top: rect.bottom + 8,
                 left: rect.left,
             })
-            // Manually show popover
             try {
                 popoverRef.current.showPopover()
             } catch {
-                // Popover already showing
+                // Ignore if already shown
             }
         } else if (!showPopover && popoverRef.current) {
-            // Manually hide popover
             try {
                 popoverRef.current.hidePopover()
             } catch {
-                // Popover already hidden
+                // Ignore if already hidden
             }
         }
     }, [showPopover])
 
-    // Handle click outside to close
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -52,6 +55,7 @@ const Calendar = ({ showPopover, setShowPopover, date, calendarRef }) => {
         }
     }, [showPopover, setShowPopover])
 
+    // ===== RENDER =====
     return (
         <div className="relative flex-1">
             <button
@@ -99,4 +103,5 @@ const Calendar = ({ showPopover, setShowPopover, date, calendarRef }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default Calendar

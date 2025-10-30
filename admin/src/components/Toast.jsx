@@ -1,6 +1,9 @@
+// ===== IMPORTS =====
 import React from 'react'
 
+// ===== COMPONENT =====
 const Toast = ({ showToast }) => {
+    // ===== RENDER =====
     if (!showToast.isShow) return null
 
     return (
@@ -15,4 +18,5 @@ const Toast = ({ showToast }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default Toast

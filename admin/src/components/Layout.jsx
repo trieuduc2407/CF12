@@ -1,11 +1,11 @@
-import React from 'react'
-import { useEffect } from 'react'
-import { useState } from 'react'
+// ===== IMPORTS =====
+import React, { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import Header from './Header'
 import Navbar from './Navbar'
 
+// ===== CONSTANTS =====
 const titleMap = [
     { path: '/admin/dashboard', title: 'Tổng quan' },
     { path: '/admin/products', title: 'Danh sách sản phẩm' },
@@ -16,10 +16,15 @@ const titleMap = [
     { path: '/admin/rooms', title: 'Danh sách bàn' },
 ]
 
+// ===== COMPONENT =====
 const Layout = () => {
+    // ===== CUSTOM HOOKS =====
     const location = useLocation()
+
+    // ===== LOCAL STATE =====
     const [title, setTitle] = useState('')
 
+    // ===== EFFECTS =====
     useEffect(() => {
         const currentTitle =
             titleMap.find((item) => item.path === location.pathname)?.title ||
@@ -27,6 +32,7 @@ const Layout = () => {
         setTitle(currentTitle)
     }, [location.pathname])
 
+    // ===== RENDER =====
     return (
         <div className="flex h-screen w-full flex-row">
             <div className="drawer lg:drawer-open">
@@ -69,4 +75,5 @@ const Layout = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Layout

@@ -1,8 +1,12 @@
+// ===== IMPORTS =====
 import React, { useRef } from 'react'
 
+// ===== COMPONENT =====
 const ImageUpload = ({ onChange, preview, setPreview }) => {
+    // ===== REFS =====
     const inputRef = useRef()
 
+    // ===== HANDLERS =====
     const handleFile = (file) => {
         if (!file) return
         const reader = new FileReader(null)
@@ -28,6 +32,7 @@ const ImageUpload = ({ onChange, preview, setPreview }) => {
         event.preventDefault()
     }
 
+    // ===== RENDER =====
     return (
         <div
             className="md:h-120 md:w-120 relative mx-4 flex h-72 w-72 flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300"
@@ -86,4 +91,5 @@ const ImageUpload = ({ onChange, preview, setPreview }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default ImageUpload

@@ -1,9 +1,13 @@
+// ===== IMPORTS =====
 import React from 'react'
 import { useSelector } from 'react-redux'
 
+// ===== COMPONENT =====
 const RoleProtectedRoute = ({ allowedRoles, children }) => {
+    // ===== REDUX STATE =====
     const { staff } = useSelector((state) => state.adminAuth)
 
+    // ===== RENDER =====
     if (!staff) return null
 
     if (!allowedRoles.includes(staff.role)) {
@@ -19,4 +23,5 @@ const RoleProtectedRoute = ({ allowedRoles, children }) => {
     return children
 }
 
+// ===== EXPORTS =====
 export default RoleProtectedRoute

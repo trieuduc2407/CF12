@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { ChevronLeft, RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -16,6 +17,7 @@ import {
     updateTable,
 } from '../store/admin/tableSlice'
 
+// ===== CONSTANTS =====
 const initialState = {
     tableName: '',
     status: 'available',
@@ -33,14 +35,18 @@ const labelMap = {
     closed: 'Không sử dụng',
 }
 
+// ===== COMPONENT =====
 const Room = () => {
+    // ===== REDUX STATE =====
+    const dispatch = useDispatch()
+    const { tables = [] } = useSelector((state) => state.adminTable)
+
+    // ===== LOCAL STATE =====
     const [currentUpdateId, setCurrentUpdateId] = useState('')
 
+    // ===== CUSTOM HOOKS =====
     const { formData, setFormData, resetForm, showToast, showToastMessage } =
         useFormWithToast(initialState)
-    const { tables = [] } = useSelector((state) => state.adminTable)
-    const dispatch = useDispatch()
-
     const { handleCrudAction } = useCrudHandlers({
         showToastMessage,
         resetForm,
@@ -49,10 +55,12 @@ const Room = () => {
         refetch: getAllTables,
     })
 
+    // ===== EFFECTS =====
     useEffect(() => {
         dispatch(getAllTables())
     }, [dispatch])
 
+    // ===== HANDLERS =====
     const getTableData = (id) => {
         dispatch(getTableById(id)).then((data) => {
             if (data?.payload?.success) {
@@ -91,6 +99,7 @@ const Room = () => {
         })
     }
 
+    // ===== RENDER =====
     return (
         <>
             <Toast showToast={showToast} />
@@ -183,4 +192,5 @@ const Room = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Room

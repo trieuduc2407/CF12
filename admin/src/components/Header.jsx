@@ -1,13 +1,20 @@
+// ===== IMPORTS =====
 import { LogOut, TextAlignJustify } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { useLogout } from '../hooks/useLogout'
 
+// ===== COMPONENT =====
 const Header = () => {
+    // ===== REDUX STATE =====
     const { staff } = useSelector((state) => state.adminAuth)
+
+    // ===== CUSTOM HOOKS =====
     const navigate = useNavigate()
     const handleLogout = useLogout()
+
+    // ===== RENDER =====
 
     return (
         <div className="flex items-center justify-between bg-white px-10 py-8">
@@ -59,4 +66,5 @@ const Header = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Header

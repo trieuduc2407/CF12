@@ -1,16 +1,18 @@
+// ===== IMPORTS =====
 import React from 'react'
 
 import formatDate from '../utils/formatDate'
 import PaymentModal from './PaymentModal'
 
+// ===== COMPONENT =====
 const SessionItem = ({ session, onPaymentSuccess }) => {
+    // ===== DERIVED STATE =====
     const sessionNumber = `#${session._id.slice(-6).toUpperCase()}`
-
     const date = formatDate(session.createdAt)
-
     const isActive = session.status === 'active'
     const isCompleted = session.status === 'completed'
 
+    // ===== RENDER =====
     return (
         <div className="flex flex-col gap-2.5 rounded-lg bg-white p-2.5">
             <div className="flex justify-between gap-2">
@@ -121,4 +123,5 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default SessionItem
