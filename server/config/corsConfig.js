@@ -7,7 +7,7 @@ export const corsOptions = {
         process.env.LOCAL_CLIENT_URL || 'http://localhost:5173',
         process.env.LOCAL_ADMIN_URL || 'http://localhost:5174',
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: [
         'Content-Type',
         'Authorization',

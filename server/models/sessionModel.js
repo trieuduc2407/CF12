@@ -25,6 +25,38 @@ const sessionSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        pointsUsed: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        pointsDiscount: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        finalPrice: {
+            type: Number,
+            default: 0,
+        },
+        pointsEarned: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user',
+            default: null,
+        },
+        customerName: {
+            type: String,
+            default: null,
+        },
+        customerPhone: {
+            type: String,
+            default: null,
+        },
         status: {
             type: String,
             enum: ['active', 'completed', 'cancelled'],

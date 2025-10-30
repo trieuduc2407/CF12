@@ -3,7 +3,8 @@ import mongoose from 'mongoose'
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: false, // Name optional, có thể update sau
+        default: null,
     },
     phone: {
         type: String,

@@ -17,6 +17,11 @@ router.patch('/orders/:orderId/status', orderController.updateOrderStatus)
 router.patch('/orders/:orderId/paid', orderController.markOrderAsPaid)
 router.get('/sessions', orderController.getAllSessions)
 router.get('/sessions/:sessionId', orderController.getSessionById)
+router.get(
+    '/sessions/:sessionId/payment-preview',
+    orderController.getSessionPaymentPreview
+)
+router.patch('/sessions/:sessionId/checkout', orderController.checkoutSession)
 router.patch(
     '/sessions/:sessionId/cancel',
     requireRoleMiddleware('admin'),

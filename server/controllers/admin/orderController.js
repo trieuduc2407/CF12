@@ -158,6 +158,111 @@ export const cancelSession = async (req, res) => {
     }
 }
 
+export const getSessionPaymentPreview = async (req, res) => {
+    try {
+        const { sessionId } = req.params
+        const { phone, pointsToUse = 0 } = req.query
+
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin số điện thoại',
+            })
+        }
+
+        const result = await sessionService.getSessionPaymentPreview(
+            sessionId,
+            phone,
+            parseInt(pointsToUse)
+        )
+
+        return res.status(200).json({
+            success: true,
+            data: result,
+        })
+    } catch (error) {
+        console.error(
+            '[orderController] getSessionPaymentPreview error:',
+            error
+        )
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi tính toán preview',
+        })
+    }
+}
+
+export const checkoutSession = async (req, res) => {
+    try {
+        const { sessionId } = req.params
+        const { phone, name, pointsToUse = 0 } = req.body
+
+        if (!phone || !name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin số điện thoại hoặc tên khách hàng',
+            })
+        }
+
+        const result = await sessionService.checkoutSession(
+            sessionId,
+            phone,
+            name,
+            pointsToUse
+        )
+
+        const io = req.app.locals.io
+        if (io) {
+            // Broadcast session:completed tới bàn
+            io.to(result.session.tableName).emit('session:completed', {
+                sessionId: result.session._id,
+                pointsUsed: result.pointsUsed,
+                pointsDiscount: result.pointsDiscount,
+                finalPrice: result.finalPrice,
+                pointsEarned: result.pointsEarned,
+                totalPoints: result.totalPoints,
+            })
+
+            // Broadcast tới admin
+            io.emit('session:statusChanged', {
+                session: result.session,
+            })
+        }
+
+        // Tạo message động
+        let message = 'Thanh toán thành công'
+        if (result.pointsUsed > 0) {
+            message += `, sử dụng ${result.pointsUsed} điểm (-${result.pointsDiscount.toLocaleString()} VNĐ)`
+        }
+        if (result.pointsEarned > 0) {
+            message += `, tích ${result.pointsEarned} điểm`
+        }
+
+        return res.status(200).json({
+            success: true,
+            message,
+            data: {
+                session: result.session,
+                payment: {
+                    totalPrice: result.session.totalAmount,
+                    pointsUsed: result.pointsUsed,
+                    pointsDiscount: result.pointsDiscount,
+                    finalPrice: result.finalPrice,
+                    pointsEarned: result.pointsEarned,
+                    totalPoints: result.totalPoints,
+                    pointsChange: result.pointsChange,
+                },
+            },
+        })
+    } catch (error) {
+        console.error('[orderController] checkoutSession error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi thanh toán session',
+        })
+    }
+}
+
 export const getPaymentPreview = async (req, res) => {
     try {
         const { orderId } = req.params

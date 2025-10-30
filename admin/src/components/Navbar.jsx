@@ -1,5 +1,6 @@
 import {
     Coffee,
+    CreditCard,
     LayoutDashboard,
     List,
     LogOut,
@@ -29,6 +30,12 @@ const adminNavbarItems = [
         title: 'Đơn hàng',
         icon: <ReceiptText />,
         path: '/admin/orders',
+    },
+    {
+        name: 'sessions',
+        title: 'Phiên & Thanh toán',
+        icon: <CreditCard />,
+        path: '/admin/sessions',
     },
     {
         name: 'users',

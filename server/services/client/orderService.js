@@ -51,6 +51,7 @@ export const createOrderFromCart = async (tableName, notes = '') => {
             userId: null,
             items: orderItems,
             totalPrice: cart.totalPrice,
+            finalPrice: cart.totalPrice, // Set finalPrice = totalPrice cho order mới
             status: 'pending',
             notes,
         })
@@ -68,7 +69,11 @@ export const createOrderFromCart = async (tableName, notes = '') => {
                 Array.isArray(product.ingredients)
             ) {
                 for (const ingredient of product.ingredients) {
-                    if (!ingredient.ingredientId || !ingredient.quantity) {
+                    // Check cả 'amount' và 'quantity' để tương thích với cả 2 tên field
+                    const ingredientAmount =
+                        ingredient.amount || ingredient.quantity
+
+                    if (!ingredient.ingredientId || !ingredientAmount) {
                         console.warn(
                             '[orderService] Invalid ingredient data:',
                             ingredient
@@ -76,11 +81,11 @@ export const createOrderFromCart = async (tableName, notes = '') => {
                         continue
                     }
 
-                    const decrementAmount = ingredient.quantity * item.quantity
+                    const decrementAmount = ingredientAmount * item.quantity
 
                     if (isNaN(decrementAmount)) {
                         console.error(
-                            `❌ NaN detected: ingredient.quantity=${ingredient.quantity}, item.quantity=${item.quantity}`
+                            `[orderService] NaN detected: ingredientAmount=${ingredientAmount}, item.quantity=${item.quantity}`
                         )
                         continue
                     }

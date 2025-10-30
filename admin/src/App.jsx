@@ -13,6 +13,7 @@ import Notfound from './pages/Notfound'
 import Orders from './pages/Orders'
 import Products from './pages/Products'
 import Room from './pages/Room'
+import Sessions from './pages/Sessions'
 import Staffs from './pages/Staffs'
 import Storage from './pages/Storage'
 import socket from './socket/socket'
@@ -92,6 +93,7 @@ const App = () => {
                     }
                 />
                 <Route path="orders" element={<Orders />} />
+                <Route path="sessions" element={<Sessions />} />
                 <Route
                     path="staffs"
                     element={

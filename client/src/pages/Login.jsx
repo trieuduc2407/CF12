@@ -42,9 +42,10 @@ const Login = () => {
             [name]: value,
         }))
 
-        const form = event.target.form
-        if (form) {
-            setIsFormValid(form.checkValidity())
+        // Chỉ validate phone (name optional)
+        if (name === 'phone') {
+            const phoneValid = value.length === 10 && /^[0-9]{10}$/.test(value)
+            setIsFormValid(phoneValid)
         }
     }
 
@@ -109,15 +110,12 @@ const Login = () => {
                     <input
                         type="text"
                         name="name"
-                        className="input validator border-1 user-valid:border-green-500 user-invalid:border-red-500 rounded-lg border-gray-300"
-                        required
-                        placeholder="Họ và tên"
-                        pattern="[\p{L}]+(\s[\p{L}]+)+"
-                        title="Vui lòng nhập đầy đủ họ và tên"
+                        className="input border-1 rounded-lg border-gray-300"
+                        placeholder="Họ và tên (tùy chọn)"
                         onChange={handleOnchange}
                     />
-                    <p className="validator-hint">
-                        Vui lòng nhập đầy đủ họ và tên
+                    <p className="text-xs text-gray-500">
+                        Bỏ trống nếu không muốn điền
                     </p>
                 </div>
                 <button

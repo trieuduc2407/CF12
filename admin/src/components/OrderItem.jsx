@@ -23,7 +23,7 @@ const statusColors = {
 const statusButtons = {
     pending: 'Chuẩn bị',
     preparing: 'Phục vụ',
-    served: 'Thanh toán',
+    // 'served' không có nút nữa - thanh toán ở level session
 }
 
 const OrderItem = ({ order }) => {
@@ -161,10 +161,34 @@ const OrderItem = ({ order }) => {
                             </p>
                         )}
                     </div>
-                    <div className="mb-10 mt-5 flex justify-between text-xl font-semibold">
+                    <div className="mb-5 mt-5 flex justify-between text-xl font-semibold">
                         <p>Tổng:</p>
                         <p>{order.totalPrice.toLocaleString()}đ</p>
                     </div>
+
+                    {/* Thông báo về thanh toán */}
+                    {order.status === 'served' && (
+                        <div className="alert alert-info mb-5 text-sm">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                className="h-6 w-6 shrink-0 stroke-current"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                            </svg>
+                            <span>
+                                Để thanh toán, vui lòng đi tới{' '}
+                                <strong>Phiên & Thanh toán</strong> trong menu
+                            </span>
+                        </div>
+                    )}
+
                     <div className="flex justify-between">
                         {order.status === 'pending' && (
                             <button className="btn btn-error btn-sm w-1/3">

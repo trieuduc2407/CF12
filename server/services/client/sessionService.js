@@ -93,7 +93,176 @@ export const addOrderToSession = async (sessionId, orderId) => {
     }
 }
 
-export const completeSession = async (sessionId, paymentData) => {
+export const getSessionPaymentPreview = async (
+    sessionId,
+    phone,
+    pointsToUse = 0
+) => {
+    try {
+        const { findUserByPhone } = await import('./userService.js')
+
+        const session = await sessionModel.findById(sessionId)
+
+        if (!session) {
+            throw new Error('Session không tồn tại')
+        }
+
+        if (session.status !== 'active') {
+            throw new Error('Session đã kết thúc')
+        }
+
+        const user = await findUserByPhone(phone)
+        const totalPrice = session.totalAmount
+
+        // User mới
+        if (!user) {
+            return {
+                preview: {
+                    totalPrice,
+                    pointsUsed: 0,
+                    pointsDiscount: 0,
+                    finalPrice: totalPrice,
+                    pointsEarned: Math.floor(totalPrice / 10000),
+                    totalPoints: Math.floor(totalPrice / 10000),
+                    pointsChange: Math.floor(totalPrice / 10000),
+                },
+                currentPoints: 0,
+                userName: null, // User mới chưa có tên
+                suggestions: {
+                    maxPoints: 0,
+                    roundPricePoints: 0,
+                },
+                isNewUser: true,
+            }
+        }
+
+        // Import helper
+        const {
+            calculatePaymentPreview,
+            getMaxUsablePoints,
+            getPointsForRoundPrice,
+        } = await import('../../helpers/client/calculatePoints.js')
+
+        const preview = calculatePaymentPreview(
+            totalPrice,
+            user.points,
+            pointsToUse
+        )
+        const maxPoints = getMaxUsablePoints(totalPrice, user.points)
+        const roundPricePoints = getPointsForRoundPrice(totalPrice, user.points)
+
+        return {
+            preview,
+            currentPoints: user.points,
+            userName: user.name || null, // Trả về tên nếu có
+            suggestions: {
+                maxPoints,
+                roundPricePoints,
+            },
+            isNewUser: false,
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+export const checkoutSession = async (
+    sessionId,
+    phone,
+    name,
+    pointsToUse = 0
+) => {
+    try {
+        const { findOrCreateUser } = await import('./userService.js')
+
+        const session = await sessionModel.findById(sessionId)
+
+        if (!session) {
+            throw new Error('Session không tồn tại')
+        }
+
+        if (session.status !== 'active') {
+            throw new Error('Session đã kết thúc')
+        }
+
+        // Tìm hoặc tạo user (name optional)
+        const user = await findOrCreateUser({ phone, name })
+
+        // Nếu name được cung cấp và khác với name hiện tại, update user
+        if (name && name !== user.name) {
+            user.name = name
+            await user.save()
+        }
+
+        // Validate pointsToUse
+        if (pointsToUse > user.points) {
+            throw new Error(
+                `Số điểm sử dụng (${pointsToUse}) vượt quá điểm hiện có (${user.points})`
+            )
+        }
+
+        // Calculate payment
+        const totalPrice = session.totalAmount
+        const actualPointsUsed = Math.min(
+            pointsToUse,
+            Math.floor(totalPrice / 1000)
+        )
+        const pointsDiscount = actualPointsUsed * 1000
+        const finalPrice = totalPrice - pointsDiscount
+        const pointsEarned = Math.floor(finalPrice / 10000)
+
+        // Update session
+        session.userId = user._id
+        session.customerName = user.name || phone // Dùng name nếu có, không thì dùng phone
+        session.customerPhone = phone
+        session.pointsUsed = actualPointsUsed
+        session.pointsDiscount = pointsDiscount
+        session.finalPrice = finalPrice
+        session.pointsEarned = pointsEarned
+        session.status = 'completed'
+        session.endTime = new Date()
+        await session.save()
+
+        // Update user points
+        const pointsChange = pointsEarned - actualPointsUsed
+        user.points += pointsChange
+        await user.save()
+
+        // Update table
+        const table = await tableModel.findOne({ tableName: session.tableName })
+        if (table) {
+            table.status = 'available'
+            table.currentSessionId = null
+            table.activeCartId = null
+            await table.save()
+        }
+
+        // Update all orders trong session thành 'paid'
+        await orderModel.updateMany(
+            { sessionId: session._id },
+            {
+                $set: {
+                    status: 'paid',
+                    userId: user._id,
+                },
+            }
+        )
+
+        return {
+            session,
+            pointsUsed: actualPointsUsed,
+            pointsDiscount,
+            finalPrice,
+            pointsEarned,
+            totalPoints: user.points,
+            pointsChange,
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+export const completeSession = async (sessionId) => {
     try {
         const session = await sessionModel.findById(sessionId)
 
