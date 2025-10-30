@@ -96,13 +96,26 @@ export const updateOrderStatus = async (req, res) => {
 
 export const getAllSessions = async (req, res) => {
     try {
-        const { status, tableName, startDate, endDate } = req.query
+        const { status, tableName, startDate, endDate, date } = req.query
 
         const filters = {}
         if (status) filters.status = status
         if (tableName) filters.tableName = tableName
-        if (startDate) filters.startDate = startDate
-        if (endDate) filters.endDate = endDate
+
+        // Nếu có tham số date, ưu tiên lọc theo ngày cụ thể
+        if (date) {
+            // Lọc session bắt đầu trong ngày này
+            const startOfDay = new Date(date)
+            startOfDay.setHours(0, 0, 0, 0)
+            const endOfDay = new Date(date)
+            endOfDay.setHours(23, 59, 59, 999)
+
+            filters.startDate = startOfDay.toISOString()
+            filters.endDate = endOfDay.toISOString()
+        } else {
+            if (startDate) filters.startDate = startDate
+            if (endDate) filters.endDate = endDate
+        }
 
         const sessions = await sessionService.getAllSessions(filters)
 

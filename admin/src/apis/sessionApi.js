@@ -3,15 +3,19 @@ import axios from 'axios'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 /**
- * Fetch all sessions with optional status filter
+ * Fetch all sessions with optional status and date filter
  * @param {string} status - Filter by status: 'all', 'active', 'completed', 'cancelled'
+ * @param {string} date - Filter by date (YYYY-MM-DD format)
  * @returns {Promise<Array>} Array of sessions
  */
-export const fetchSessions = async (status = 'all') => {
+export const fetchSessions = async (status = 'all', date = null) => {
     try {
         const params = new URLSearchParams()
         if (status !== 'all') {
             params.append('status', status)
+        }
+        if (date) {
+            params.append('date', date)
         }
 
         const response = await axios.get(
