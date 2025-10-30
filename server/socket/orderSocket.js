@@ -39,7 +39,7 @@ export const orderSocket = (io, socket) => {
             // Broadcast order status update to the table
             if (updatedOrder.tableName) {
                 console.log(
-                    `📤 [orderSocket] Broadcasting order:updated to table ${updatedOrder.tableName}`
+                    `[orderSocket] Đang broadcast order:updated đến bàn ${updatedOrder.tableName}`
                 )
                 io.to(updatedOrder.tableName).emit('order:updated', {
                     order: updatedOrder,
@@ -49,7 +49,7 @@ export const orderSocket = (io, socket) => {
 
             // Broadcast to admin panel
             console.log(
-                `📤 [orderSocket] Broadcasting order:statusChanged to admin`
+                `[orderSocket] Đang broadcast order:statusChanged đến admin`
             )
             io.emit('order:statusChanged', {
                 order: updatedOrder,
@@ -60,7 +60,7 @@ export const orderSocket = (io, socket) => {
                 order: updatedOrder,
             })
         } catch (error) {
-            console.error('❌ [orderSocket] order:statusUpdate error:', error)
+            console.error('[orderSocket] order:statusUpdate error:', error)
             socket.emit('order:updateError', {
                 message: error.message || 'Lỗi khi cập nhật order',
             })
@@ -84,22 +84,20 @@ export const orderSocket = (io, socket) => {
                 return
             }
 
-            console.log(`🚫 [orderSocket] Cancel request: order=${orderId}`)
+            console.log(`[orderSocket] Cancel request: order=${orderId}`)
 
             const cancelledOrder = await orderService.cancelOrder(orderId)
 
-            // Broadcast to admin panel
             console.log(
-                `📤 [orderSocket] Broadcasting order:cancelled to admin`
+                `[orderSocket] Đang broadcast order:cancelled đến admin`
             )
             io.emit('order:cancelled', {
                 order: cancelledOrder,
             })
 
-            // Broadcast to table
             if (cancelledOrder.tableName) {
                 console.log(
-                    `📤 [orderSocket] Broadcasting order:updated to table ${cancelledOrder.tableName}`
+                    `[orderSocket] Đang broadcast order:updated đến bàn ${cancelledOrder.tableName}`
                 )
                 io.to(cancelledOrder.tableName).emit('order:updated', {
                     order: cancelledOrder,
@@ -107,12 +105,11 @@ export const orderSocket = (io, socket) => {
                 })
             }
 
-            // Send success response
             socket.emit('order:cancelSuccess', {
                 order: cancelledOrder,
             })
         } catch (error) {
-            console.error('❌ [orderSocket] order:cancel error:', error)
+            console.error('[orderSocket] order:cancel error:', error)
             socket.emit('order:cancelError', {
                 message: error.message || 'Lỗi khi hủy order',
             })

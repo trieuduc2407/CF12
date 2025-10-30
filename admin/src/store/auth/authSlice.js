@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
 axios.interceptors.request.use((config) => {
     const token = localStorage.getItem('adminToken')
     if (token) {
@@ -19,7 +21,7 @@ export const loginStaff = createAsyncThunk(
     '/auth/loginStaff',
     async (formData) => {
         const response = await axios.post(
-            import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/login',
+            `${API_URL}/api/admin/auth/login`,
             formData
         )
         if (response?.data?.success && response?.data?.token) {
@@ -30,18 +32,13 @@ export const loginStaff = createAsyncThunk(
 )
 
 export const logoutStaff = createAsyncThunk('/auth/logoutStaff', async () => {
-    const response = await axios.post(
-        import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/logout/',
-        {}
-    )
+    const response = await axios.post(`${API_URL}/api/admin/auth/logout/`, {})
     localStorage.removeItem('adminToken')
     return response?.data
 })
 
 export const getMe = createAsyncThunk('/auth/getMe', async () => {
-    const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + '/api/admin/auth/me'
-    )
+    const response = await axios.get(`${API_URL}/api/admin/auth/me`)
     return response?.data
 })
 
@@ -49,8 +46,7 @@ export const changePassword = createAsyncThunk(
     '/staff/changePassword',
     async ({ id, formData }) => {
         const response = await axios.put(
-            import.meta.env.VITE_BACKEND_URL +
-                `/api/admin/auth/change-password/${id}`,
+            `${API_URL}/api/admin/auth/change-password/${id}`,
             formData,
             {
                 headers: { 'Content-Type': 'application/json' },

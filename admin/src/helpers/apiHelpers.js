@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 /**
  * Helper function để tạo axios request với error handling
@@ -9,7 +9,7 @@ export const apiRequest = async (method, url, data = null, config = {}) => {
     try {
         const response = await axios({
             method,
-            url: `${API_BASE}${url}`,
+            url: `${API_URL}${url}`,
             data,
             ...config,
         })

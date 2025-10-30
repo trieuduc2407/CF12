@@ -315,7 +315,9 @@ export const lockItem = async (tableName, clientId, itemId) => {
             throw new Error('Sản phẩm đang được người khác chỉnh sửa')
         }
 
-        console.log(`🔒 [cartService] Locking item ${itemId} by ${clientId}`)
+        console.log(
+            `[cartService] Đang khóa item ${itemId} bởi client ${clientId}`
+        )
 
         await cartModel.findOneAndUpdate(
             { _id: cart._id, 'items.itemId': itemId },
@@ -327,7 +329,7 @@ export const lockItem = async (tableName, clientId, itemId) => {
             }
         )
 
-        console.log(`✅ [cartService] Item ${itemId} locked in DB`)
+        console.log(`[cartService] Đã khóa item ${itemId} trong DB`)
 
         return { itemId, locked: true, lockedBy: clientId }
     } catch (error) {
@@ -351,9 +353,8 @@ export const unlockItem = async (tableName, clientId, itemId) => {
 
         const item = cart.items.find((i) => i.itemId === itemId)
 
-        // Nếu item không tồn tại (đã bị xóa/update), trả về success để tránh lỗi
         if (!item) {
-            console.log('⚠️ Item không tồn tại, bỏ qua unlock:', itemId)
+            console.log('Item không tồn tại, bỏ qua unlock:', itemId)
             return { itemId, locked: false, lockedBy: null }
         }
 
@@ -388,7 +389,6 @@ export const unlockAllItemsByClient = async (clientId) => {
             `🔓 [cartService] Unlocking all items for client: ${clientId}`
         )
 
-        // Find all active carts that have items locked by this client
         const carts = await cartModel.find({
             status: 'active',
             'items.lockedBy': clientId,
@@ -396,7 +396,7 @@ export const unlockAllItemsByClient = async (clientId) => {
 
         if (!carts || carts.length === 0) {
             console.log(
-                `✅ [cartService] No locked items found for ${clientId}`
+                `[cartService] Không tìm thấy item bị khóa cho client ${clientId}`
             )
             return []
         }
@@ -409,7 +409,6 @@ export const unlockAllItemsByClient = async (clientId) => {
             )
 
             if (itemsToUnlock.length > 0) {
-                // Unlock all items belonging to this client
                 await cartModel.updateOne(
                     { _id: cart._id },
                     {
@@ -423,7 +422,6 @@ export const unlockAllItemsByClient = async (clientId) => {
                     }
                 )
 
-                // Get table info for broadcasting
                 const table = await tableModel.findById(cart.tableId)
                 itemsToUnlock.forEach((item) => {
                     unlockedItems.push({
@@ -433,7 +431,7 @@ export const unlockAllItemsByClient = async (clientId) => {
                 })
 
                 console.log(
-                    `✅ [cartService] Unlocked ${itemsToUnlock.length} items in cart ${cart._id}`
+                    `[cartService] Đã mở khóa ${itemsToUnlock.length} items trong cart ${cart._id}`
                 )
             }
         }
@@ -441,7 +439,7 @@ export const unlockAllItemsByClient = async (clientId) => {
         return unlockedItems
     } catch (error) {
         console.error(
-            `❌ [cartService] Error unlocking items for client ${clientId}:`,
+            `[cartService] Lỗi khi mở khóa items cho client ${clientId}:`,
             error
         )
         return []
@@ -462,18 +460,15 @@ export const deleteItem = async (tableName, clientId, itemId) => {
         const item = cart.items.find((i) => i.itemId === itemId)
         if (!item) throw new Error('Sản phẩm không tồn tại trong giỏ hàng')
 
-        // Kiểm tra lock: chỉ cho phép xóa nếu item không bị lock hoặc bị lock bởi chính client này
         if (item.locked && item.lockedBy !== clientId) {
             throw new Error('Sản phẩm đang được người khác chỉnh sửa')
         }
 
-        // Xóa item khỏi cart
         await cartModel.findByIdAndUpdate(cart._id, {
             $pull: { items: { itemId } },
             $inc: { version: 1 },
         })
 
-        // Tính lại totalPrice
         const updatedCart = await cartModel.findById(cart._id)
         updatedCart.totalPrice = updatedCart.items.reduce(
             (acc, curr) => acc + curr.subTotal,
@@ -481,7 +476,6 @@ export const deleteItem = async (tableName, clientId, itemId) => {
         )
         await updatedCart.save()
 
-        // Populate và trả về cart mới
         const populatedCart = await cartModel
             .findById(cart._id)
             .populate('items.productId', 'name basePrice imageUrl sizes')
@@ -491,6 +485,73 @@ export const deleteItem = async (tableName, clientId, itemId) => {
         console.log(error)
         throw new Error(
             `Xảy ra lỗi khi xóa sản phẩm khỏi giỏ hàng: ${error.message}`
+        )
+    }
+}
+
+export const updateClientUserId = async (tableName, clientId, userId) => {
+    try {
+        const table = await tableModel.findOne({ tableName })
+        if (!table) throw new Error('Bàn không tồn tại')
+
+        let cart = await cartModel.findOne({
+            tableId: table._id,
+            status: 'active',
+        })
+
+        if (!cart) {
+            try {
+                cart = await cartModel.create({
+                    tableId: table._id,
+                    clients: [{ clientId, userId }],
+                    items: [],
+                    totalPrice: 0,
+                })
+                console.log(
+                    `[cartService] Đã tạo cart mới cho bàn ${tableName} với userId ${userId}`
+                )
+                return transformCartResponse(cart)
+            } catch (createError) {
+                if (createError.code === 11000) {
+                    console.log(
+                        `[cartService] Cart đã tồn tại (race condition), đang fetch lại cart hiện có`
+                    )
+                    cart = await cartModel.findOne({
+                        tableId: table._id,
+                        status: 'active',
+                    })
+                    if (!cart) {
+                        throw new Error('Không thể tạo hoặc tìm thấy giỏ hàng')
+                    }
+                } else {
+                    throw createError
+                }
+            }
+        }
+
+        const clientIndex = cart.clients.findIndex(
+            (c) => c.clientId === clientId
+        )
+
+        if (clientIndex === -1) {
+            cart.clients.push({ clientId, userId })
+            console.log(
+                `[cartService] Đã thêm client ${clientId} với userId ${userId}`
+            )
+        } else {
+            cart.clients[clientIndex].userId = userId
+            console.log(
+                `[cartService] Đã cập nhật userId cho client ${clientId} thành ${userId}`
+            )
+        }
+
+        await cart.save()
+
+        return transformCartResponse(cart)
+    } catch (error) {
+        console.error('[cartService] updateClientUserId error:', error)
+        throw new Error(
+            `Xảy ra lỗi khi cập nhật userId cho client: ${error.message}`
         )
     }
 }

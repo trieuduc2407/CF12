@@ -18,9 +18,16 @@ const Home = () => {
         }
     }, [clientId, tableName, dispatch])
 
+    const handleLogin = () => {
+        navigate(`/tables/${tableName}/login`)
+    }
+
     return (
         <>
-            <div className="card m-5 flex-row justify-start bg-red-300 py-5 text-3xl">
+            <div
+                className="card m-5 flex-row justify-start bg-red-300 py-5 text-3xl"
+                onClick={() => handleLogin()}
+            >
                 <div className="px-5">
                     <ShoppingBag size={48} />
                 </div>

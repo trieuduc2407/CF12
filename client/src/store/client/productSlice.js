@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
 const initialState = {
     isLoading: false,
     products: [],
@@ -13,8 +15,7 @@ export const getProductById = createAsyncThunk(
     async (productId, { rejectWithValue }) => {
         try {
             const response = await axios.get(
-                import.meta.env.VITE_BACKEND_URL +
-                    `/api/client/products/${productId}`
+                `${API_URL}/api/client/products/${productId}`
             )
             return response?.data
         } catch (error) {
@@ -26,9 +27,7 @@ export const getProductById = createAsyncThunk(
 export const getAllProducts = createAsyncThunk(
     '/clientProduct/getAllProducts',
     async () => {
-        const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL + '/api/client/products/all'
-        )
+        const response = await axios.get(`${API_URL}/api/client/products/all`)
         return response?.data
     }
 )

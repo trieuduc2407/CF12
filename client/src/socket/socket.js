@@ -1,12 +1,12 @@
 import { io } from 'socket.io-client'
 import { v4 as uuidv4 } from 'uuid'
 
-const URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 const clientId = localStorage.getItem('clientId') || uuidv4()
 localStorage.setItem('clientId', clientId)
 
-const socket = io(URL, {
+const socket = io(API_URL, {
     transports: ['websocket', 'polling'],
     query: { uuid: clientId },
 })

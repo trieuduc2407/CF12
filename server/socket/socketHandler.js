@@ -129,7 +129,6 @@ export const socketHandler = (io, app) => {
                 }
             }
 
-            // Unlock all items locked by this client
             if (disconnectedClientId) {
                 try {
                     const unlockedItems =
@@ -137,11 +136,10 @@ export const socketHandler = (io, app) => {
                             disconnectedClientId
                         )
 
-                    // Broadcast unlock events to all affected tables
                     unlockedItems.forEach(({ tableName, itemId }) => {
                         if (tableName) {
                             console.log(
-                                `📤 [socketHandler] Broadcasting unlock for ${itemId} in ${tableName}`
+                                `[socketHandler] Đang broadcast unlock cho ${itemId} ở bàn ${tableName}`
                             )
                             io.to(tableName).emit('cart:itemUnlocked', {
                                 itemId,
@@ -152,7 +150,7 @@ export const socketHandler = (io, app) => {
                     })
                 } catch (error) {
                     console.error(
-                        '❌ [socketHandler] Error unlocking items on disconnect:',
+                        '[socketHandler] Lỗi khi mở khóa items sau disconnect:',
                         error
                     )
                 }

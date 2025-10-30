@@ -13,7 +13,6 @@ const transformCartResponse = (cart, stripLockState = false) => {
         cartObj.items = cartObj.items.map((item) => {
             const { productId, ...rest } = item
 
-            // Strip lock state for broadcast events to prevent overwriting client-side locks
             if (stripLockState) {
                 const { locked, lockedBy, ...itemWithoutLock } = rest
                 return {

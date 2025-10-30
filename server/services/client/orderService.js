@@ -75,7 +75,10 @@ export const createOrderFromCart = async (
             ) {
                 for (const ingredient of product.ingredients) {
                     if (!ingredient.ingredientId || !ingredient.quantity) {
-                        console.warn('⚠️ Invalid ingredient data:', ingredient)
+                        console.warn(
+                            '[orderService] Invalid ingredient data:',
+                            ingredient
+                        )
                         continue
                     }
 

@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { createLoadingReducers, crudHelpers } from '../../helpers/apiHelpers'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
 const initialState = {
     isLoading: false,
     products: [],
@@ -44,8 +46,7 @@ export const toggleSignature = createAsyncThunk(
     async (id) => {
         const axios = (await import('axios')).default
         const response = await axios.put(
-            import.meta.env.VITE_BACKEND_URL +
-                `/api/admin/products/signature/${id}`,
+            `${API_URL}/api/admin/products/signature/${id}`,
             {}
         )
         return response?.data

@@ -49,7 +49,7 @@ export const createOrder = async (req, res) => {
             data: order,
         })
     } catch (error) {
-        console.error('❌ [orderController] createOrder error:', error)
+        console.error('[orderController] createOrder error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi tạo order',
@@ -125,7 +125,7 @@ export const cancelOrder = async (req, res) => {
             data: order,
         })
     } catch (error) {
-        console.error('❌ [orderController] cancelOrder error:', error)
+        console.error('[orderController] cancelOrder error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi hủy order',

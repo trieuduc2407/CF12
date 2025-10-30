@@ -96,7 +96,7 @@ const App = () => {
         })
 
         socket.on('cart:deleteError', ({ message }) => {
-            console.error('❌ [App] Received cart:deleteError:', message)
+            console.error('[App] Received cart:deleteError:', message)
             alert(message)
         })
 

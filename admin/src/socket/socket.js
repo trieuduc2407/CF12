@@ -9,14 +9,12 @@ const socket = io(SOCKET_URL, {
     reconnectionAttempts: 5,
 })
 
-socket.on('connect', () => {
-})
+socket.on('connect', () => {})
 
-socket.on('disconnect', () => {
-})
+socket.on('disconnect', () => {})
 
 socket.on('connect_error', (error) => {
-    console.error('❌ Socket connection error:', error)
+    console.error('[Socket] Connection error:', error)
 })
 
 export default socket

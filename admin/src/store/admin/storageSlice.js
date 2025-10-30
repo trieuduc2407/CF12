@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { createLoadingReducers, crudHelpers } from '../../helpers/apiHelpers'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
 const initialState = {
     isLoading: false,
     ingredients: [],
@@ -39,8 +41,7 @@ export const searchIngredient = createAsyncThunk(
     async (q) => {
         const axios = (await import('axios')).default
         const response = await axios.get(
-            import.meta.env.VITE_BACKEND_URL +
-                `/api/admin/storage/search?q=${q}`
+            `${API_URL}/api/admin/storage/search?q=${q}`
         )
         return response?.data
     }

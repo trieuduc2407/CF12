@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
     tableName: null,
     clientId: null,
+    userId: null,
 }
 
 const sessionSlice = createSlice({
@@ -12,6 +13,7 @@ const sessionSlice = createSlice({
         setSession: (state, action) => {
             state.tableName = action.payload.tableName
             state.clientId = action.payload.clientId
+            state.userId = action.payload.userId
         },
     },
 })

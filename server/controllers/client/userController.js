@@ -1,6 +1,6 @@
 import * as userService from '../../services/client/userService.js'
 
-export const findOrCreateUser = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const { name, phone } = req.body
         if (!name) {
@@ -21,13 +21,19 @@ export const findOrCreateUser = async (req, res) => {
 
         return res.json({
             success: true,
-            data: user,
+            message: 'Đăng nhập thành công',
+            data: {
+                userId: user._id,
+                name: user.name,
+                phone: user.phone,
+                points: user.points,
+            },
         })
     } catch (error) {
-        console.log(error)
+        console.error(' login error:', error)
         return res.json({
             success: false,
-            message: error.message || 'Server error',
+            message: error.message || 'Lỗi khi đăng nhập',
         })
     }
 }
