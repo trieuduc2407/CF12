@@ -36,10 +36,7 @@ const Orders = () => {
 
     useEffect(() => {
         dispatch(getAllOrders())
-
-        // Listen for session:statusChanged to refetch orders
         const handleSessionStatusChanged = () => {
-            console.log('[Orders] Session status changed, refetching orders...')
             dispatch(getAllOrders())
         }
 
@@ -55,6 +52,7 @@ const Orders = () => {
         if (calendar) {
             const handleDateChange = (event) => {
                 const selectedDate = event.target.value
+                console.log('[Orders] Date changed:', selectedDate)
                 setDate(selectedDate)
                 setShowPopover(false)
                 handleFilterChange('date', selectedDate)
@@ -64,14 +62,14 @@ const Orders = () => {
                 calendar.removeEventListener('change', handleDateChange)
             }
         }
-    }, [calendarRef, handleFilterChange])
+    }, [handleFilterChange])
 
     return (
         <>
             <div className="mb-5 flex justify-between gap-2.5 rounded-lg bg-white p-2.5">
-                <div className="flex flex-1 flex-col gap-2">
+                <div className="flex flex-1 flex-col gap-2 md:flex-row">
                     <select
-                        className="select bg-white outline-1"
+                        className="select bg-white outline-1 md:w-1/2"
                         name="filter_select"
                         value={filters.status}
                         onChange={(event) =>
@@ -106,7 +104,7 @@ const Orders = () => {
                     ))
                 ) : (
                     <p className="text-center font-semibold">
-                        Không có đơn hàng nào
+                        Không có đơn nào
                     </p>
                 )}
             </div>

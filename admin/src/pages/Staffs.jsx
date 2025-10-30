@@ -6,6 +6,7 @@ import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
 import Toast from '../components/Toast'
 import { addStaffForm, updateStaffForm } from '../config/form'
+import { useCrudHandlers } from '../hooks/useCrudHandlers'
 import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
     addStaff,
@@ -41,6 +42,14 @@ const Staffs = () => {
     const dispatch = useDispatch()
     const { staffs = [] } = useSelector((state) => state.adminStaff)
 
+    const { handleCrudAction } = useCrudHandlers({
+        showToastMessage,
+        resetForm,
+        setCurrentUpdateId,
+        dispatch,
+        refetch: getAllStaff,
+    })
+
     const getStaffData = (id) => {
         dispatch(getStaff(id)).then((data) => {
             if (data?.payload?.success) {
@@ -52,76 +61,36 @@ const Staffs = () => {
     }
 
     const handleUpdate = () => {
-        dispatch(updateStaff({ id: currentUpdateId, formData })).then(
-            (data) => {
-                if (
-                    data?.payload?.success === false &&
-                    data?.payload?.message === 'Không có quyền truy cập'
-                ) {
-                    showToastMessage(
-                        'error',
-                        'Bạn không có quyền cập nhật vai trò này'
-                    )
-                    document.getElementById('my-drawer').checked = false
-                    return
-                }
-
-                if (data?.payload?.success) {
-                    dispatch(getAllStaff())
-                    showToastMessage('success', data.payload.message)
-                    document.getElementById('my-drawer').checked = false
-                }
+        handleCrudAction(
+            dispatch(updateStaff({ id: currentUpdateId, formData })),
+            {
+                errorConditions: [
+                    {
+                        message: 'Không có quyền truy cập',
+                        displayMessage:
+                            'Bạn không có quyền cập nhật vai trò này',
+                    },
+                ],
             }
         )
     }
 
     const handleDelete = (id) => {
-        dispatch(deleteStaff(id)).then((data) => {
-            if (
-                data?.payload?.success === false &&
-                data?.payload?.message === 'Không đủ quyền xóa nhân viên này'
-            ) {
-                showToastMessage('error', data.payload.message)
-                document.getElementById('my-drawer').checked = false
-                return
-            }
-
-            if (data?.payload?.success) {
-                dispatch(getAllStaff())
-                showToastMessage('success', data.payload.message)
-                document.getElementById('my-drawer').checked = false
-            }
+        handleCrudAction(dispatch(deleteStaff(id)), {
+            errorConditions: [{ message: 'Không đủ quyền xóa nhân viên này' }],
         })
     }
 
     const onSubmit = (event) => {
         event.preventDefault()
-        dispatch(addStaff(formData)).then((data) => {
-            if (
-                data?.payload?.success === false &&
-                data?.payload?.message ===
-                    'Bạn không có quyền tạo nhân viên với vai trò này'
-            ) {
-                showToastMessage('error', data.payload.message)
-                document.getElementById('my-drawer').checked = false
-                return
-            }
-
-            if (
-                data?.payload?.success === false &&
-                data?.payload?.message === 'Username đã tồn tại'
-            ) {
-                showToastMessage('error', data.payload.message)
-                document.getElementById('my-drawer').checked = false
-                return
-            }
-
-            if (data?.payload?.success) {
-                dispatch(getAllStaff())
-                resetForm()
-                showToastMessage('success', data?.payload?.message)
-                document.getElementById('my-drawer').checked = false
-            }
+        handleCrudAction(dispatch(addStaff(formData)), {
+            errorConditions: [
+                {
+                    message: 'Bạn không có quyền tạo nhân viên với vai trò này',
+                },
+                { message: 'Username đã tồn tại' },
+            ],
+            shouldResetForm: true,
         })
     }
 

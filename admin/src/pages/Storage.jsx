@@ -13,6 +13,7 @@ import ListLayout from '../components/ListLayout'
 import Searchbar from '../components/Searchbar'
 import Toast from '../components/Toast'
 import { addIngredientForm } from '../config/form'
+import { useCrudHandlers } from '../hooks/useCrudHandlers'
 import { useDebounce } from '../hooks/useDebounce'
 import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
@@ -59,6 +60,14 @@ const Storage = () => {
     const errors = validateFormData(addIngredientForm, formData)
     const dispatch = useDispatch()
     const { ingredients = [] } = useSelector((state) => state.adminStorage)
+
+    const { handleCrudAction } = useCrudHandlers({
+        showToastMessage,
+        resetForm,
+        setCurrentUpdateId,
+        dispatch,
+        refetch: getAllIngredients,
+    })
 
     const sortedIngredients = useMemo(() => {
         if (!sortBy) return ingredients
@@ -132,66 +141,35 @@ const Storage = () => {
     }
 
     const handleUpdate = () => {
-        dispatch(updateIngredient({ id: currentUpdateId, formData })).then(
-            (data) => {
-                if (
-                    data?.payload?.success === false &&
-                    data?.payload?.message ===
-                        'Xảy ra lỗi khi cập nhật nguyên liệu: Tên nguyên liệu đã tồn tại'
-                ) {
-                    showToastMessage('error', data.payload.message)
-                    document.getElementById('my-drawer').checked = false
-                    return
-                }
-
-                if (data?.payload?.success) {
-                    dispatch(getAllIngredients())
-                    resetForm()
-                    setCurrentUpdateId('')
-                    showToastMessage(
-                        'success',
-                        data?.payload?.message ||
-                            'Cập nhật nguyên liệu thành công'
-                    )
-                    document.getElementById('my-drawer').checked = false
-                }
+        handleCrudAction(
+            dispatch(updateIngredient({ id: currentUpdateId, formData })),
+            {
+                successMessage: 'Cập nhật nguyên liệu thành công',
+                errorConditions: [
+                    {
+                        message:
+                            'Xảy ra lỗi khi cập nhật nguyên liệu: Tên nguyên liệu đã tồn tại',
+                    },
+                ],
+                shouldResetForm: true,
             }
         )
     }
 
     const handleDelete = (id) => {
-        dispatch(deleteIngredient(id)).then((data) => {
-            if (data?.payload?.success) {
-                dispatch(getAllIngredients())
-                showToastMessage(
-                    'error',
-                    data?.payload?.message || 'Xóa nguyên liệu thành công'
-                )
-            }
+        handleCrudAction(dispatch(deleteIngredient(id)), {
+            successMessage: 'Xóa nguyên liệu thành công',
+            toastType: 'error',
+            shouldCloseDrawer: false,
         })
     }
 
     const onSubmit = (event) => {
         event.preventDefault()
-        dispatch(addIngredient(formData)).then((data) => {
-            if (
-                data?.payload?.success === false &&
-                data?.payload?.message === 'Nguyên liệu đã tồn tại'
-            ) {
-                showToastMessage('error', data.payload.message)
-                document.getElementById('my-drawer').checked = false
-                return
-            }
-
-            if (data?.payload?.success) {
-                dispatch(getAllIngredients())
-                resetForm()
-                showToastMessage(
-                    'success',
-                    data?.payload?.message || 'Thêm nguyên liệu thành công'
-                )
-                document.getElementById('my-drawer').checked = false
-            }
+        handleCrudAction(dispatch(addIngredient(formData)), {
+            successMessage: 'Thêm nguyên liệu thành công',
+            errorConditions: [{ message: 'Nguyên liệu đã tồn tại' }],
+            shouldResetForm: true,
         })
     }
 

@@ -1,5 +1,5 @@
 import { RefreshCcw } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { fetchSessions as fetchSessionsApi } from '../apis/sessionApi'
 import SessionItem from '../components/SessionItem'
@@ -11,7 +11,7 @@ const Sessions = () => {
     const [error, setError] = useState(null)
     const [statusFilter, setStatusFilter] = useState('all')
 
-    const loadSessions = async () => {
+    const loadSessions = useCallback(async () => {
         setIsLoading(true)
         setError(null)
         try {
@@ -23,16 +23,12 @@ const Sessions = () => {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [statusFilter])
 
     useEffect(() => {
         loadSessions()
 
-        // Listen for session:statusChanged to refetch sessions
         const handleSessionStatusChanged = () => {
-            console.log(
-                '[Sessions] Session status changed, refetching sessions...'
-            )
             loadSessions()
         }
 
@@ -41,8 +37,7 @@ const Sessions = () => {
         return () => {
             socket.off('session:statusChanged', handleSessionStatusChanged)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [statusFilter])
+    }, [loadSessions])
 
     const handleClearFilters = () => {
         setStatusFilter('all')
@@ -91,7 +86,7 @@ const Sessions = () => {
                         ))
                     ) : (
                         <p className="text-center font-semibold">
-                            Không có phiên nào
+                            Không có bàn nào đang hoạt động
                         </p>
                     )}
                 </div>

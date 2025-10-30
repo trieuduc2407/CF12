@@ -58,7 +58,48 @@ const adminProductSlice = createSlice({
     initialState,
     reducers: {},
     extraReducers: (builder) => {
+        // getAllProducts - load toàn bộ danh sách
         createLoadingReducers(builder, getAllProducts, 'products')
+
+        // Các actions khác chỉ set loading, không update products array
+        // Refetch sẽ được gọi trong useCrudHandlers
+        builder
+            .addCase(addProduct.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(addProduct.fulfilled, (state) => {
+                state.isLoading = false
+            })
+            .addCase(addProduct.rejected, (state) => {
+                state.isLoading = false
+            })
+            .addCase(updateProduct.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(updateProduct.fulfilled, (state) => {
+                state.isLoading = false
+            })
+            .addCase(updateProduct.rejected, (state) => {
+                state.isLoading = false
+            })
+            .addCase(deleteProduct.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(deleteProduct.fulfilled, (state) => {
+                state.isLoading = false
+            })
+            .addCase(deleteProduct.rejected, (state) => {
+                state.isLoading = false
+            })
+            .addCase(toggleSignature.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(toggleSignature.fulfilled, (state) => {
+                state.isLoading = false
+            })
+            .addCase(toggleSignature.rejected, (state) => {
+                state.isLoading = false
+            })
     },
 })
 

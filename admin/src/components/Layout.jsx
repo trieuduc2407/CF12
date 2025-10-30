@@ -1,19 +1,32 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import Header from './Header'
 import Navbar from './Navbar'
 
-const title = {
-    '/admin/dashboard': 'Tổng quan',
-    '/admin/products': 'Danh sách sản phẩm',
-    '/admin/orders': 'Danh sách đơn hàng',
-    '/admin/staffs': 'Danh sách nhân viên',
-    '/admin/storage': 'Danh sách kho',
-    '/admin/rooms': 'Danh sách bàn',
-}
+const titleMap = [
+    { path: '/admin/dashboard', title: 'Tổng quan' },
+    { path: '/admin/products', title: 'Danh sách sản phẩm' },
+    { path: '/admin/orders', title: 'Danh sách đơn' },
+    { path: '/admin/sessions', title: 'Danh sách bàn hoạt động' },
+    { path: '/admin/staffs', title: 'Danh sách nhân viên' },
+    { path: '/admin/storage', title: 'Danh sách kho' },
+    { path: '/admin/rooms', title: 'Danh sách bàn' },
+]
 
 const Layout = () => {
+    const location = useLocation()
+    const [title, setTitle] = useState('')
+
+    useEffect(() => {
+        const currentTitle =
+            titleMap.find((item) => item.path === location.pathname)?.title ||
+            ''
+        setTitle(currentTitle)
+    }, [location.pathname])
+
     return (
         <div className="flex h-screen w-full flex-row">
             <div className="drawer lg:drawer-open">
@@ -26,7 +39,7 @@ const Layout = () => {
                     <Header />
                     <main className="scrollbar-hide flex flex-1 flex-col overflow-y-auto p-4">
                         <p className="my-5 text-center text-lg font-semibold">
-                            {title[window.location.pathname]}
+                            {title}
                         </p>
                         <Outlet />
                     </main>

@@ -6,6 +6,7 @@ import CommonForm from '../components/CommonForm'
 import ListLayout from '../components/ListLayout'
 import Toast from '../components/Toast'
 import { addTableForm, updateTableForm } from '../config/form'
+import { useCrudHandlers } from '../hooks/useCrudHandlers'
 import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
     addTable,
@@ -40,6 +41,14 @@ const Room = () => {
     const { tables = [] } = useSelector((state) => state.adminTable)
     const dispatch = useDispatch()
 
+    const { handleCrudAction } = useCrudHandlers({
+        showToastMessage,
+        resetForm,
+        setCurrentUpdateId,
+        dispatch,
+        refetch: getAllTables,
+    })
+
     useEffect(() => {
         dispatch(getAllTables())
     }, [dispatch])
@@ -59,38 +68,26 @@ const Room = () => {
     }
 
     const handleUpdate = () => {
-        dispatch(updateTable({ id: currentUpdateId, formData })).then(
-            (data) => {
-                if (data?.payload?.success) {
-                    dispatch(getAllTables())
-                    document.getElementById('my-drawer').checked = false
-                    showToastMessage('success', 'Cập nhật bàn thành công')
-                    resetForm()
-                    setCurrentUpdateId('')
-                }
+        handleCrudAction(
+            dispatch(updateTable({ id: currentUpdateId, formData })),
+            {
+                successMessage: 'Cập nhật bàn thành công',
+                shouldResetForm: true,
             }
         )
     }
 
     const handleDelete = (id) => {
-        dispatch(deleteTable(id)).then((data) => {
-            if (data?.payload?.success) {
-                dispatch(getAllTables())
-                document.getElementById('my-drawer').checked = false
-                showToastMessage('success', 'Xóa bàn thành công')
-            }
+        handleCrudAction(dispatch(deleteTable(id)), {
+            successMessage: 'Xóa bàn thành công',
         })
     }
 
     const onSubmit = (event) => {
         event.preventDefault()
-        dispatch(addTable(formData)).then((data) => {
-            if (data?.payload?.success) {
-                dispatch(getAllTables())
-                document.getElementById('my-drawer').checked = false
-                showToastMessage('success', 'Thêm bàn thành công')
-                resetForm()
-            }
+        handleCrudAction(dispatch(addTable(formData)), {
+            successMessage: 'Thêm bàn thành công',
+            shouldResetForm: true,
         })
     }
 

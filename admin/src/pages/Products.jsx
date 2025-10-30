@@ -5,7 +5,7 @@ import {
     RotateCcw,
     Search,
 } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Card from '../components/Card'
@@ -15,6 +15,7 @@ import Searchbar from '../components/Searchbar'
 import Toast from '../components/Toast'
 import { addProductForm } from '../config/form'
 import { buildProductPayload } from '../helpers/productFormHelpers'
+import { useCrudHandlers } from '../hooks/useCrudHandlers'
 import { useDebounce } from '../hooks/useDebounce'
 import { useFormWithToast } from '../hooks/useFormWithToast'
 import {
@@ -55,9 +56,16 @@ const Products = () => {
     const { products = [] } = useSelector((state) => state.adminProduct)
     const dispatch = useDispatch()
 
-    const productsList = Array.isArray(products)
-        ? products
-        : products.data || []
+    const { handleCrudAction } = useCrudHandlers({
+        showToastMessage,
+        dispatch,
+        refetch: getAllProducts,
+    })
+
+    const productsList = useMemo(() => {
+        const list = Array.isArray(products) ? products : products.data || []
+        return list.slice().sort((a, b) => a.name.localeCompare(b.name))
+    }, [products])
 
     useEffect(() => {
         dispatch(getAllIngredients())
@@ -181,35 +189,29 @@ const Products = () => {
 
         const payload = buildProductPayload(formData, image, imageUpdated)
 
-        dispatch(updateProduct({ id, formData: payload })).then((data) => {
-            if (data?.payload?.success) {
-                dispatch(getAllProducts())
+        handleCrudAction(dispatch(updateProduct({ id, formData: payload })), {
+            successMessage: 'Cập nhật sản phẩm thành công!',
+            onSuccess: () => {
                 setCurrentUpdateId('')
                 resetForm()
                 setImage(null)
                 setPreview('')
                 setImageUpdated(false)
-                document.getElementById('my-drawer').checked = false
-                showToastMessage('success', 'Cập nhật sản phẩm thành công!')
-            }
+            },
         })
     }
 
     const handleDelete = (id) => {
-        dispatch(deleteProduct(id)).then((data) => {
-            if (data?.payload?.success) {
-                dispatch(getAllProducts())
-                showToastMessage('success', 'Xóa sản phẩm thành công!')
-            }
+        handleCrudAction(dispatch(deleteProduct(id)), {
+            successMessage: 'Xóa sản phẩm thành công!',
+            shouldCloseDrawer: false,
         })
     }
 
     const handleToggleSignature = async (id) => {
-        const result = await dispatch(toggleSignature(id))
-        if (result?.payload?.success) {
-            dispatch(getAllProducts())
-            showToastMessage('success', result.payload.message)
-        }
+        await handleCrudAction(dispatch(toggleSignature(id)), {
+            shouldCloseDrawer: false,
+        })
     }
 
     const onSubmit = (event) => {
@@ -228,14 +230,13 @@ const Products = () => {
 
         const payload = buildProductPayload(formData, image)
 
-        dispatch(addProduct(payload)).then((data) => {
-            if (data?.payload?.success) {
-                dispatch(getAllProducts())
+        handleCrudAction(dispatch(addProduct(payload)), {
+            successMessage: 'Thêm sản phẩm thành công!',
+            onSuccess: () => {
                 resetForm()
                 setImage(null)
                 setPreview('')
-                showToastMessage('success', 'Thêm sản phẩm thành công!')
-            }
+            },
         })
     }
 
@@ -346,20 +347,17 @@ const Products = () => {
                                 </p>
                             )
                         ) : productsList.length > 0 ? (
-                            productsList
-                                .slice()
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((product) => (
-                                    <Card
-                                        product={product}
-                                        key={product._id}
-                                        getProductData={getProductData}
-                                        handleDelete={handleDelete}
-                                        handleToggleSignature={() =>
-                                            handleToggleSignature(product._id)
-                                        }
-                                    />
-                                ))
+                            productsList.map((product) => (
+                                <Card
+                                    product={product}
+                                    key={product._id}
+                                    getProductData={getProductData}
+                                    handleDelete={handleDelete}
+                                    handleToggleSignature={() =>
+                                        handleToggleSignature(product._id)
+                                    }
+                                />
+                            ))
                         ) : (
                             <p className="col-span-full text-center text-lg font-semibold text-gray-500">
                                 Chưa có sản phẩm nào
