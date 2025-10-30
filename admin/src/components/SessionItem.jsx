@@ -32,12 +32,10 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                               : 'Đã hủy'}
                     </div>
                 </div>
-                <p className="text-wrap font-light text-gray-500">
-                    Bàn {session.tableName}
-                </p>
+                <p className="text-wrap font-light">Bàn {session.tableName}</p>
                 <div className="font-light text-gray-500">
                     <p>{date[0]}</p>
-                    <p className="text-xs">{date[1]}</p>
+                    <p className="hidden">{date[1]}</p>
                 </div>
             </div>
 
@@ -54,25 +52,6 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                             <div className="mb-1 flex items-center justify-between">
                                 <span className="text-xs font-semibold">
                                     #{order._id.slice(-6).toUpperCase()}
-                                </span>
-                                <span
-                                    className={`badge badge-xs ${
-                                        order.status === 'pending'
-                                            ? 'badge-warning'
-                                            : order.status === 'preparing'
-                                              ? 'badge-info'
-                                              : order.status === 'served'
-                                                ? 'badge-success'
-                                                : 'badge-neutral'
-                                    }`}
-                                >
-                                    {order.status === 'pending'
-                                        ? 'Chờ'
-                                        : order.status === 'preparing'
-                                          ? 'Làm'
-                                          : order.status === 'served'
-                                            ? 'Xong'
-                                            : order.status}
                                 </span>
                             </div>
                             {order.items?.slice(0, 2).map((item, idx) => (
@@ -108,7 +87,7 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                                 .showModal()
                         }
                     >
-                        💰 Thanh toán
+                        Thanh toán
                     </button>
                 )}
                 {isCompleted && session.finalPrice !== undefined && (
@@ -123,7 +102,7 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                             </p>
                         )}
                         {session.pointsEarned > 0 && (
-                            <p className="text-blue-600">
+                            <p className="text-amber-500">
                                 Tích {session.pointsEarned} điểm
                             </p>
                         )}
@@ -131,7 +110,6 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                 )}
             </div>
 
-            {/* Payment Modal */}
             {isActive && (
                 <PaymentModal
                     session={session}

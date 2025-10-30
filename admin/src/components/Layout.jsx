@@ -10,7 +10,7 @@ const titleMap = [
     { path: '/admin/dashboard', title: 'Tổng quan' },
     { path: '/admin/products', title: 'Danh sách sản phẩm' },
     { path: '/admin/orders', title: 'Danh sách đơn' },
-    { path: '/admin/sessions', title: 'Danh sách bàn hoạt động' },
+    { path: '/admin/sessions', title: 'Thanh toán' },
     { path: '/admin/staffs', title: 'Danh sách nhân viên' },
     { path: '/admin/storage', title: 'Danh sách kho' },
     { path: '/admin/rooms', title: 'Danh sách bàn' },
