@@ -2,7 +2,7 @@ import React from 'react'
 
 import PaymentModal from './PaymentModal'
 
-const SessionItem = ({ session }) => {
+const SessionItem = ({ session, onPaymentSuccess }) => {
     const sessionNumber = `#${session._id.slice(-6).toUpperCase()}`
 
     const formattedDate = new Date(session.startTime)
@@ -143,6 +143,7 @@ const SessionItem = ({ session }) => {
                 <PaymentModal
                     session={session}
                     modalId={`payment_modal_${session._id}`}
+                    onPaymentSuccess={onPaymentSuccess}
                 />
             )}
         </div>

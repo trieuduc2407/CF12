@@ -3,6 +3,7 @@ import { RefreshCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
 import SessionItem from '../components/SessionItem'
+import socket from '../socket/socket'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
@@ -35,6 +36,20 @@ const Sessions = () => {
 
     useEffect(() => {
         fetchSessions()
+
+        // Listen for session:statusChanged to refetch sessions
+        const handleSessionStatusChanged = () => {
+            console.log(
+                '[Sessions] Session status changed, refetching sessions...'
+            )
+            fetchSessions()
+        }
+
+        socket.on('session:statusChanged', handleSessionStatusChanged)
+
+        return () => {
+            socket.off('session:statusChanged', handleSessionStatusChanged)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusFilter])
 
@@ -71,7 +86,11 @@ const Sessions = () => {
                 <div className="flex flex-col gap-4">
                     {filteredSessions.length > 0 ? (
                         filteredSessions.map((session) => (
-                            <SessionItem key={session._id} session={session} />
+                            <SessionItem
+                                key={session._id}
+                                session={session}
+                                onPaymentSuccess={fetchSessions}
+                            />
                         ))
                     ) : (
                         <p className="text-center font-semibold">

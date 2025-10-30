@@ -33,7 +33,7 @@ const adminNavbarItems = [
     },
     {
         name: 'sessions',
-        title: 'Phiên & Thanh toán',
+        title: 'Thanh toán',
         icon: <CreditCard />,
         path: '/admin/sessions',
     },

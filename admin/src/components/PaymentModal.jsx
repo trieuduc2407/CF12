@@ -7,7 +7,7 @@ import {
     getSessionPaymentPreview,
 } from '../store/admin/orderSlice'
 
-const PaymentModal = ({ session, modalId }) => {
+const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
     const dispatch = useDispatch()
 
     const [phone, setPhone] = useState('')
@@ -185,6 +185,11 @@ const PaymentModal = ({ session, modalId }) => {
             setExistingUserName('')
 
             alert('Thanh toán thành công!')
+
+            // Refetch sessions để cập nhật UI
+            if (onPaymentSuccess) {
+                onPaymentSuccess()
+            }
         } catch (err) {
             setError(err.message || 'Thanh toán thất bại')
         } finally {

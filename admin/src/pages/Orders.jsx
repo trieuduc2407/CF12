@@ -8,6 +8,7 @@ import Calendar from '../components/Calendar'
 import OrderItem from '../components/OrderItem'
 import getTodayDate from '../helpers/getTodayDate'
 import sortOrders from '../helpers/sortOrders'
+import socket from '../socket/socket'
 import {
     clearFilters,
     getAllOrders,
@@ -35,6 +36,18 @@ const Orders = () => {
 
     useEffect(() => {
         dispatch(getAllOrders())
+
+        // Listen for session:statusChanged to refetch orders
+        const handleSessionStatusChanged = () => {
+            console.log('[Orders] Session status changed, refetching orders...')
+            dispatch(getAllOrders())
+        }
+
+        socket.on('session:statusChanged', handleSessionStatusChanged)
+
+        return () => {
+            socket.off('session:statusChanged', handleSessionStatusChanged)
+        }
     }, [dispatch])
 
     useEffect(() => {
