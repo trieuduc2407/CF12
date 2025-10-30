@@ -157,7 +157,7 @@ const Menu = () => {
             </div>
 
             <div
-                className={`bg-bg-base sticky top-0 pt-[var(--safe-top)] transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
+                className={`bg-bg-base sticky top-0 mt-[var(--safe-top)] transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
             >
                 <div className="relative bg-white p-1.5">
                     <p className="text-center text-gray-700">
@@ -315,7 +315,7 @@ const Menu = () => {
                     )}
                 </div>
             </div>
-            <div className="fixed bottom-0 mb-[var(--safe-bottom)] flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
+            <div className="fixed bottom-0 flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
                 <button className="btn btn-sm flex flex-row rounded-md border-0 bg-white py-5 shadow-none">
                     <ReceiptText className="text-amber-500" />
                     <p className="font-medium text-black"> Đơn hàng</p>
