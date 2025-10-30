@@ -1,6 +1,4 @@
-import axios from 'axios'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+import * as authApi from '../apis/authApi.js'
 
 export const checkAuth = async () => {
     try {
@@ -9,8 +7,9 @@ export const checkAuth = async () => {
             return false
         }
 
-        const res = await axios.get(`${API_URL}/api/admin/auth/me`)
-        return res.data?.success === true
+        // authApi.getMe đã trả về staff data nếu thành công
+        await authApi.getMe()
+        return true
     } catch {
         localStorage.removeItem('adminToken')
         return false

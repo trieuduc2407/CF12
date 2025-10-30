@@ -53,8 +53,8 @@ export const toggleSignature = createAsyncThunk(
     }
 )
 
-const productSlice = createSlice({
-    name: 'product',
+const adminProductSlice = createSlice({
+    name: 'adminProduct',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
@@ -62,4 +62,4 @@ const productSlice = createSlice({
     },
 })
 
-export default productSlice.reducer
+export default adminProductSlice.reducer

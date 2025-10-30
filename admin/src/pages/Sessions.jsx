@@ -1,48 +1,39 @@
-import axios from 'axios'
 import { RefreshCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
+import { fetchSessions as fetchSessionsApi } from '../apis/sessionApi'
 import SessionItem from '../components/SessionItem'
 import socket from '../socket/socket'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 const Sessions = () => {
     const [filteredSessions, setFilteredSessions] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState(null)
     const [statusFilter, setStatusFilter] = useState('all')
 
-    const fetchSessions = async () => {
+    const loadSessions = async () => {
         setIsLoading(true)
+        setError(null)
         try {
-            const params = new URLSearchParams()
-            if (statusFilter !== 'all') {
-                params.append('status', statusFilter)
-            }
-
-            const response = await axios.get(
-                `${API_URL}/api/admin/sessions?${params.toString()}`
-            )
-
-            if (response.data.success) {
-                setFilteredSessions(response.data.data)
-            }
+            const sessions = await fetchSessionsApi(statusFilter)
+            setFilteredSessions(sessions)
         } catch (error) {
-            console.error('Error fetching sessions:', error)
+            console.error('[Sessions] Error loading sessions:', error)
+            setError(error.message)
         } finally {
             setIsLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchSessions()
+        loadSessions()
 
         // Listen for session:statusChanged to refetch sessions
         const handleSessionStatusChanged = () => {
             console.log(
                 '[Sessions] Session status changed, refetching sessions...'
             )
-            fetchSessions()
+            loadSessions()
         }
 
         socket.on('session:statusChanged', handleSessionStatusChanged)
@@ -78,6 +69,12 @@ const Sessions = () => {
                 </button>
             </div>
 
+            {error && (
+                <div className="alert alert-error mb-4">
+                    <span>❌ {error}</span>
+                </div>
+            )}
+
             {isLoading ? (
                 <div className="flex justify-center py-10">
                     <span className="loading loading-spinner loading-lg"></span>
@@ -89,7 +86,7 @@ const Sessions = () => {
                             <SessionItem
                                 key={session._id}
                                 session={session}
-                                onPaymentSuccess={fetchSessions}
+                                onPaymentSuccess={loadSessions}
                             />
                         ))
                     ) : (

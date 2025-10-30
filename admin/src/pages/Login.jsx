@@ -23,26 +23,15 @@ const Login = () => {
         event.preventDefault()
 
         dispatch(loginStaff(formData))
-            .then((result) => {
-                if (result?.payload?.success === false) {
-                    resetForm()
-                    showToastMessage('error', result.payload.message, 2000)
-                    return
-                }
-
-                if (result?.payload?.success) {
+            .unwrap()
+            .then((response) => {
+                if (response?.success) {
                     navigate('/admin/dashboard', { replace: true })
                 }
             })
             .catch((error) => {
                 resetForm()
-                showToastMessage(
-                    'error',
-                    error?.response?.data?.message ||
-                        error?.message ||
-                        'Đã xảy ra lỗi khi đăng nhập',
-                    3000
-                )
+                showToastMessage('error', error || 'Đăng nhập thất bại', 3000)
             })
     }
     return (

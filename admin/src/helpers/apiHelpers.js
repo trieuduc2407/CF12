@@ -2,6 +2,15 @@ import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
+// Axios interceptor để tự động thêm token vào tất cả requests
+axios.interceptors.request.use((config) => {
+    const token = localStorage.getItem('adminToken')
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+})
+
 /**
  * Helper function để tạo axios request với error handling
  */

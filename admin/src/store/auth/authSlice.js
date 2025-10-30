@@ -1,15 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-
-axios.interceptors.request.use((config) => {
-    const token = localStorage.getItem('adminToken')
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-})
+import * as authApi from '../../apis/authApi.js'
 
 const initialState = {
     isLoading: false,
@@ -19,41 +10,57 @@ const initialState = {
 
 export const loginStaff = createAsyncThunk(
     '/auth/loginStaff',
-    async (formData) => {
-        const response = await axios.post(
-            `${API_URL}/api/admin/auth/login`,
-            formData
-        )
-        if (response?.data?.success && response?.data?.token) {
-            localStorage.setItem('adminToken', response.data.token)
+    async (formData, { rejectWithValue }) => {
+        try {
+            const response = await authApi.loginStaff(formData)
+            if (response?.success && response?.token) {
+                localStorage.setItem('adminToken', response.token)
+            }
+            return response
+        } catch (error) {
+            return rejectWithValue(error.message || 'Đăng nhập thất bại')
         }
-        return response?.data
     }
 )
 
-export const logoutStaff = createAsyncThunk('/auth/logoutStaff', async () => {
-    const response = await axios.post(`${API_URL}/api/admin/auth/logout/`, {})
-    localStorage.removeItem('adminToken')
-    return response?.data
-})
+export const logoutStaff = createAsyncThunk(
+    '/auth/logoutStaff',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await authApi.logoutStaff()
+            localStorage.removeItem('adminToken')
+            return response
+        } catch (error) {
+            localStorage.removeItem('adminToken')
+            return rejectWithValue(error.message || 'Đăng xuất thất bại')
+        }
+    }
+)
 
-export const getMe = createAsyncThunk('/auth/getMe', async () => {
-    const response = await axios.get(`${API_URL}/api/admin/auth/me`)
-    return response?.data
-})
+export const getMe = createAsyncThunk(
+    '/auth/getMe',
+    async (_, { rejectWithValue }) => {
+        try {
+            const staffData = await authApi.getMe()
+            return { success: true, data: staffData }
+        } catch (error) {
+            return rejectWithValue(
+                error.message || 'Không thể lấy thông tin user'
+            )
+        }
+    }
+)
 
 export const changePassword = createAsyncThunk(
     '/staff/changePassword',
-    async ({ id, formData }) => {
-        const response = await axios.put(
-            `${API_URL}/api/admin/auth/change-password/${id}`,
-            formData,
-            {
-                headers: { 'Content-Type': 'application/json' },
-            }
-        )
-        localStorage.removeItem('adminToken')
-        return response?.data
+    async ({ id, formData }, { rejectWithValue }) => {
+        try {
+            const response = await authApi.changePassword({ id, formData })
+            localStorage.removeItem('adminToken')
+            return response
+        } catch (error) {
+            return rejectWithValue(error.message || 'Đổi mật khẩu thất bại')
+        }
     }
 )
 
