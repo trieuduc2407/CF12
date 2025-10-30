@@ -1,19 +1,12 @@
 import React from 'react'
 
+import formatDate from '../utils/formatDate'
 import PaymentModal from './PaymentModal'
 
 const SessionItem = ({ session, onPaymentSuccess }) => {
     const sessionNumber = `#${session._id.slice(-6).toUpperCase()}`
 
-    const formattedDate = new Date(session.startTime)
-        .toLocaleString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        })
-        .split(' ')
+    const date = formatDate(session.createdAt)
 
     const isActive = session.status === 'active'
     const isCompleted = session.status === 'completed'
@@ -43,8 +36,8 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                     Bàn {session.tableName}
                 </p>
                 <div className="font-light text-gray-500">
-                    <p>{formattedDate[0]}</p>
-                    <p className="text-xs">{formattedDate[1]}</p>
+                    <p>{date[0]}</p>
+                    <p className="text-xs">{date[1]}</p>
                 </div>
             </div>
 

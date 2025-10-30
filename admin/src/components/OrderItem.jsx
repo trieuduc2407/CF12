@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 
 import getNextStatus from '../helpers/getNextStatus'
 import socket from '../socket/socket'
+import formatDate from '../utils/formatDate'
 
 const statusMap = {
     pending: 'Chờ xác nhận',
@@ -23,7 +24,6 @@ const statusColors = {
 const statusButtons = {
     pending: 'Chuẩn bị',
     preparing: 'Phục vụ',
-    // 'served' không có nút nữa - thanh toán ở level session
 }
 
 const OrderItem = ({ order }) => {
@@ -31,15 +31,7 @@ const OrderItem = ({ order }) => {
 
     const orderNumber = `#${order._id.slice(-6).toUpperCase()}`
 
-    const formatedDate = new Date(order.createdAt)
-        .toLocaleString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        })
-        .split(' ')
+    const date = formatDate(order.createdAt)
 
     const handleStatusChange = (newStatus) => {
         const payload = {
@@ -72,8 +64,8 @@ const OrderItem = ({ order }) => {
                     Bàn {order.sessionId.tableName}
                 </p>
                 <div className="font-light text-gray-500">
-                    <p>{formatedDate[0]}</p>
-                    <p className="hidden">{formatedDate[1]}</p>
+                    <p>{date[0]}</p>
+                    <p className="hidden">{date[1]}</p>
                 </div>
             </div>
             <div className="text-sm">
@@ -131,7 +123,7 @@ const OrderItem = ({ order }) => {
                             <span className="font-semibold">
                                 Thời gian tạo:{' '}
                             </span>
-                            {formatedDate.join(' ')}
+                            {date.join(' ')}
                         </p>
                         <p className="font-semibold">Món đã gọi:</p>
                         {order.items.map((item) => (

@@ -103,8 +103,7 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
             setIsNewUser(false)
             setExistingUserName('')
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedPhone])
+    }, [debouncedPhone, fetchPreview, pointsToUse])
 
     // Fetch lại preview khi pointsToUse thay đổi (không debounce)
     useEffect(() => {
@@ -122,8 +121,7 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                 pointsChange: Math.floor(session.totalAmount / 10000),
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pointsToUse])
+    }, [pointsToUse, phone, isNewUser, fetchPreview, session.totalAmount])
 
     const handleQuickAction = (action) => {
         if (isNewUser) return
