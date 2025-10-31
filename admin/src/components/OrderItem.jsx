@@ -1,10 +1,11 @@
 // ===== IMPORTS =====
 import { Info } from 'lucide-react'
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import getNextStatus from '../helpers/getNextStatus'
 import socket from '../socket/socket'
+import { cancelOrder } from '../store/admin/orderSlice'
 import formatDate from '../utils/formatDate'
 import Toast from './Toast'
 
@@ -33,6 +34,7 @@ const statusButtons = {
 // ===== COMPONENT =====
 const OrderItem = ({ order }) => {
     // ===== REDUX STATE =====
+    const dispatch = useDispatch()
     const { staff } = useSelector((state) => state.adminAuth)
 
     // ===== LOCAL STATE =====
@@ -41,12 +43,48 @@ const OrderItem = ({ order }) => {
         type: '',
         text: '',
     })
+    const [isProcessing, setIsProcessing] = useState(false)
 
     // ===== DERIVED STATE =====
     const orderNumber = `#${order._id.slice(-6).toUpperCase()}`
     const date = formatDate(order.createdAt)
 
     // ===== HANDLERS =====
+    const handleCancelOrder = async () => {
+        if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+            return
+        }
+
+        setIsProcessing(true)
+        try {
+            await dispatch(cancelOrder(order._id)).unwrap()
+
+            setShowToast({
+                isShow: true,
+                type: 'success',
+                text: 'Đã hủy đơn hàng thành công',
+            })
+
+            setTimeout(() => {
+                setShowToast({ isShow: false, type: '', text: '' })
+            }, 3000)
+
+            document.getElementById(`detail_modal_${order._id}`)?.close()
+        } catch (error) {
+            setShowToast({
+                isShow: true,
+                type: 'error',
+                text: error || 'Lỗi khi hủy đơn hàng',
+            })
+
+            setTimeout(() => {
+                setShowToast({ isShow: false, type: '', text: '' })
+            }, 3000)
+        } finally {
+            setIsProcessing(false)
+        }
+    }
+
     const handleStatusChange = (newStatus) => {
         const payload = {
             orderId: order._id,
@@ -199,15 +237,23 @@ const OrderItem = ({ order }) => {
                             </div>
                         )}
 
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                             {order.status === 'pending' && (
-                                <button className="btn btn-error btn-sm w-1/3">
-                                    Hủy đơn
+                                <button
+                                    className="btn btn-error btn-sm flex-1"
+                                    onClick={handleCancelOrder}
+                                    disabled={isProcessing}
+                                >
+                                    {isProcessing ? (
+                                        <span className="loading loading-spinner loading-xs"></span>
+                                    ) : (
+                                        'Hủy đơn'
+                                    )}
                                 </button>
                             )}
                             {order.status in statusButtons && (
                                 <button
-                                    className="btn btn-success btn-sm ml-auto w-1/3"
+                                    className="btn btn-success btn-sm ml-auto flex-1"
                                     onClick={() =>
                                         handleStatusChange(
                                             getNextStatus(order.status)

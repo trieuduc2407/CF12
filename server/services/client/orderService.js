@@ -51,7 +51,7 @@ export const createOrderFromCart = async (tableName, notes = '') => {
             userId: null,
             items: orderItems,
             totalPrice: cart.totalPrice,
-            finalPrice: cart.totalPrice, // Set finalPrice = totalPrice cho order mới
+            finalPrice: cart.totalPrice,
             status: 'pending',
             notes,
         })
@@ -69,7 +69,6 @@ export const createOrderFromCart = async (tableName, notes = '') => {
                 Array.isArray(product.ingredients)
             ) {
                 for (const ingredient of product.ingredients) {
-                    // Check cả 'amount' và 'quantity' để tương thích với cả 2 tên field
                     const ingredientAmount =
                         ingredient.amount || ingredient.quantity
 
@@ -248,7 +247,7 @@ export const getAllOrders = async (filters = {}) => {
 
 export const cancelOrder = async (orderId) => {
     try {
-        const order = await orderModel.findById(orderId)
+        const order = await orderModel.findById(orderId).populate('sessionId')
 
         if (!order) {
             throw new Error('Order không tồn tại')
@@ -258,33 +257,111 @@ export const cancelOrder = async (orderId) => {
             throw new Error('Chỉ có thể hủy order đang chờ xử lý')
         }
 
+        console.log(
+            `[orderService] Bắt đầu hủy order ${orderId}, hoàn trả nguyên liệu`
+        )
+
+        // Hoàn trả nguyên liệu
         for (const item of order.items) {
             const product = await productModel.findById(item.productId)
-            if (product && product.ingredients) {
+            if (
+                product &&
+                product.ingredients &&
+                Array.isArray(product.ingredients)
+            ) {
                 for (const ingredient of product.ingredients) {
-                    await storageModel.findByIdAndUpdate(
+                    // Sử dụng cả 'amount' và 'quantity' để tương thích
+                    const ingredientAmount =
+                        ingredient.amount || ingredient.quantity
+
+                    if (!ingredient.ingredientId || !ingredientAmount) {
+                        console.warn(
+                            '[orderService] Invalid ingredient data:',
+                            ingredient
+                        )
+                        continue
+                    }
+
+                    // Hoàn trả đúng số lượng đã trừ khi tạo order
+                    const returnAmount = ingredientAmount * item.quantity
+
+                    if (isNaN(returnAmount)) {
+                        console.error(
+                            `[orderService] NaN detected: ingredientAmount=${ingredientAmount}, item.quantity=${item.quantity}`
+                        )
+                        continue
+                    }
+
+                    const storage = await storageModel.findByIdAndUpdate(
                         ingredient.ingredientId,
                         {
                             $inc: {
-                                quantity: ingredient.quantity * item.quantity,
+                                quantity: returnAmount,
                             },
-                        }
+                        },
+                        { new: true }
+                    )
+
+                    console.log(
+                        `[orderService] Hoàn trả ${returnAmount} ${storage?.unit || ''} của nguyên liệu ${storage?.name || ingredient.ingredientId}`
                     )
                 }
             }
         }
 
+        // Cập nhật trạng thái order
         order.status = 'cancelled'
         await order.save()
 
+        // Cập nhật tổng tiền session
         const session = await sessionModel.findById(order.sessionId)
         if (session) {
             session.totalAmount -= order.totalPrice
             await session.save()
+            console.log(
+                `[orderService] Đã trừ ${order.totalPrice}đ khỏi session ${session._id}`
+            )
         }
+
+        // Kiểm tra xem tất cả orders trong session có bị hủy không
+        const allOrdersInSession = await orderModel.find({
+            sessionId: order.sessionId,
+        })
+
+        const allCancelled = allOrdersInSession.every(
+            (o) => o.status === 'cancelled'
+        )
+
+        if (allCancelled && session) {
+            console.log(
+                `[orderService] Tất cả orders đã bị hủy, đóng session ${session._id}`
+            )
+
+            // Đóng session với status 'cancelled'
+            session.status = 'cancelled'
+            session.endTime = new Date()
+            await session.save()
+
+            // Reset bàn về available
+            const table = await tableModel.findOne({
+                tableName: order.tableName,
+            })
+            if (table) {
+                table.status = 'available'
+                table.currentSessionId = null
+                table.activeCartId = null
+                await table.save()
+                console.log(
+                    `[orderService] Đã reset bàn ${order.tableName} về available`
+                )
+            }
+        }
+
+        console.log(`[orderService] Đã hủy order ${orderId} thành công`)
 
         return order
     } catch (error) {
+        console.error('[orderService] Lỗi khi hủy order:', error)
         throw error
     }
 }

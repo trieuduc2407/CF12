@@ -94,6 +94,56 @@ export const updateOrderStatus = async (req, res) => {
     }
 }
 
+export const cancelOrder = async (req, res) => {
+    try {
+        const { orderId } = req.params
+
+        const order = await orderService.cancelOrder(orderId)
+
+        const io = req.app.locals.io
+        if (io) {
+            io.emit('order:cancelled', {
+                order,
+            })
+
+            if (order.tableName) {
+                io.to(order.tableName).emit('order:updated', {
+                    order,
+                    tableName: order.tableName,
+                })
+            }
+        }
+
+        const session = await sessionService.getSessionById(order.sessionId)
+        if (
+            session &&
+            (session.status === 'completed' ||
+                session.status === 'cancelled') &&
+            io
+        ) {
+            console.log(
+                `[orderController] Session ${session._id} đã đóng (${session.status}), emit session:closed`
+            )
+            io.emit('session:closed', {
+                session,
+                tableName: order.tableName,
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Hủy order thành công',
+            data: order,
+        })
+    } catch (error) {
+        console.error('[orderController] cancelOrder error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi hủy order',
+        })
+    }
+}
+
 export const getAllSessions = async (req, res) => {
     try {
         const { status, tableName, startDate, endDate, date } = req.query
@@ -102,9 +152,7 @@ export const getAllSessions = async (req, res) => {
         if (status) filters.status = status
         if (tableName) filters.tableName = tableName
 
-        // Nếu có tham số date, ưu tiên lọc theo ngày cụ thể
         if (date) {
-            // Lọc session bắt đầu trong ngày này
             const startOfDay = new Date(date)
             startOfDay.setHours(0, 0, 0, 0)
             const endOfDay = new Date(date)

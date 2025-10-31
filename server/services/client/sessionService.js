@@ -68,6 +68,9 @@ export const getSessionDetails = async (sessionId) => {
     }
 }
 
+// Alias cho getSessionDetails
+export const getSessionById = getSessionDetails
+
 export const addOrderToSession = async (sessionId, orderId) => {
     try {
         const session = await sessionModel.findById(sessionId)
@@ -154,7 +157,7 @@ export const getSessionPaymentPreview = async (
         return {
             preview,
             currentPoints: user.points,
-            userName: user.name || null, // Trả về tên nếu có
+            userName: user.name || null,
             suggestions: {
                 maxPoints,
                 roundPricePoints,

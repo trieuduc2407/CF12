@@ -11,6 +11,7 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
     const date = formatDate(session.createdAt)
     const isActive = session.status === 'active'
     const isCompleted = session.status === 'completed'
+    const isCancelled = session.status === 'cancelled'
 
     // ===== RENDER =====
     return (
@@ -111,6 +112,11 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                                 Tích {session.pointsEarned} điểm
                             </p>
                         )}
+                    </div>
+                )}
+                {isCancelled && (
+                    <div className="text-right text-lg">
+                        <p className="font-semibold text-red-600">Đã hủy: 0đ</p>
                     </div>
                 )}
             </div>

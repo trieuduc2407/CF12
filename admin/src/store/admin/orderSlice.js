@@ -75,6 +75,17 @@ export const checkoutSession = createAsyncThunk(
     }
 )
 
+export const cancelOrder = createAsyncThunk(
+    'adminOrder/cancelOrder',
+    async (orderId, { rejectWithValue }) => {
+        try {
+            return await orderApi.cancelOrder(orderId)
+        } catch (error) {
+            return rejectWithValue(error.message || 'Không thể hủy đơn hàng')
+        }
+    }
+)
+
 const orderSlice = createSlice({
     name: 'adminOrder',
     initialState,
@@ -157,6 +168,25 @@ const orderSlice = createSlice({
                 applyFilters(state)
             })
             .addCase(checkoutSession.rejected, (state, action) => {
+                state.loading = false
+                state.error = action.payload
+            })
+            .addCase(cancelOrder.pending, (state) => {
+                state.loading = true
+                state.error = null
+            })
+            .addCase(cancelOrder.fulfilled, (state, action) => {
+                state.loading = false
+                const cancelledOrder = action.payload
+                const index = state.orders.findIndex(
+                    (order) => order._id === cancelledOrder._id
+                )
+                if (index !== -1) {
+                    state.orders[index] = cancelledOrder
+                }
+                applyFilters(state)
+            })
+            .addCase(cancelOrder.rejected, (state, action) => {
                 state.loading = false
                 state.error = action.payload
             })

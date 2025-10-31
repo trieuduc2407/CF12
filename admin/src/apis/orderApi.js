@@ -148,3 +148,31 @@ export const processPayment = async (orderId, paymentData) => {
         )
     }
 }
+
+/**
+ * Cancel order (admin only)
+ * @param {string} orderId - Order ID
+ * @returns {Promise<Object>} Cancelled order
+ */
+export const cancelOrder = async (orderId) => {
+    try {
+        const response = await axios.patch(
+            `${API_URL}/api/admin/orders/${orderId}/cancel`,
+            {},
+            { withCredentials: true }
+        )
+
+        if (response.data.success) {
+            return response.data.data
+        }
+
+        throw new Error(response.data.message || 'Không thể hủy đơn hàng')
+    } catch (error) {
+        console.error('[orderApi] cancelOrder error:', error)
+        throw new Error(
+            error.response?.data?.message ||
+                error.message ||
+                'Lỗi khi hủy đơn hàng'
+        )
+    }
+}

@@ -15,6 +15,7 @@ router.get(
 )
 router.patch('/orders/:orderId/status', orderController.updateOrderStatus)
 router.patch('/orders/:orderId/paid', orderController.markOrderAsPaid)
+router.patch('/orders/:orderId/cancel', orderController.cancelOrder)
 router.get('/sessions', orderController.getAllSessions)
 router.get('/sessions/:sessionId', orderController.getSessionById)
 router.get(
