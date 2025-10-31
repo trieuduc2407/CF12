@@ -1,27 +1,9 @@
+// ===== IMPORTS =====
 import bcrypt from 'bcrypt'
 
 import { staffModel } from '../../models/staffModel.js'
 
-export const addStaff = async (data) => {
-    try {
-        const { username, password } = data
-
-        const checkExisting = await staffModel.findOne({ username })
-        if (checkExisting) {
-            throw new Error('Username đã tồn tại')
-        }
-
-        const passwordHash = await bcrypt.hash(password, 10)
-        const newStaff = await staffModel.create({
-            ...data,
-            passwordHash,
-        })
-        return newStaff
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi thêm nhân viên: ${error.message}`)
-    }
-}
-
+// ===== READ (GET) OPERATIONS =====
 export const getStaffById = async (id) => {
     try {
         const existingStaff = await staffModel.findById(id)
@@ -52,6 +34,28 @@ export const getAllStaffs = async () => {
     }
 }
 
+// ===== CREATE OPERATIONS =====
+export const addStaff = async (data) => {
+    try {
+        const { username, password } = data
+
+        const checkExisting = await staffModel.findOne({ username })
+        if (checkExisting) {
+            throw new Error('Username đã tồn tại')
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10)
+        const newStaff = await staffModel.create({
+            ...data,
+            passwordHash,
+        })
+        return newStaff
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi thêm nhân viên: ${error.message}`)
+    }
+}
+
+// ===== UPDATE OPERATIONS =====
 export const updateStaff = async (id, data) => {
     try {
         const updatedStaff = await staffModel.findByIdAndUpdate(id, data, {
@@ -63,6 +67,7 @@ export const updateStaff = async (id, data) => {
     }
 }
 
+// ===== DELETE OPERATIONS =====
 export const deleteStaff = async (id) => {
     try {
         const existingStaff = await staffModel.findById(id)

@@ -1,19 +1,7 @@
+// ===== IMPORTS =====
 import { productModel } from '../../models/productModel.js'
 
-export const addProduct = async (data) => {
-    try {
-        const existingProduct = await productModel.findOne({ name: data.name })
-        if (existingProduct) {
-            throw new Error('Sản phẩm đã tồn tại')
-        }
-
-        const newProduct = await productModel.create(data)
-        return newProduct
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi thêm sản phẩm: ${error.message}`)
-    }
-}
-
+// ===== READ (GET) OPERATIONS =====
 export const getProductById = async (id) => {
     try {
         const product = await productModel.findById(id)
@@ -37,6 +25,33 @@ export const getAllProducts = async () => {
     }
 }
 
+export const searchProducts = async (query) => {
+    try {
+        const products = await productModel.find({
+            name: { $regex: query, $options: 'i' },
+        })
+        return products
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi tìm kiếm sản phẩm: ${error.message}`)
+    }
+}
+
+// ===== CREATE OPERATIONS =====
+export const addProduct = async (data) => {
+    try {
+        const existingProduct = await productModel.findOne({ name: data.name })
+        if (existingProduct) {
+            throw new Error('Sản phẩm đã tồn tại')
+        }
+
+        const newProduct = await productModel.create(data)
+        return newProduct
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi thêm sản phẩm: ${error.message}`)
+    }
+}
+
+// ===== UPDATE OPERATIONS =====
 export const updateProduct = async (id, data) => {
     try {
         const existingProduct = await productModel.findById(id)
@@ -58,20 +73,6 @@ export const updateProduct = async (id, data) => {
         return updatedProduct
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi cập nhật sản phẩm: ${error.message}`)
-    }
-}
-
-export const deleteProduct = async (id) => {
-    try {
-        const existingProduct = await productModel.findById(id)
-        if (!existingProduct) {
-            throw new Error('Sản phẩm không tồn tại')
-        }
-
-        await productModel.findByIdAndDelete(id)
-        return true
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi xóa sản phẩm: ${error.message}`)
     }
 }
 
@@ -109,13 +110,17 @@ export const toggleSignature = async (id) => {
     }
 }
 
-export const searchProducts = async (query) => {
+// ===== DELETE OPERATIONS =====
+export const deleteProduct = async (id) => {
     try {
-        const products = await productModel.find({
-            name: { $regex: query, $options: 'i' },
-        })
-        return products
+        const existingProduct = await productModel.findById(id)
+        if (!existingProduct) {
+            throw new Error('Sản phẩm không tồn tại')
+        }
+
+        await productModel.findByIdAndDelete(id)
+        return true
     } catch (error) {
-        throw new Error(`Xảy ra lỗi khi tìm kiếm sản phẩm: ${error.message}`)
+        throw new Error(`Xảy ra lỗi khi xóa sản phẩm: ${error.message}`)
     }
 }

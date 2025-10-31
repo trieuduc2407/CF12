@@ -1,5 +1,52 @@
+// ===== IMPORTS =====
 import * as orderService from '../../services/client/orderService.js'
 
+// ===== READ (GET) OPERATIONS =====
+export const getOrderById = async (req, res) => {
+    try {
+        const { orderId } = req.params
+
+        const order = await orderService.getOrderById(orderId)
+
+        return res.status(200).json({
+            success: true,
+            data: order,
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi lấy chi tiết order',
+        })
+    }
+}
+
+export const getOrdersByTable = async (req, res) => {
+    try {
+        const { tableName } = req.query
+        if (!tableName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin bàn',
+            })
+        }
+
+        const orders = await orderService.getOrdersByTable(tableName)
+
+        return res.status(200).json({
+            success: true,
+            data: orders,
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi lấy danh sách orders',
+        })
+    }
+}
+
+// ===== CREATE OPERATIONS =====
 export const createOrder = async (req, res) => {
     try {
         const { tableName, notes } = req.body
@@ -53,50 +100,7 @@ export const createOrder = async (req, res) => {
     }
 }
 
-export const getOrdersByTable = async (req, res) => {
-    try {
-        const { tableName } = req.query
-        if (!tableName) {
-            return res.status(400).json({
-                success: false,
-                message: 'Thiếu thông tin bàn',
-            })
-        }
-
-        const orders = await orderService.getOrdersByTable(tableName)
-
-        return res.status(200).json({
-            success: true,
-            data: orders,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi lấy danh sách orders',
-        })
-    }
-}
-
-export const getOrderById = async (req, res) => {
-    try {
-        const { orderId } = req.params
-
-        const order = await orderService.getOrderById(orderId)
-
-        return res.status(200).json({
-            success: true,
-            data: order,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi lấy chi tiết order',
-        })
-    }
-}
-
+// ===== UPDATE OPERATIONS =====
 export const cancelOrder = async (req, res) => {
     try {
         const { orderId } = req.params

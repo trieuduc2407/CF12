@@ -1,46 +1,7 @@
+// ===== IMPORTS =====
 import * as staffService from '../../services/admin/staffService.js'
 
-export const addStaff = async (req, res) => {
-    try {
-        const { name, username, password, role } = req.body
-
-        if (req.user.role === 'staff' && role !== 'employee') {
-            return res.json({
-                success: false,
-                message: 'Bạn không có quyền tạo nhân viên với vai trò này',
-            })
-        }
-
-        if (!name || !username || !password || !role) {
-            return res.json({
-                success: false,
-                message: 'Vui lòng cung cấp đầy đủ thông tin',
-            })
-        }
-
-        const newStaff = await staffService.addStaff({
-            name,
-            username,
-            password,
-            role,
-        })
-        return res.json({
-            success: true,
-            message: 'Thêm nhân viên thành công',
-            data: {
-                name: newStaff.name,
-                role: newStaff.role,
-            },
-        })
-    } catch (error) {
-        console.log(error)
-        return res.json({
-            success: false,
-            message: error.message || 'Server error',
-        })
-    }
-}
-
+// ===== READ (GET) OPERATIONS =====
 export const getStaffById = async (req, res) => {
     try {
         const { id } = req.params
@@ -85,6 +46,49 @@ export const getAllStaff = async (req, res) => {
     }
 }
 
+// ===== CREATE OPERATIONS =====
+export const addStaff = async (req, res) => {
+    try {
+        const { name, username, password, role } = req.body
+
+        if (req.user.role === 'staff' && role !== 'employee') {
+            return res.json({
+                success: false,
+                message: 'Bạn không có quyền tạo nhân viên với vai trò này',
+            })
+        }
+
+        if (!name || !username || !password || !role) {
+            return res.json({
+                success: false,
+                message: 'Vui lòng cung cấp đầy đủ thông tin',
+            })
+        }
+
+        const newStaff = await staffService.addStaff({
+            name,
+            username,
+            password,
+            role,
+        })
+        return res.json({
+            success: true,
+            message: 'Thêm nhân viên thành công',
+            data: {
+                name: newStaff.name,
+                role: newStaff.role,
+            },
+        })
+    } catch (error) {
+        console.log(error)
+        return res.json({
+            success: false,
+            message: error.message || 'Server error',
+        })
+    }
+}
+
+// ===== UPDATE OPERATIONS =====
 export const updateStaff = async (req, res) => {
     try {
         const { id } = req.params
@@ -128,6 +132,7 @@ export const updateStaff = async (req, res) => {
     }
 }
 
+// ===== DELETE OPERATIONS =====
 export const deleteStaff = async (req, res) => {
     try {
         const { id } = req.params

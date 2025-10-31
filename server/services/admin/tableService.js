@@ -1,5 +1,26 @@
+// ===== IMPORTS =====
 import { tableModel } from '../../models/tableModel.js'
 
+// ===== READ (GET) OPERATIONS =====
+export const getTableById = async (id) => {
+    try {
+        const table = await tableModel.findById(id)
+        return table
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi lấy thông tin bàn: ${error.message}`)
+    }
+}
+
+export const getAllTables = async () => {
+    try {
+        const tables = await tableModel.find()
+        return tables
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi lấy danh sách bàn: ${error.message}`)
+    }
+}
+
+// ===== CREATE OPERATIONS =====
 export const addTable = async (data) => {
     try {
         const existingTable = await tableModel.findOne({
@@ -16,27 +37,13 @@ export const addTable = async (data) => {
     }
 }
 
-export const getAllTables = async () => {
-    try {
-        const tables = await tableModel.find()
-        return tables
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi lấy danh sách bàn: ${error.message}`)
-    }
-}
-
-export const getTableById = async (id) => {
-    try {
-        const table = await tableModel.findById(id)
-        return table
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi lấy thông tin bàn: ${error.message}`)
-    }
-}
-
+// ===== UPDATE OPERATIONS =====
 export const updateTable = async (id, data) => {
     try {
-        const checkName = await tableModel.findOne({ tableName: data.tableName, _id: { $ne: id } })
+        const checkName = await tableModel.findOne({
+            tableName: data.tableName,
+            _id: { $ne: id },
+        })
         if (checkName) {
             throw new Error('Bàn đã tồn tại')
         }
@@ -47,14 +54,6 @@ export const updateTable = async (id, data) => {
         return updatedTable
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi cập nhật bàn: ${error.message}`)
-    }
-}
-
-export const deleteTable = async (id) => {
-    try {
-        await tableModel.findByIdAndDelete(id)
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi xóa bàn: ${error.message}`)
     }
 }
 
@@ -70,5 +69,14 @@ export const updateActiveCartId = async (tableName, activeCartId) => {
         throw new Error(
             `Xảy ra lỗi khi cập nhật activeCartId: ${error.message}`
         )
+    }
+}
+
+// ===== DELETE OPERATIONS =====
+export const deleteTable = async (id) => {
+    try {
+        await tableModel.findByIdAndDelete(id)
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi xóa bàn: ${error.message}`)
     }
 }

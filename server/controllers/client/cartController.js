@@ -1,6 +1,8 @@
+// ===== IMPORTS =====
 import * as cartService from '../../services/client/cartService.js'
 import * as orderService from '../../services/client/orderService.js'
 
+// ===== READ (GET) OPERATIONS =====
 export const getActiveCart = async (req, res) => {
     try {
         const { tableName } = req.params
@@ -40,6 +42,7 @@ export const getActiveCart = async (req, res) => {
     }
 }
 
+// ===== CREATE (ADD) OPERATIONS =====
 export const addItem = async (req, res) => {
     try {
         const { tableName } = req.params
@@ -75,6 +78,7 @@ export const addItem = async (req, res) => {
     }
 }
 
+// ===== UPDATE OPERATIONS =====
 export const updateItem = async (req, res) => {
     try {
         const { tableName } = req.params

@@ -1,46 +1,7 @@
+// ===== IMPORTS =====
 import * as tableService from '../../services/admin/tableService.js'
 
-export const addTable = async (req, res) => {
-    const { tableName, status } = req.body
-    if (!tableName || !status) {
-        return res.json({
-            success: false,
-            message: 'Vui lòng cung cấp đầy đủ thông tin',
-        })
-    }
-
-    try {
-        const newTable = await tableService.addTable({
-            tableName,
-            status,
-        })
-        return res.json({
-            success: true,
-            data: newTable,
-        })
-    } catch (error) {
-        return res.json({
-            success: false,
-            message: error.message || 'Server error',
-        })
-    }
-}
-
-export const getAllTables = async (req, res) => {
-    try {
-        const tables = await tableService.getAllTables()
-        return res.json({
-            success: true,
-            data: tables,
-        })
-    } catch (error) {
-        return res.json({
-            success: false,
-            message: error.message || 'Server error',
-        })
-    }
-}
-
+// ===== READ (GET) OPERATIONS =====
 export const getTableById = async (req, res) => {
     const { id } = req.params
     if (!id) {
@@ -71,6 +32,49 @@ export const getTableById = async (req, res) => {
     }
 }
 
+export const getAllTables = async (req, res) => {
+    try {
+        const tables = await tableService.getAllTables()
+        return res.json({
+            success: true,
+            data: tables,
+        })
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: error.message || 'Server error',
+        })
+    }
+}
+
+// ===== CREATE OPERATIONS =====
+export const addTable = async (req, res) => {
+    const { tableName, status } = req.body
+    if (!tableName || !status) {
+        return res.json({
+            success: false,
+            message: 'Vui lòng cung cấp đầy đủ thông tin',
+        })
+    }
+
+    try {
+        const newTable = await tableService.addTable({
+            tableName,
+            status,
+        })
+        return res.json({
+            success: true,
+            data: newTable,
+        })
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: error.message || 'Server error',
+        })
+    }
+}
+
+// ===== UPDATE OPERATIONS =====
 export const updateTable = async (req, res) => {
     const { id } = req.params
     if (!id) {
@@ -114,29 +118,6 @@ export const updateTable = async (req, res) => {
     }
 }
 
-export const deleteTable = async (req, res) => {
-    const { id } = req.params
-    if (!id) {
-        return res.json({
-            success: false,
-            message: 'Vui lòng cung cấp ID bàn',
-        })
-    }
-
-    try {
-        await tableService.deleteTable(id)
-        return res.json({
-            success: true,
-            message: 'Xóa bàn thành công',
-        })
-    } catch (error) {
-        return res.json({
-            success: false,
-            message: error.message || 'Server error',
-        })
-    }
-}
-
 export const updateActiveCartId = async (req, res) => {
     const { tableName } = req.params
     if (!tableName) {
@@ -162,6 +143,30 @@ export const updateActiveCartId = async (req, res) => {
         return res.json({
             success: true,
             data: updatedTable,
+        })
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: error.message || 'Server error',
+        })
+    }
+}
+
+// ===== DELETE OPERATIONS =====
+export const deleteTable = async (req, res) => {
+    const { id } = req.params
+    if (!id) {
+        return res.json({
+            success: false,
+            message: 'Vui lòng cung cấp ID bàn',
+        })
+    }
+
+    try {
+        await tableService.deleteTable(id)
+        return res.json({
+            success: true,
+            message: 'Xóa bàn thành công',
         })
     } catch (error) {
         return res.json({

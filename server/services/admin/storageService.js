@@ -1,20 +1,7 @@
+// ===== IMPORTS =====
 import { storageModel } from '../../models/storageModel.js'
 
-export const addIngredient = async (data) => {
-    const { name } = data
-    const existingIngredient = await storageModel.findOne({ name })
-    if (existingIngredient) {
-        throw new Error('Nguyên liệu đã tồn tại')
-    }
-
-    try {
-        const newIngredient = await storageModel.create(data)
-        return newIngredient
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi thêm nguyên liệu: ${error.message}`)
-    }
-}
-
+// ===== READ (GET) OPERATIONS =====
 export const getIngredientById = async (id) => {
     try {
         const ingredient = await storageModel.findById(id)
@@ -39,6 +26,34 @@ export const getAllIngredients = async () => {
     }
 }
 
+export const searchIngredient = async (query) => {
+    try {
+        const ingredients = await storageModel.find({
+            name: { $regex: query, $options: 'i' },
+        })
+        return ingredients
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi tìm kiếm nguyên liệu: ${error.message}`)
+    }
+}
+
+// ===== CREATE OPERATIONS =====
+export const addIngredient = async (data) => {
+    const { name } = data
+    const existingIngredient = await storageModel.findOne({ name })
+    if (existingIngredient) {
+        throw new Error('Nguyên liệu đã tồn tại')
+    }
+
+    try {
+        const newIngredient = await storageModel.create(data)
+        return newIngredient
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi thêm nguyên liệu: ${error.message}`)
+    }
+}
+
+// ===== UPDATE OPERATIONS =====
 export const updateIngredient = async (id, data) => {
     try {
         const existingIngredient = await storageModel.findById(id)
@@ -68,6 +83,7 @@ export const updateIngredient = async (id, data) => {
     }
 }
 
+// ===== DELETE OPERATIONS =====
 export const deleteIngredient = async (id) => {
     try {
         const existingIngredient = await storageModel.findById(id)
@@ -79,16 +95,5 @@ export const deleteIngredient = async (id) => {
         return true
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi xóa nguyên liệu: ${error.message}`)
-    }
-}
-
-export const searchIngredient = async (query) => {
-    try {
-        const ingredients = await storageModel.find({
-            name: { $regex: query, $options: 'i' },
-        })
-        return ingredients
-    } catch (error) {
-        throw new Error(`Xảy ra lỗi khi tìm kiếm nguyên liệu: ${error.message}`)
     }
 }
