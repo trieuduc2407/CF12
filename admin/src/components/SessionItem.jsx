@@ -34,10 +34,12 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                               : 'Đã hủy'}
                     </div>
                 </div>
-                <p className="text-wrap font-light">Bàn {session.tableName}</p>
-                <div className="font-light text-gray-500">
+                <p className="text-wrap font-light md:font-semibold">
+                    Bàn {session.tableName}
+                </p>
+                <div className="flex gap-2.5 font-light md:font-semibold">
                     <p>{date[0]}</p>
-                    <p className="hidden">{date[1]}</p>
+                    <p className="hidden md:block">{date[1]}</p>
                 </div>
             </div>
 
@@ -77,8 +79,9 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
             </div>
 
             <div className="flex items-center justify-between gap-4 border-t pt-2">
-                <p className="flex-1 text-lg font-bold">
-                    Tổng: {session.totalAmount.toLocaleString()}đ
+                <p className="flex-1 text-lg font-bold md:text-xl">
+                    Tổng: <br className="md:hidden" />{' '}
+                    {session.totalAmount.toLocaleString()}đ
                 </p>
                 {isActive && (
                     <button
@@ -93,7 +96,7 @@ const SessionItem = ({ session, onPaymentSuccess }) => {
                     </button>
                 )}
                 {isCompleted && session.finalPrice !== undefined && (
-                    <div className="text-right text-xs">
+                    <div className="text-right text-lg">
                         <p className="font-semibold text-green-600">
                             Đã thanh toán: {session.finalPrice.toLocaleString()}
                             đ

@@ -1,4 +1,5 @@
 // ===== IMPORTS =====
+import { Info } from 'lucide-react'
 import React from 'react'
 import { useSelector } from 'react-redux'
 
@@ -164,25 +165,12 @@ const OrderItem = ({ order }) => {
                         <p>{order.totalPrice.toLocaleString()}đ</p>
                     </div>
 
-                    {/* Thông báo về thanh toán */}
                     {order.status === 'served' && (
                         <div className="alert alert-info mb-5 text-sm">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                className="h-6 w-6 shrink-0 stroke-current"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                ></path>
-                            </svg>
+                            <Info />
                             <span>
-                                Để thanh toán, vui lòng đi tới{' '}
-                                <strong>Phiên & Thanh toán</strong> trong menu
+                                Để thanh toán, vui lòng chọn{' '}
+                                <strong>Thanh toán</strong> trong menu
                             </span>
                         </div>
                     )}

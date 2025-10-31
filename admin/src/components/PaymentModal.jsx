@@ -1,4 +1,5 @@
 // ===== IMPORTS =====
+import { Check } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
@@ -208,10 +209,10 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
         <dialog id={modalId} className="modal">
             <div className="modal-box max-w-md bg-white">
                 <h3 className="mb-4 text-center text-lg font-bold">
-                    💳 Thanh toán - Bàn {session.tableName}
+                    Thanh toán - Bàn {session.tableName}
                 </h3>
                 <p className="mb-3 text-center text-sm text-gray-600">
-                    Session #{session._id.slice(-6).toUpperCase()} |{' '}
+                    Phiên #{session._id.slice(-6).toUpperCase()} |{' '}
                     {session.orders?.length || 0} đơn gọi món
                 </p>
 
@@ -252,7 +253,7 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                         </label>
                         <input
                             type="text"
-                            className="input input-bordered w-full bg-white"
+                            className="input input-bordered w-full bg-white disabled:bg-gray-100 disabled:text-gray-700"
                             placeholder={
                                 existingUserName
                                     ? existingUserName
@@ -261,10 +262,11 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={existingUserName ? true : false}
+                            readOnly={existingUserName ? true : false}
                         />
                         {existingUserName && (
-                            <p className="mt-1 text-xs text-gray-600">
-                                ✓ Đã có tên trong hệ thống
+                            <p className="mt-1 flex items-center text-xs text-green-600">
+                                <Check /> Đã có tên trong hệ thống
                             </p>
                         )}
                     </div>

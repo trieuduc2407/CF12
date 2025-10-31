@@ -103,7 +103,7 @@ const Sessions = () => {
 
             {error && (
                 <div className="alert alert-error mb-4">
-                    <span>❌ {error}</span>
+                    <span>{error}</span>
                 </div>
             )}
 
