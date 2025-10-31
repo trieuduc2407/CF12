@@ -29,7 +29,7 @@ const me = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log(error)
+        console.error('[adminAuthController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -81,7 +81,7 @@ const loginStaff = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log(error)
+        console.error('[adminAuthController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -96,7 +96,7 @@ const logoutStaff = async (req, res) => {
             message: 'Đăng xuất thành công',
         })
     } catch (error) {
-        console.log(error)
+        console.error('[adminAuthController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -133,7 +133,7 @@ const changePassword = async (req, res) => {
             message: 'Đổi mật khẩu thành công',
         })
     } catch (error) {
-        console.log(error)
+        console.error('[adminAuthController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -142,3 +142,4 @@ const changePassword = async (req, res) => {
 }
 
 export { loginStaff, logoutStaff, me, changePassword }
+

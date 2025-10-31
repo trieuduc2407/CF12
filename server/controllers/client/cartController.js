@@ -62,7 +62,10 @@ export const addItem = async (req, res) => {
                     })
                 }
             } catch (socketError) {
-                console.log('Socket emit error:', socketError)
+                console.error(
+                    '[cartController] Socket emit error:',
+                    socketError
+                )
             }
         }
 

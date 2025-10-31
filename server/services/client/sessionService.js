@@ -360,3 +360,4 @@ export const getAllSessions = async (filters = {}) => {
         throw error
     }
 }
+

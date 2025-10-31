@@ -138,9 +138,6 @@ export const socketHandler = (io, app) => {
 
                     unlockedItems.forEach(({ tableName, itemId }) => {
                         if (tableName) {
-                            console.log(
-                                `[socketHandler] Đang broadcast unlock cho ${itemId} ở bàn ${tableName}`
-                            )
                             io.to(tableName).emit('cart:itemUnlocked', {
                                 itemId,
                                 locked: false,

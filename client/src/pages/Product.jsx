@@ -282,6 +282,7 @@ const Product = () => {
                                 className="flex w-20 justify-around"
                                 formData={formData}
                                 setFormData={setFormData}
+                                maxQuantity={product.maxQuantity}
                             />
                         </div>
                     </form>
@@ -291,6 +292,7 @@ const Product = () => {
                             className="hidden items-center justify-between md:flex md:w-[35%]"
                             formData={formData}
                             setFormData={setFormData}
+                            maxQuantity={product.maxQuantity}
                         />
                         <button
                             className="btn w-[90%] rounded-lg border-0 bg-amber-500 text-white md:w-[55%]"

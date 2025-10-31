@@ -26,7 +26,7 @@ const staffAuthMiddleware = (req, res, next) => {
         req.user = decoded
         next()
     } catch (error) {
-        console.log(error)
+        console.error('[staffAuthMiddleware] error:', error)
         res.json({
             success: false,
             message: 'Token không hợp lệ',
@@ -35,3 +35,4 @@ const staffAuthMiddleware = (req, res, next) => {
 }
 
 export { staffAuthMiddleware }
+

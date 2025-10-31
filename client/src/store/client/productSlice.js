@@ -35,7 +35,16 @@ export const getAllProducts = createAsyncThunk(
 const productSlice = createSlice({
     name: 'clientProduct',
     initialState,
-    reducers: {},
+    reducers: {
+        updateProductAvailability: (state, action) => {
+            const { productId, available, maxQuantity } = action.payload
+            const product = state.products.find((p) => p._id === productId)
+            if (product) {
+                product.available = available
+                product.maxQuantity = maxQuantity
+            }
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(getAllProducts.pending, (state) => {
@@ -69,5 +78,7 @@ const productSlice = createSlice({
             })
     },
 })
+
+export const { updateProductAvailability } = productSlice.actions
 
 export default productSlice.reducer

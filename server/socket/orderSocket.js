@@ -26,31 +26,19 @@ export const orderSocket = (io, socket) => {
                 return
             }
 
-            console.log(
-                `📝 [orderSocket] Status update request: order=${orderId}, status=${status}, staff=${staffId}`
-            )
-
             const updatedOrder = await orderService.updateOrderStatus(
                 orderId,
                 status,
                 staffId
             )
 
-            // Broadcast order status update to the table
             if (updatedOrder.tableName) {
-                console.log(
-                    `[orderSocket] Đang broadcast order:updated đến bàn ${updatedOrder.tableName}`
-                )
                 io.to(updatedOrder.tableName).emit('order:updated', {
                     order: updatedOrder,
                     tableName: updatedOrder.tableName,
                 })
             }
 
-            // Broadcast to admin panel
-            console.log(
-                `[orderSocket] Đang broadcast order:statusChanged đến admin`
-            )
             io.emit('order:statusChanged', {
                 order: updatedOrder,
             })
@@ -84,21 +72,13 @@ export const orderSocket = (io, socket) => {
                 return
             }
 
-            console.log(`[orderSocket] Cancel request: order=${orderId}`)
-
             const cancelledOrder = await orderService.cancelOrder(orderId)
 
-            console.log(
-                `[orderSocket] Đang broadcast order:cancelled đến admin`
-            )
             io.emit('order:cancelled', {
                 order: cancelledOrder,
             })
 
             if (cancelledOrder.tableName) {
-                console.log(
-                    `[orderSocket] Đang broadcast order:updated đến bàn ${cancelledOrder.tableName}`
-                )
                 io.to(cancelledOrder.tableName).emit('order:updated', {
                     order: cancelledOrder,
                     tableName: cancelledOrder.tableName,

@@ -1,4 +1,6 @@
 // ===== IMPORTS =====
+import { calculateMaxQuantity } from '../../helpers/admin/checkProductAvailability.js'
+import { productModel } from '../../models/productModel.js'
 import * as orderService from '../../services/client/orderService.js'
 
 // ===== READ (GET) OPERATIONS =====
@@ -13,7 +15,7 @@ export const getOrderById = async (req, res) => {
             data: order,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[orderController] error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi lấy chi tiết order',
@@ -38,7 +40,7 @@ export const getOrdersByTable = async (req, res) => {
             data: orders,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[orderController] error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi lấy danh sách orders',
@@ -57,10 +59,27 @@ export const createOrder = async (req, res) => {
             })
         }
 
-        const { order, storageWarnings } =
+        const { order, storageWarnings, affectedProducts } =
             await orderService.createOrderFromCart(tableName, notes || '')
+
         const io = req.app.locals.io
         if (io) {
+            // Emit affected products availability changes
+            if (affectedProducts && affectedProducts.length > 0) {
+                for (const productId of affectedProducts) {
+                    const product = await productModel.findById(productId)
+                    const maxQuantity = await calculateMaxQuantity(productId)
+
+                    io.emit('product:availability-changed', {
+                        productId: product._id,
+                        productName: product.name,
+                        available: product.available,
+                        maxQuantity,
+                    })
+                }
+            }
+
+            // Emit order created
             io.emit('order:new', {
                 order,
                 tableName,
@@ -70,12 +89,14 @@ export const createOrder = async (req, res) => {
                 order,
             })
 
+            // Emit storage warnings
             if (storageWarnings && storageWarnings.length > 0) {
                 storageWarnings.forEach((warning) => {
                     io.emit('storage:warning', warning)
                 })
             }
 
+            // Emit cart cleared
             io.to(tableName).emit('cart:updated', {
                 cart: {
                     items: [],
@@ -90,9 +111,21 @@ export const createOrder = async (req, res) => {
             success: true,
             message: 'Gửi yêu cầu gọi món thành công',
             data: order,
+            storageWarnings,
         })
     } catch (error) {
         console.error('[orderController] createOrder error:', error)
+
+        // Handle INSUFFICIENT_INGREDIENTS error
+        if (error.code === 'INSUFFICIENT_INGREDIENTS') {
+            return res.status(400).json({
+                success: false,
+                code: 'INSUFFICIENT_INGREDIENTS',
+                message: error.message,
+                unavailableItems: error.unavailableItems,
+            })
+        }
+
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi tạo order',
@@ -132,3 +165,4 @@ export const cancelOrder = async (req, res) => {
         })
     }
 }
+

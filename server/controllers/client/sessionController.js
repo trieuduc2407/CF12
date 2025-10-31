@@ -29,7 +29,7 @@ export const getActiveSession = async (req, res) => {
             data: session,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[sessionController] error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi lấy session',
@@ -60,7 +60,7 @@ export const createSession = async (req, res) => {
             data: session,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[sessionController] error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi tạo session',
@@ -94,7 +94,7 @@ export const checkoutSession = async (req, res) => {
             data: session,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[sessionController] error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi thanh toán',
@@ -117,10 +117,11 @@ export const getSessionDetails = async (req, res) => {
             data: session,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[sessionController] error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi lấy chi tiết session',
         })
     }
 }
+

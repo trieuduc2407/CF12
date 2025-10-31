@@ -21,7 +21,7 @@ export const getProductById = async (req, res) => {
             data: product,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] getProductById error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -37,7 +37,7 @@ export const getAllProducts = async (req, res) => {
             data: products,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -61,7 +61,7 @@ export const searchProduct = async (req, res) => {
             data: products,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -99,7 +99,7 @@ export const addProduct = async (req, res) => {
             data: newProduct,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -180,7 +180,7 @@ export const updateProduct = async (req, res) => {
             data: updatedProduct,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -204,7 +204,7 @@ export const toggleSignature = async (req, res) => {
             message: result.message,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -231,7 +231,7 @@ export const deleteProduct = async (req, res) => {
             message: 'Xóa sản phẩm thành công',
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',

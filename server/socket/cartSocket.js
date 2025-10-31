@@ -38,10 +38,6 @@ export const cartSocket = (io, socket) => {
             if (!payload || typeof payload !== 'object') return
             const { tableName, clientId, itemId } = payload
 
-            console.log(
-                `[cartSocket] Yêu cầu khóa: item=${itemId}, client=${clientId}, bàn=${tableName}`
-            )
-
             const result = await cartService.lockItem(
                 tableName,
                 clientId,
@@ -49,9 +45,6 @@ export const cartSocket = (io, socket) => {
             )
 
             if (tableName) {
-                console.log(
-                    `[cartSocket] Đang broadcast cart:itemLocked cho ${itemId}`
-                )
                 io.to(tableName).emit('cart:itemLocked', {
                     itemId,
                     locked: true,
@@ -95,37 +88,16 @@ export const cartSocket = (io, socket) => {
             if (!payload || typeof payload !== 'object') return
             const { tableName, clientId, ...data } = payload
 
-            console.log(
-                `[cartSocket] Yêu cầu cập nhật: item=${data.itemId || data.originalItemId}, client=${clientId}`
-            )
-
             const updatedCart = await cartService.updateItem(
                 tableName,
                 clientId,
                 data
             )
 
-            console.log(
-                `[cartSocket] Đã cập nhật cart items:`,
-                JSON.stringify(
-                    updatedCart.items?.map((i) => ({
-                        itemId: i.itemId,
-                        locked: i.locked,
-                        lockedBy: i.lockedBy,
-                    }))
-                )
-            )
-
             if (tableName) {
-                console.log(
-                    `[cartSocket] Đang broadcast cart:updated đến bàn ${tableName}`
-                )
                 io.to(tableName).emit('cart:updated', updatedCart)
 
                 const updatedItemId = data.itemId || data.originalItemId
-                console.log(
-                    `[cartSocket] Đang broadcast cart:itemUnlocked cho ${updatedItemId}`
-                )
                 io.to(tableName).emit('cart:itemUnlocked', {
                     itemId: updatedItemId,
                     locked: false,
@@ -239,10 +211,6 @@ export const cartSocket = (io, socket) => {
             if (!payload || typeof payload !== 'object') return
             const { tableName, clientId, userId } = payload
 
-            console.log(
-                `[cartSocket] User đăng nhập: bàn=${tableName}, client=${clientId}, user=${userId}`
-            )
-
             const updatedCart = await cartService.updateClientUserId(
                 tableName,
                 clientId,
@@ -250,9 +218,6 @@ export const cartSocket = (io, socket) => {
             )
 
             if (tableName && updatedCart) {
-                console.log(
-                    `[cartSocket] Đang broadcast user:loggedIn đến bàn ${tableName}`
-                )
                 io.to(tableName).emit('user:loggedIn', {
                     clientId,
                     userId,

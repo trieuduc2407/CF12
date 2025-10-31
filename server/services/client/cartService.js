@@ -1,3 +1,4 @@
+import { calculateMaxQuantity } from '../../helpers/admin/checkProductAvailability.js'
 import { calculateItemSubTotal } from '../../helpers/client/calculateItemSubtotal.js'
 import { transformCartResponse } from '../../helpers/client/transformCartResponse.js'
 import { cartModel } from '../../models/cartModel.js'
@@ -52,10 +53,23 @@ export const addItem = async (tableName, data) => {
         if (!product) throw new Error('Sản phẩm không tồn tại')
         if (!product.available) throw new Error('Sản phẩm hiện không khả dụng')
 
+        // VALIDATE: Check maxQuantity
         const existingItem = cart.items.find((i) => i.itemId === data.itemId)
+        const currentQuantityInCart = existingItem ? existingItem.quantity : 0
+        const requestedQuantity = data.quantity || 1
+        const newTotalQuantity = currentQuantityInCart + requestedQuantity
+
+        const maxQuantity = await calculateMaxQuantity(data.productId)
+
+        if (newTotalQuantity > maxQuantity) {
+            throw new Error(
+                `Chỉ có thể thêm tối đa ${maxQuantity} phần. Hiện tại giỏ đã có ${currentQuantityInCart} phần.`
+            )
+        }
+
         if (existingItem) {
             // Merge: increase quantity
-            const newQuantity = existingItem.quantity + (data.quantity || 1)
+            const newQuantity = newTotalQuantity
             const subTotal = calculateItemSubTotal(product, {
                 ...existingItem,
                 quantity: newQuantity,
@@ -96,7 +110,7 @@ export const addItem = async (tableName, data) => {
 
         return transformCartResponse(populatedCart)
     } catch (error) {
-        console.log(error)
+        console.error('[cartService] error:', error)
         throw new Error(
             `Xảy ra lỗi khi thêm sản phẩm vào giỏ hàng: ${error.message}`
         )
@@ -163,7 +177,7 @@ export const addItemViaSocket = async ({ tableName, clientId, data }) => {
 
         return transformCartResponse(populatedCart)
     } catch (error) {
-        console.log(error)
+        console.error('[cartService] error:', error)
         throw new Error(
             `Xảy ra lỗi khi thêm sản phẩm vào giỏ hàng: ${error.message}`
         )
@@ -195,6 +209,19 @@ export const updateItem = async (tableName, clientId, data) => {
         }
 
         const updatedQuantity = data.quantity ?? item.quantity
+
+        // VALIDATE: Check maxQuantity
+        if (data.quantity !== undefined) {
+            const maxQuantity = await calculateMaxQuantity(item.productId)
+
+            if (updatedQuantity > maxQuantity) {
+                throw new Error(`Chỉ có thể đặt tối đa ${maxQuantity} phần`)
+            }
+
+            if (updatedQuantity < 1) {
+                throw new Error('Số lượng phải ít nhất là 1')
+            }
+        }
         const updatedSize = data.selectedSize ?? item.selectedSize
         const updatedTemp = data.selectedTemperature ?? item.selectedTemperature
 
@@ -276,21 +303,9 @@ export const updateItem = async (tableName, clientId, data) => {
             .findById(cart._id)
             .populate('items.productId', 'name basePrice imageUrl sizes')
 
-        console.log(
-            `📦 [cartService] updateItem result - items lock status:`,
-            JSON.stringify(
-                populatedCart.items.map((i) => ({
-                    itemId: i.itemId,
-                    locked: i.locked,
-                    lockedBy: i.lockedBy,
-                }))
-            )
-        )
-
-        // Strip lock state from response - lock management is done via separate events
         return transformCartResponse(populatedCart, true)
     } catch (error) {
-        console.log(error)
+        console.error('[cartService] error:', error)
         throw new Error(
             `Xảy ra lỗi khi cập nhật sản phẩm trong giỏ hàng: ${error.message}`
         )
@@ -315,10 +330,6 @@ export const lockItem = async (tableName, clientId, itemId) => {
             throw new Error('Sản phẩm đang được người khác chỉnh sửa')
         }
 
-        console.log(
-            `[cartService] Đang khóa item ${itemId} bởi client ${clientId}`
-        )
-
         await cartModel.findOneAndUpdate(
             { _id: cart._id, 'items.itemId': itemId },
             {
@@ -329,11 +340,9 @@ export const lockItem = async (tableName, clientId, itemId) => {
             }
         )
 
-        console.log(`[cartService] Đã khóa item ${itemId} trong DB`)
-
         return { itemId, locked: true, lockedBy: clientId }
     } catch (error) {
-        console.log(error)
+        console.error('[cartService] error:', error)
         throw new Error(
             `Xảy ra lỗi khi khóa sản phẩm trong giỏ hàng: ${error.message}`
         )
@@ -354,7 +363,6 @@ export const unlockItem = async (tableName, clientId, itemId) => {
         const item = cart.items.find((i) => i.itemId === itemId)
 
         if (!item) {
-            console.log('Item không tồn tại, bỏ qua unlock:', itemId)
             return { itemId, locked: false, lockedBy: null }
         }
 
@@ -374,7 +382,7 @@ export const unlockItem = async (tableName, clientId, itemId) => {
 
         return { itemId, locked: false, lockedBy: null }
     } catch (error) {
-        console.log(error)
+        console.error('[cartService] error:', error)
         throw new Error(
             `Xảy ra lỗi khi mở khóa sản phẩm trong giỏ hàng: ${error.message}`
         )
@@ -385,19 +393,12 @@ export const unlockAllItemsByClient = async (clientId) => {
     try {
         if (!clientId) return
 
-        console.log(
-            `🔓 [cartService] Unlocking all items for client: ${clientId}`
-        )
-
         const carts = await cartModel.find({
             status: 'active',
             'items.lockedBy': clientId,
         })
 
         if (!carts || carts.length === 0) {
-            console.log(
-                `[cartService] Không tìm thấy item bị khóa cho client ${clientId}`
-            )
             return []
         }
 
@@ -429,10 +430,6 @@ export const unlockAllItemsByClient = async (clientId) => {
                         itemId: item.itemId,
                     })
                 })
-
-                console.log(
-                    `[cartService] Đã mở khóa ${itemsToUnlock.length} items trong cart ${cart._id}`
-                )
             }
         }
 
@@ -482,7 +479,7 @@ export const deleteItem = async (tableName, clientId, itemId) => {
 
         return transformCartResponse(populatedCart)
     } catch (error) {
-        console.log(error)
+        console.error('[cartService] error:', error)
         throw new Error(
             `Xảy ra lỗi khi xóa sản phẩm khỏi giỏ hàng: ${error.message}`
         )
@@ -507,15 +504,9 @@ export const updateClientUserId = async (tableName, clientId, userId) => {
                     items: [],
                     totalPrice: 0,
                 })
-                console.log(
-                    `[cartService] Đã tạo cart mới cho bàn ${tableName} với userId ${userId}`
-                )
                 return transformCartResponse(cart)
             } catch (createError) {
                 if (createError.code === 11000) {
-                    console.log(
-                        `[cartService] Cart đã tồn tại (race condition), đang fetch lại cart hiện có`
-                    )
                     cart = await cartModel.findOne({
                         tableId: table._id,
                         status: 'active',
@@ -535,14 +526,8 @@ export const updateClientUserId = async (tableName, clientId, userId) => {
 
         if (clientIndex === -1) {
             cart.clients.push({ clientId, userId })
-            console.log(
-                `[cartService] Đã thêm client ${clientId} với userId ${userId}`
-            )
         } else {
             cart.clients[clientIndex].userId = userId
-            console.log(
-                `[cartService] Đã cập nhật userId cho client ${clientId} thành ${userId}`
-            )
         }
 
         await cart.save()

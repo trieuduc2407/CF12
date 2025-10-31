@@ -22,7 +22,7 @@ export const getStaffById = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log(error)
+        console.error('[staffController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -38,7 +38,7 @@ export const getAllStaff = async (req, res) => {
             data: staffs,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[staffController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -80,7 +80,7 @@ export const addStaff = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log(error)
+        console.error('[staffController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -124,7 +124,7 @@ export const updateStaff = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log(error)
+        console.error('[staffController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -166,7 +166,7 @@ export const deleteStaff = async (req, res) => {
             message: 'Xóa nhân viên thành công',
         })
     } catch (error) {
-        console.log(error)
+        console.error('[staffController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',

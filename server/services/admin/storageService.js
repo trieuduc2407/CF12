@@ -1,4 +1,5 @@
 // ===== IMPORTS =====
+import { updateProductsUsingStorage } from '../../helpers/admin/checkProductAvailability.js'
 import { storageModel } from '../../models/storageModel.js'
 
 // ===== READ (GET) OPERATIONS =====
@@ -69,6 +70,8 @@ export const updateIngredient = async (id, data) => {
             throw new Error('Tên nguyên liệu đã tồn tại')
         }
 
+        const oldQuantity = existingIngredient.quantity
+
         const updatedIngredient = await storageModel.findByIdAndUpdate(
             id,
             {
@@ -77,7 +80,22 @@ export const updateIngredient = async (id, data) => {
             },
             { new: true }
         )
-        return updatedIngredient
+
+        const newQuantity = updatedIngredient.quantity
+        const threshold = updatedIngredient.threshold
+
+        let changedProducts = []
+
+        if (
+            newQuantity <= threshold ||
+            (oldQuantity <= threshold && newQuantity > threshold)
+        ) {
+            changedProducts = await updateProductsUsingStorage(
+                updatedIngredient._id
+            )
+        }
+
+        return { storage: updatedIngredient, changedProducts }
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi cập nhật nguyên liệu: ${error.message}`)
     }

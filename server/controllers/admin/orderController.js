@@ -1,11 +1,34 @@
+// ===== IMPORTS =====
+import { calculateMaxQuantity } from '../../helpers/admin/checkProductAvailability.js'
 import {
     calculatePaymentPreview,
     getMaxUsablePoints,
     getPointsForRoundPrice,
 } from '../../helpers/client/calculatePoints.js'
+import { productModel } from '../../models/productModel.js'
 import * as orderService from '../../services/client/orderService.js'
 import * as sessionService from '../../services/client/sessionService.js'
 import { findUserByPhone } from '../../services/client/userService.js'
+
+// ===== READ (GET) - ORDERS =====
+export const getOrderById = async (req, res) => {
+    try {
+        const { orderId } = req.params
+
+        const order = await orderService.getOrderById(orderId)
+
+        return res.status(200).json({
+            success: true,
+            data: order,
+        })
+    } catch (error) {
+        console.error('[orderController] getOrderById error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi lấy chi tiết order',
+        })
+    }
+}
 
 export const getAllOrders = async (req, res) => {
     try {
@@ -25,301 +48,10 @@ export const getAllOrders = async (req, res) => {
             data: orders,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[orderController] getAllOrders error:', error)
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi lấy danh sách orders',
-        })
-    }
-}
-
-export const getOrderById = async (req, res) => {
-    try {
-        const { orderId } = req.params
-
-        const order = await orderService.getOrderById(orderId)
-
-        return res.status(200).json({
-            success: true,
-            data: order,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi lấy chi tiết order',
-        })
-    }
-}
-
-export const updateOrderStatus = async (req, res) => {
-    try {
-        const { orderId } = req.params
-        const { status } = req.body
-        const staffId = req.staff?._id
-
-        if (!status) {
-            return res.status(400).json({
-                success: false,
-                message: 'Thiếu thông tin trạng thái',
-            })
-        }
-
-        const order = await orderService.updateOrderStatus(
-            orderId,
-            status,
-            staffId
-        )
-
-        const io = req.app.locals.io
-        if (io) {
-            io.to(order.tableName).emit('order:statusUpdated', {
-                orderId: order._id,
-                orderNumber: order.orderNumber,
-                status: order.status,
-            })
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: 'Cập nhật trạng thái order thành công',
-            data: order,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi cập nhật trạng thái order',
-        })
-    }
-}
-
-export const cancelOrder = async (req, res) => {
-    try {
-        const { orderId } = req.params
-
-        const order = await orderService.cancelOrder(orderId)
-
-        const io = req.app.locals.io
-        if (io) {
-            io.emit('order:cancelled', {
-                order,
-            })
-
-            if (order.tableName) {
-                io.to(order.tableName).emit('order:updated', {
-                    order,
-                    tableName: order.tableName,
-                })
-            }
-        }
-
-        const session = await sessionService.getSessionById(order.sessionId)
-        if (
-            session &&
-            (session.status === 'completed' ||
-                session.status === 'cancelled') &&
-            io
-        ) {
-            console.log(
-                `[orderController] Session ${session._id} đã đóng (${session.status}), emit session:closed`
-            )
-            io.emit('session:closed', {
-                session,
-                tableName: order.tableName,
-            })
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: 'Hủy order thành công',
-            data: order,
-        })
-    } catch (error) {
-        console.error('[orderController] cancelOrder error:', error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi hủy order',
-        })
-    }
-}
-
-export const getAllSessions = async (req, res) => {
-    try {
-        const { status, tableName, startDate, endDate, date } = req.query
-
-        const filters = {}
-        if (status) filters.status = status
-        if (tableName) filters.tableName = tableName
-
-        if (date) {
-            const startOfDay = new Date(date)
-            startOfDay.setHours(0, 0, 0, 0)
-            const endOfDay = new Date(date)
-            endOfDay.setHours(23, 59, 59, 999)
-
-            filters.startDate = startOfDay.toISOString()
-            filters.endDate = endOfDay.toISOString()
-        } else {
-            if (startDate) filters.startDate = startDate
-            if (endDate) filters.endDate = endDate
-        }
-
-        const sessions = await sessionService.getAllSessions(filters)
-
-        return res.status(200).json({
-            success: true,
-            data: sessions,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi lấy danh sách sessions',
-        })
-    }
-}
-
-export const getSessionById = async (req, res) => {
-    try {
-        const { sessionId } = req.params
-
-        const session = await sessionService.getSessionDetails(sessionId)
-
-        return res.status(200).json({
-            success: true,
-            data: session,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi lấy chi tiết session',
-        })
-    }
-}
-
-export const cancelSession = async (req, res) => {
-    try {
-        const { sessionId } = req.params
-
-        const session = await sessionService.cancelSession(sessionId)
-
-        return res.status(200).json({
-            success: true,
-            message: 'Hủy session thành công',
-            data: session,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi hủy session',
-        })
-    }
-}
-
-export const getSessionPaymentPreview = async (req, res) => {
-    try {
-        const { sessionId } = req.params
-        const { phone, pointsToUse = 0 } = req.query
-
-        if (!phone) {
-            return res.status(400).json({
-                success: false,
-                message: 'Thiếu thông tin số điện thoại',
-            })
-        }
-
-        const result = await sessionService.getSessionPaymentPreview(
-            sessionId,
-            phone,
-            parseInt(pointsToUse)
-        )
-
-        return res.status(200).json({
-            success: true,
-            data: result,
-        })
-    } catch (error) {
-        console.error(
-            '[orderController] getSessionPaymentPreview error:',
-            error
-        )
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi tính toán preview',
-        })
-    }
-}
-
-export const checkoutSession = async (req, res) => {
-    try {
-        const { sessionId } = req.params
-        const { phone, name, pointsToUse = 0 } = req.body
-
-        if (!phone || !name) {
-            return res.status(400).json({
-                success: false,
-                message: 'Thiếu thông tin số điện thoại hoặc tên khách hàng',
-            })
-        }
-
-        const result = await sessionService.checkoutSession(
-            sessionId,
-            phone,
-            name,
-            pointsToUse
-        )
-
-        const io = req.app.locals.io
-        if (io) {
-            // Broadcast session:completed tới bàn
-            io.to(result.session.tableName).emit('session:completed', {
-                sessionId: result.session._id,
-                pointsUsed: result.pointsUsed,
-                pointsDiscount: result.pointsDiscount,
-                finalPrice: result.finalPrice,
-                pointsEarned: result.pointsEarned,
-                totalPoints: result.totalPoints,
-            })
-
-            // Broadcast tới admin
-            io.emit('session:statusChanged', {
-                session: result.session,
-            })
-        }
-
-        // Tạo message động
-        let message = 'Thanh toán thành công'
-        if (result.pointsUsed > 0) {
-            message += `, sử dụng ${result.pointsUsed} điểm (-${result.pointsDiscount.toLocaleString()} VNĐ)`
-        }
-        if (result.pointsEarned > 0) {
-            message += `, tích ${result.pointsEarned} điểm`
-        }
-
-        return res.status(200).json({
-            success: true,
-            message,
-            data: {
-                session: result.session,
-                payment: {
-                    totalPrice: result.session.totalAmount,
-                    pointsUsed: result.pointsUsed,
-                    pointsDiscount: result.pointsDiscount,
-                    finalPrice: result.finalPrice,
-                    pointsEarned: result.pointsEarned,
-                    totalPoints: result.totalPoints,
-                    pointsChange: result.pointsChange,
-                },
-            },
-        })
-    } catch (error) {
-        console.error('[orderController] checkoutSession error:', error)
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Lỗi khi thanh toán session',
         })
     }
 }
@@ -344,7 +76,6 @@ export const getPaymentPreview = async (req, res) => {
             })
         }
 
-        // Lấy thông tin user
         const user = await findUserByPhone(phone)
 
         if (!user) {
@@ -402,6 +133,139 @@ export const getPaymentPreview = async (req, res) => {
     }
 }
 
+// ===== READ (GET) - SESSIONS =====
+export const getSessionById = async (req, res) => {
+    try {
+        const { sessionId } = req.params
+
+        const session = await sessionService.getSessionDetails(sessionId)
+
+        return res.status(200).json({
+            success: true,
+            data: session,
+        })
+    } catch (error) {
+        console.error('[orderController] getSessionById error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi lấy chi tiết session',
+        })
+    }
+}
+
+export const getAllSessions = async (req, res) => {
+    try {
+        const { status, tableName, startDate, endDate, date } = req.query
+
+        const filters = {}
+        if (status) filters.status = status
+        if (tableName) filters.tableName = tableName
+
+        if (date) {
+            const startOfDay = new Date(date)
+            startOfDay.setHours(0, 0, 0, 0)
+            const endOfDay = new Date(date)
+            endOfDay.setHours(23, 59, 59, 999)
+
+            filters.startDate = startOfDay.toISOString()
+            filters.endDate = endOfDay.toISOString()
+        } else {
+            if (startDate) filters.startDate = startDate
+            if (endDate) filters.endDate = endDate
+        }
+
+        const sessions = await sessionService.getAllSessions(filters)
+
+        return res.status(200).json({
+            success: true,
+            data: sessions,
+        })
+    } catch (error) {
+        console.error('[orderController] getAllSessions error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi lấy danh sách sessions',
+        })
+    }
+}
+
+export const getSessionPaymentPreview = async (req, res) => {
+    try {
+        const { sessionId } = req.params
+        const { phone, pointsToUse = 0 } = req.query
+
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin số điện thoại',
+            })
+        }
+
+        const result = await sessionService.getSessionPaymentPreview(
+            sessionId,
+            phone,
+            parseInt(pointsToUse)
+        )
+
+        return res.status(200).json({
+            success: true,
+            data: result,
+        })
+    } catch (error) {
+        console.error(
+            '[orderController] getSessionPaymentPreview error:',
+            error
+        )
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi tính toán preview',
+        })
+    }
+}
+
+// ===== UPDATE - ORDERS =====
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params
+        const { status } = req.body
+        const staffId = req.staff?._id
+
+        if (!status) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin trạng thái',
+            })
+        }
+
+        const order = await orderService.updateOrderStatus(
+            orderId,
+            status,
+            staffId
+        )
+
+        const io = req.app.locals.io
+        if (io) {
+            io.to(order.tableName).emit('order:statusUpdated', {
+                orderId: order._id,
+                orderNumber: order.orderNumber,
+                status: order.status,
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Cập nhật trạng thái order thành công',
+            data: order,
+        })
+    } catch (error) {
+        console.error('[orderController] updateOrderStatus error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi cập nhật trạng thái order',
+        })
+    }
+}
+
 export const markOrderAsPaid = async (req, res) => {
     try {
         const { orderId } = req.params
@@ -446,7 +310,6 @@ export const markOrderAsPaid = async (req, res) => {
             })
         }
 
-        // Tạo message động dựa trên việc dùng điểm
         let message = 'Đã thanh toán thành công'
         if (pointsUsed > 0) {
             message += `, sử dụng ${pointsUsed} điểm (-${pointsDiscount.toLocaleString()} VNĐ)`
@@ -476,6 +339,161 @@ export const markOrderAsPaid = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error.message || 'Lỗi khi thanh toán order',
+        })
+    }
+}
+
+// ===== UPDATE - SESSIONS =====
+export const checkoutSession = async (req, res) => {
+    try {
+        const { sessionId } = req.params
+        const { phone, name, pointsToUse = 0 } = req.body
+
+        if (!phone || !name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin số điện thoại hoặc tên khách hàng',
+            })
+        }
+
+        const result = await sessionService.checkoutSession(
+            sessionId,
+            phone,
+            name,
+            pointsToUse
+        )
+
+        const io = req.app.locals.io
+        if (io) {
+            io.to(result.session.tableName).emit('session:completed', {
+                sessionId: result.session._id,
+                pointsUsed: result.pointsUsed,
+                pointsDiscount: result.pointsDiscount,
+                finalPrice: result.finalPrice,
+                pointsEarned: result.pointsEarned,
+                totalPoints: result.totalPoints,
+            })
+
+            io.emit('session:statusChanged', {
+                session: result.session,
+            })
+        }
+
+        let message = 'Thanh toán thành công'
+        if (result.pointsUsed > 0) {
+            message += `, sử dụng ${result.pointsUsed} điểm (-${result.pointsDiscount.toLocaleString()} VNĐ)`
+        }
+        if (result.pointsEarned > 0) {
+            message += `, tích ${result.pointsEarned} điểm`
+        }
+
+        return res.status(200).json({
+            success: true,
+            message,
+            data: {
+                session: result.session,
+                payment: {
+                    totalPrice: result.session.totalAmount,
+                    pointsUsed: result.pointsUsed,
+                    pointsDiscount: result.pointsDiscount,
+                    finalPrice: result.finalPrice,
+                    pointsEarned: result.pointsEarned,
+                    totalPoints: result.totalPoints,
+                    pointsChange: result.pointsChange,
+                },
+            },
+        })
+    } catch (error) {
+        console.error('[orderController] checkoutSession error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi thanh toán session',
+        })
+    }
+}
+
+// ===== DELETE - ORDERS =====
+export const cancelOrder = async (req, res) => {
+    try {
+        const { orderId } = req.params
+
+        const { order, affectedProducts } =
+            await orderService.cancelOrder(orderId)
+
+        const io = req.app.locals.io
+        if (io) {
+            io.emit('order:cancelled', {
+                order,
+            })
+
+            if (order.tableName) {
+                io.to(order.tableName).emit('order:updated', {
+                    order,
+                    tableName: order.tableName,
+                })
+            }
+
+            if (affectedProducts && affectedProducts.length > 0) {
+                for (const productId of affectedProducts) {
+                    const product = await productModel.findById(productId)
+                    const maxQuantity = await calculateMaxQuantity(productId)
+
+                    io.emit('product:availability-changed', {
+                        productId: product._id,
+                        productName: product.name,
+                        available: product.available,
+                        maxQuantity,
+                    })
+                }
+            }
+
+            const session = await sessionService.getSessionById(order.sessionId)
+            if (
+                session &&
+                (session.status === 'completed' ||
+                    session.status === 'cancelled')
+            ) {
+                console.log(
+                    `[orderController] Session ${session._id} đã đóng (${session.status}), emit session:closed`
+                )
+                io.emit('session:closed', {
+                    session,
+                    tableName: order.tableName,
+                })
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Hủy order thành công',
+            data: order,
+        })
+    } catch (error) {
+        console.error('[orderController] cancelOrder error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi hủy order',
+        })
+    }
+}
+
+// ===== DELETE - SESSIONS =====
+export const cancelSession = async (req, res) => {
+    try {
+        const { sessionId } = req.params
+
+        const session = await sessionService.cancelSession(sessionId)
+
+        return res.status(200).json({
+            success: true,
+            message: 'Hủy session thành công',
+            data: session,
+        })
+    } catch (error) {
+        console.error('[orderController] cancelSession error:', error)
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Lỗi khi hủy session',
         })
     }
 }

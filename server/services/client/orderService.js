@@ -1,3 +1,7 @@
+import {
+    calculateMaxQuantity,
+    updateProductAvailability,
+} from '../../helpers/admin/checkProductAvailability.js'
 import { cartModel } from '../../models/cartModel.js'
 import { orderModel } from '../../models/orderModel.js'
 import { productModel } from '../../models/productModel.js'
@@ -23,6 +27,31 @@ export const createOrderFromCart = async (tableName, notes = '') => {
 
         if (!cart || cart.items.length === 0) {
             throw new Error('Giỏ hàng trống')
+        }
+
+        // VALIDATE: Check maxQuantity trước khi tạo order (Prevent Overselling)
+        const unavailableItems = []
+
+        for (const item of cart.items) {
+            const productId = item.productId._id || item.productId
+            const maxQuantity = await calculateMaxQuantity(productId)
+
+            if (item.quantity > maxQuantity) {
+                unavailableItems.push({
+                    productId: productId,
+                    productName: item.productId.name || item.productName,
+                    requested: item.quantity,
+                    available: maxQuantity,
+                })
+            }
+        }
+
+        // Nếu có món không đủ nguyên liệu → REJECT toàn bộ order
+        if (unavailableItems.length > 0) {
+            const error = new Error('Một số món không đủ nguyên liệu')
+            error.code = 'INSUFFICIENT_INGREDIENTS'
+            error.unavailableItems = unavailableItems
+            throw error
         }
 
         let session = await sessionService.getActiveSession(tableName)
@@ -59,6 +88,8 @@ export const createOrderFromCart = async (tableName, notes = '') => {
         await newOrder.save()
 
         const storageWarnings = []
+        const affectedProducts = new Set()
+
         for (const item of cart.items) {
             const productId = item.productId._id || item.productId
             const product = await productModel.findById(productId)
@@ -99,7 +130,10 @@ export const createOrderFromCart = async (tableName, notes = '') => {
                         { new: true }
                     )
 
+                    // CHỈ UPDATE PRODUCT KHI CHẠM THRESHOLD
                     if (storage && storage.quantity <= storage.threshold) {
+                        affectedProducts.add(productId.toString())
+
                         storageWarnings.push({
                             ingredient: storage,
                             message: `Nguyên liệu "${storage.name}" sắp hết (${storage.quantity} ${storage.unit})`,
@@ -109,6 +143,11 @@ export const createOrderFromCart = async (tableName, notes = '') => {
             }
         }
 
+        // UPDATE AVAILABILITY CHO CÁC PRODUCTS BỊ ẢNH HƯỞNG
+        for (const productId of affectedProducts) {
+            await updateProductAvailability(productId)
+        }
+
         await sessionService.addOrderToSession(session._id, newOrder._id)
 
         cart.items = []
@@ -116,7 +155,11 @@ export const createOrderFromCart = async (tableName, notes = '') => {
         cart.version += 1
         await cart.save()
 
-        return { order: newOrder, storageWarnings }
+        return {
+            order: newOrder,
+            storageWarnings,
+            affectedProducts: Array.from(affectedProducts),
+        }
     } catch (error) {
         throw error
     }
@@ -257,9 +300,8 @@ export const cancelOrder = async (orderId) => {
             throw new Error('Chỉ có thể hủy order đang chờ xử lý')
         }
 
-        console.log(
-            `[orderService] Bắt đầu hủy order ${orderId}, hoàn trả nguyên liệu`
-        )
+        const affectedProducts = new Set()
+        const storagesAboveThreshold = new Set()
 
         // Hoàn trả nguyên liệu
         for (const item of order.items) {
@@ -292,6 +334,11 @@ export const cancelOrder = async (orderId) => {
                         continue
                     }
 
+                    const oldStorage = await storageModel.findById(
+                        ingredient.ingredientId
+                    )
+                    const oldQuantity = oldStorage.quantity
+
                     const storage = await storageModel.findByIdAndUpdate(
                         ingredient.ingredientId,
                         {
@@ -302,11 +349,32 @@ export const cancelOrder = async (orderId) => {
                         { new: true }
                     )
 
-                    console.log(
-                        `[orderService] Hoàn trả ${returnAmount} ${storage?.unit || ''} của nguyên liệu ${storage?.name || ingredient.ingredientId}`
-                    )
+                    const newQuantity = storage.quantity
+
+                    // CHỈ UPDATE PRODUCT KHI:
+                    // 1. Vẫn dưới/bằng threshold (newQuantity <= threshold)
+                    // 2. HOẶC vừa vượt qua threshold (từ dưới lên trên)
+                    if (
+                        newQuantity <= storage.threshold ||
+                        (oldQuantity <= storage.threshold &&
+                            newQuantity > storage.threshold)
+                    ) {
+                        affectedProducts.add(item.productId.toString())
+
+                        if (
+                            oldQuantity <= storage.threshold &&
+                            newQuantity > storage.threshold
+                        ) {
+                            storagesAboveThreshold.add(storage._id.toString())
+                        }
+                    }
                 }
             }
+        }
+
+        // UPDATE AVAILABILITY CHO CÁC PRODUCTS BỊ ẢNH HƯỞNG
+        for (const productId of affectedProducts) {
+            await updateProductAvailability(productId)
         }
 
         // Cập nhật trạng thái order
@@ -318,9 +386,6 @@ export const cancelOrder = async (orderId) => {
         if (session) {
             session.totalAmount -= order.totalPrice
             await session.save()
-            console.log(
-                `[orderService] Đã trừ ${order.totalPrice}đ khỏi session ${session._id}`
-            )
         }
 
         // Kiểm tra xem tất cả orders trong session có bị hủy không
@@ -333,16 +398,10 @@ export const cancelOrder = async (orderId) => {
         )
 
         if (allCancelled && session) {
-            console.log(
-                `[orderService] Tất cả orders đã bị hủy, đóng session ${session._id}`
-            )
-
-            // Đóng session với status 'cancelled'
             session.status = 'cancelled'
             session.endTime = new Date()
             await session.save()
 
-            // Reset bàn về available
             const table = await tableModel.findOne({
                 tableName: order.tableName,
             })
@@ -351,15 +410,14 @@ export const cancelOrder = async (orderId) => {
                 table.currentSessionId = null
                 table.activeCartId = null
                 await table.save()
-                console.log(
-                    `[orderService] Đã reset bàn ${order.tableName} về available`
-                )
             }
         }
 
-        console.log(`[orderService] Đã hủy order ${orderId} thành công`)
-
-        return order
+        return {
+            order,
+            affectedProducts: Array.from(affectedProducts),
+            storagesAboveThreshold: Array.from(storagesAboveThreshold),
+        }
     } catch (error) {
         console.error('[orderService] Lỗi khi hủy order:', error)
         throw error

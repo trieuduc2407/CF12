@@ -14,6 +14,7 @@ import Product from './pages/Product'
 import socket from './socket/socket'
 import { lockItem, unlockItem, updateCart } from './store/client/cartSlice'
 import { addOrder, updateOrder } from './store/client/orderSlice'
+import { updateProductAvailability } from './store/client/productSlice'
 
 const SocketManager = () => {
     const currentTableRef = useRef(null)
@@ -119,6 +120,13 @@ const App = () => {
             alert(message)
         })
 
+        socket.on('product:availability-changed', (data) => {
+            const { productId, available, maxQuantity } = data
+            dispatch(
+                updateProductAvailability({ productId, available, maxQuantity })
+            )
+        })
+
         return () => {
             socket.off('cart:updated')
             socket.off('cart:itemLocked')
@@ -128,6 +136,7 @@ const App = () => {
             socket.off('order:updated')
             socket.off('order:cancelSuccess')
             socket.off('order:cancelError')
+            socket.off('product:availability-changed')
         }
     }, [dispatch])
 

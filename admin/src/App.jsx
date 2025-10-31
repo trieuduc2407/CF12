@@ -19,6 +19,7 @@ import Staffs from './pages/Staffs'
 import Storage from './pages/Storage'
 import socket from './socket/socket'
 import { addNewOrder, updateOrderInList } from './store/admin/orderSlice'
+import { updateProductAvailability } from './store/admin/productSlice'
 
 const App = () => {
     const dispatch = useDispatch()
@@ -77,6 +78,27 @@ const App = () => {
             }
         })
 
+        socket.on('product:availability-changed', (data) => {
+            const { productId, productName, available, maxQuantity } = data
+            dispatch(
+                updateProductAvailability({ productId, available, maxQuantity })
+            )
+
+            const statusText = available
+                ? `có sẵn (còn ${maxQuantity} phần)`
+                : 'hết hàng'
+
+            setShowToast({
+                isShow: true,
+                type: available ? 'info' : 'warning',
+                text: `${productName} đã ${statusText}`,
+            })
+
+            setTimeout(() => {
+                setShowToast({ isShow: false, type: '', text: '' })
+            }, 5000)
+        })
+
         if (Notification.permission === 'default') {
             Notification.requestPermission()
         }
@@ -86,6 +108,7 @@ const App = () => {
             socket.off('order:statusChanged')
             socket.off('order:cancelled')
             socket.off('storage:warning')
+            socket.off('product:availability-changed')
         }
     }, [dispatch])
     return (

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import CartItem from '../components/CartItem'
+import InsufficientIngredientsModal from '../components/InsufficientIngredientsModal'
 import sortItem from '../helpers/sortItem'
 import socket from '../socket/socket'
 import { getCart } from '../store/client/cartSlice'
@@ -17,6 +18,8 @@ const Cart = () => {
 
     const [notes, setNotes] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showInsufficientModal, setShowInsufficientModal] = useState(false)
+    const [unavailableItems, setUnavailableItems] = useState([])
 
     const { items: cartItems, totalPrice } = useSelector(
         (state) => state.clientCart
@@ -25,6 +28,7 @@ const Cart = () => {
         (state) => state.clientSession
     )
     const { loading: orderLoading } = useSelector((state) => state.clientOrder)
+    const { products } = useSelector((state) => state.clientProduct)
 
     const handleCreateOrder = async () => {
         if (cartItems.length === 0) {
@@ -37,6 +41,27 @@ const Cart = () => {
             alert(
                 'Có món đang được chỉnh sửa, vui lòng chờ hoàn tất trước khi gọi món'
             )
+            return
+        }
+
+        // Validate maxQuantity trước khi submit
+        const invalidItems = []
+        for (const cartItem of cartItems) {
+            const product = products.find((p) => p._id === cartItem.product._id)
+            if (product && product.maxQuantity !== undefined) {
+                if (cartItem.quantity > product.maxQuantity) {
+                    invalidItems.push({
+                        productName: cartItem.product.name,
+                        requested: cartItem.quantity,
+                        available: product.maxQuantity,
+                    })
+                }
+            }
+        }
+
+        if (invalidItems.length > 0) {
+            setUnavailableItems(invalidItems)
+            setShowInsufficientModal(true)
             return
         }
 
@@ -55,7 +80,16 @@ const Cart = () => {
 
             await dispatch(getCart(tableName))
         } catch (error) {
-            alert(error || 'Không thể gửi yêu cầu gọi món')
+            // Xử lý INSUFFICIENT_INGREDIENTS error từ backend
+            if (
+                error.unavailableItems &&
+                Array.isArray(error.unavailableItems)
+            ) {
+                setUnavailableItems(error.unavailableItems)
+                setShowInsufficientModal(true)
+            } else {
+                alert(error || 'Không thể gửi yêu cầu gọi món')
+            }
         } finally {
             setIsSubmitting(false)
         }
@@ -163,6 +197,11 @@ const Cart = () => {
                     </button>
                 </div>
             </div>
+            <InsufficientIngredientsModal
+                isOpen={showInsufficientModal}
+                onClose={() => setShowInsufficientModal(false)}
+                unavailableItems={unavailableItems}
+            />
         </div>
     )
 }

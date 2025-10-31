@@ -1,4 +1,5 @@
 // ===== IMPORTS =====
+import { calculateMaxQuantity } from '../../helpers/admin/checkProductAvailability.js'
 import * as storageService from '../../services/admin/storageService.js'
 
 // ===== READ (GET) OPERATIONS =====
@@ -25,7 +26,7 @@ export const getIngredientById = async (req, res) => {
             data: ingredient,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[storageController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -41,7 +42,7 @@ export const getAllIngredients = async (req, res) => {
             data: ingredients,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[storageController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -65,7 +66,7 @@ export const searchIngredient = async (req, res) => {
             data: ingredients,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[storageController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -96,7 +97,7 @@ export const addIngredient = async (req, res) => {
             data: newIngredient,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[storageController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -116,28 +117,46 @@ export const updateIngredient = async (req, res) => {
             })
         }
 
-        const updatedIngredient = await storageService.updateIngredient(id, {
+        const result = await storageService.updateIngredient(id, {
             name,
             quantity,
             unit,
             threshold,
         })
 
+        const { storage, changedProducts } = result
+
         const io = req.app.locals.io
-        if (io && updatedIngredient.quantity <= updatedIngredient.threshold) {
-            io.emit('storage:warning', {
-                ingredient: updatedIngredient,
-                message: `Nguyên liệu "${updatedIngredient.name}" sắp hết (${updatedIngredient.quantity} ${updatedIngredient.unit})`,
-            })
+        if (io) {
+            // Emit storage warning nếu chạm threshold
+            if (storage.quantity <= storage.threshold) {
+                io.emit('storage:warning', {
+                    ingredient: storage,
+                    message: `Nguyên liệu "${storage.name}" sắp hết (${storage.quantity} ${storage.unit})`,
+                })
+            }
+
+            // Emit product availability changes
+            if (changedProducts.length > 0) {
+                for (const result of changedProducts) {
+                    io.emit('product:availability-changed', {
+                        productId: result.product._id,
+                        productName: result.product.name,
+                        available: result.newAvailable,
+                        maxQuantity: result.maxQuantity,
+                    })
+                }
+            }
         }
 
         return res.json({
             success: true,
             message: 'Cập nhật nguyên liệu thành công',
-            data: updatedIngredient,
+            data: storage,
+            affectedProducts: changedProducts.length,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[storageController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -162,7 +181,7 @@ export const deleteIngredient = async (req, res) => {
             message: 'Xóa nguyên liệu thành công',
         })
     } catch (error) {
-        console.log(error)
+        console.error('[storageController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',

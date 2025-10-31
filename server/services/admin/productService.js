@@ -1,4 +1,5 @@
 // ===== IMPORTS =====
+import { updateProductAvailability } from '../../helpers/admin/checkProductAvailability.js'
 import { productModel } from '../../models/productModel.js'
 
 // ===== READ (GET) OPERATIONS =====
@@ -45,6 +46,10 @@ export const addProduct = async (data) => {
         }
 
         const newProduct = await productModel.create(data)
+
+        // CHECK AVAILABILITY NGAY SAU KHI TẠO
+        await updateProductAvailability(newProduct._id)
+
         return newProduct
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi thêm sản phẩm: ${error.message}`)
@@ -70,6 +75,10 @@ export const updateProduct = async (id, data) => {
         const updatedProduct = await productModel.findByIdAndUpdate(id, data, {
             new: true,
         })
+
+        // CHECK AVAILABILITY NGAY SAU KHI CẬP NHẬT
+        await updateProductAvailability(updatedProduct._id)
+
         return updatedProduct
     } catch (error) {
         throw new Error(`Xảy ra lỗi khi cập nhật sản phẩm: ${error.message}`)

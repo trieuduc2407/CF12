@@ -49,10 +49,32 @@ const Card = ({
                 )}
             </figure>
             <div className="card-body py-4">
-                <p className="card-title">{product.name}</p>
-                <p className="font-medium">
-                    {formatNumber(product.basePrice)} VND
-                </p>
+                <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                        <p className="card-title">{product.name}</p>
+                        <p className="font-medium">
+                            {formatNumber(product.basePrice)} VND
+                        </p>
+                    </div>
+                    {product.maxQuantity !== undefined &&
+                        product.maxQuantity <= 10 && (
+                            <div className="ml-2">
+                                <span
+                                    className={`badge ${
+                                        product.maxQuantity === 0
+                                            ? 'badge-error'
+                                            : product.maxQuantity <= 5
+                                              ? 'badge-warning'
+                                              : 'badge-success'
+                                    } text-white`}
+                                >
+                                    {product.maxQuantity === 0
+                                        ? 'Hết'
+                                        : `Còn ${product.maxQuantity}`}
+                                </span>
+                            </div>
+                        )}
+                </div>
                 <div className="card-actions justify-between">
                     <button
                         className="btn btn-success"

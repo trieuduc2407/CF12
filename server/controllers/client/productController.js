@@ -1,3 +1,4 @@
+import { calculateMaxQuantity } from '../../helpers/admin/checkProductAvailability.js'
 import * as productService from '../../services/client/productService.js'
 
 export const getProductById = async (req, res) => {
@@ -48,7 +49,7 @@ export const getProductById = async (req, res) => {
             },
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
@@ -60,26 +61,36 @@ export const getAllProducts = async (req, res) => {
     try {
         const products = await productService.getAllProducts()
 
+        // Enrich products với maxQuantity
+        const enrichedProducts = await Promise.all(
+            products.map(async (product) => {
+                const maxQuantity = await calculateMaxQuantity(product._id)
+                return {
+                    available: product.available,
+                    basePrice: product.basePrice,
+                    category: product.category,
+                    imageUrl: product.imageUrl,
+                    name: product.name,
+                    size: product.size,
+                    temperature: product.temperature,
+                    _id: product._id,
+                    createdAt: product.createdAt,
+                    signature: product.signature,
+                    maxQuantity,
+                }
+            })
+        )
+
         return res.json({
             success: true,
-            data: products.map((product) => ({
-                available: product.available,
-                basePrice: product.basePrice,
-                category: product.category,
-                imageUrl: product.imageUrl,
-                name: product.name,
-                size: product.size,
-                temperature: product.temperature,
-                _id: product._id,
-                createdAt: product.createdAt,
-                signature: product.signature,
-            })),
+            data: enrichedProducts,
         })
     } catch (error) {
-        console.log(error)
+        console.error('[productController] error:', error)
         return res.json({
             success: false,
             message: error.message || 'Server error',
         })
     }
 }
+

@@ -56,7 +56,16 @@ export const toggleSignature = createAsyncThunk(
 const adminProductSlice = createSlice({
     name: 'adminProduct',
     initialState,
-    reducers: {},
+    reducers: {
+        updateProductAvailability: (state, action) => {
+            const { productId, available, maxQuantity } = action.payload
+            const product = state.products.find((p) => p._id === productId)
+            if (product) {
+                product.available = available
+                product.maxQuantity = maxQuantity
+            }
+        },
+    },
     extraReducers: (builder) => {
         // getAllProducts - load toàn bộ danh sách
         createLoadingReducers(builder, getAllProducts, 'products')
@@ -102,5 +111,7 @@ const adminProductSlice = createSlice({
             })
     },
 })
+
+export const { updateProductAvailability } = adminProductSlice.actions
 
 export default adminProductSlice.reducer

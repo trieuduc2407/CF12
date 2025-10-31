@@ -22,3 +22,4 @@ export const getAllProducts = async () => {
         throw new Error(`Xảy ra lỗi khi lấy sản phẩm: ${error.message}`)
     }
 }
+
