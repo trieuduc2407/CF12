@@ -117,18 +117,18 @@ const OrderItem = ({ order }) => {
             <Toast showToast={showToast} />
             <div className="flex flex-col gap-2.5 rounded-lg bg-white p-2.5">
                 <div className="flex justify-between gap-2">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 md:w-1/3 xl:w-1/4 2xl:w-1/5">
                         <p className="text-lg font-semibold">{orderNumber}</p>
                         <div className={`badge ${statusColors[order.status]}`}>
                             {statusMap[order.status]}
                         </div>
                     </div>
-                    <p className="text-wrap font-light text-gray-500">
+                    <p className="text-wrap font-semibold">
                         Bàn {order.sessionId.tableName}
                     </p>
-                    <div className="font-light text-gray-500">
+                    <div className="flex gap-2.5 font-semibold">
                         <p>{date[0]}</p>
-                        <p className="hidden">{date[1]}</p>
+                        <p className="hidden md:block">{date[1]}</p>
                     </div>
                 </div>
                 <div className="text-sm">
