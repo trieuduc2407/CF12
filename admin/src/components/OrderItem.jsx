@@ -1,11 +1,12 @@
 // ===== IMPORTS =====
 import { Info } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import getNextStatus from '../helpers/getNextStatus'
 import socket from '../socket/socket'
 import formatDate from '../utils/formatDate'
+import Toast from './Toast'
 
 // ===== CONSTANTS =====
 const statusMap = {
@@ -34,6 +35,13 @@ const OrderItem = ({ order }) => {
     // ===== REDUX STATE =====
     const { staff } = useSelector((state) => state.adminAuth)
 
+    // ===== LOCAL STATE =====
+    const [showToast, setShowToast] = useState({
+        isShow: false,
+        type: '',
+        text: '',
+    })
+
     // ===== DERIVED STATE =====
     const orderNumber = `#${order._id.slice(-6).toUpperCase()}`
     const date = formatDate(order.createdAt)
@@ -53,153 +61,170 @@ const OrderItem = ({ order }) => {
         })
 
         socket.once('order:updateError', ({ message }) => {
-            alert(`Lỗi cập nhật đơn hàng: ${message}`)
+            setShowToast({
+                isShow: true,
+                type: 'error',
+                text: `Lỗi cập nhật đơn hàng: ${message}`,
+            })
+
+            setTimeout(() => {
+                setShowToast({ isShow: false, type: '', text: '' })
+            }, 3000)
         })
     }
 
     // ===== RENDER =====
     return (
-        <div className="flex flex-col gap-2.5 rounded-lg bg-white p-2.5">
-            <div className="flex justify-between gap-2">
-                <div className="flex gap-2">
-                    <p className="text-lg font-semibold">{orderNumber}</p>
-                    <div className={`badge ${statusColors[order.status]}`}>
-                        {statusMap[order.status]}
+        <>
+            <Toast showToast={showToast} />
+            <div className="flex flex-col gap-2.5 rounded-lg bg-white p-2.5">
+                <div className="flex justify-between gap-2">
+                    <div className="flex gap-2">
+                        <p className="text-lg font-semibold">{orderNumber}</p>
+                        <div className={`badge ${statusColors[order.status]}`}>
+                            {statusMap[order.status]}
+                        </div>
                     </div>
-                </div>
-                <p className="text-wrap font-light text-gray-500">
-                    Bàn {order.sessionId.tableName}
-                </p>
-                <div className="font-light text-gray-500">
-                    <p>{date[0]}</p>
-                    <p className="hidden">{date[1]}</p>
-                </div>
-            </div>
-            <div className="text-sm">
-                <p className="mb-1.5 font-medium">Món ({order.items.length})</p>
-                {order.items.map((item) => (
-                    <div key={item.itemId}>
-                        <p>
-                            {item.quantity} x {item.productName}{' '}
-                            <span className="font-light text-gray-500">
-                                ({item.selectedSize} -{' '}
-                                {item.selectedTemperature === 'ice'
-                                    ? 'Đá'
-                                    : 'Nóng'}
-                                )
-                            </span>
-                        </p>
-                    </div>
-                ))}
-            </div>
-            <div className="flex justify-between gap-4">
-                <p className="flex-1 text-lg font-semibold">
-                    {order.totalPrice.toLocaleString()}đ
-                </p>
-                <button
-                    className="btn btn-success btn-sm"
-                    onClick={() =>
-                        document
-                            .getElementById(`detail_modal_${order._id}`)
-                            .showModal()
-                    }
-                >
-                    Chi tiết
-                </button>
-            </div>
-            <dialog id={`detail_modal_${order._id}`} className="modal">
-                <div className="modal-box bg-white">
-                    <p className="mb-2.5 text-center">
-                        Chi tiết đơn hàng{' '}
-                        <span className="font-semibold">{orderNumber}</span>
+                    <p className="text-wrap font-light text-gray-500">
+                        Bàn {order.sessionId.tableName}
                     </p>
-                    <div className="flex flex-col gap-1.5">
-                        <p>
-                            <span className="font-semibold">Bàn: </span>
-                            {order.sessionId.tableName}
-                        </p>
-                        <div>
-                            <span className="font-semibold">Trạng thái:</span>{' '}
-                            <div
-                                className={`badge ${statusColors[order.status]}`}
-                            >
-                                {statusMap[order.status]}
-                            </div>
-                        </div>
-                        <p>
-                            <span className="font-semibold">
-                                Thời gian tạo:{' '}
-                            </span>
-                            {date.join(' ')}
-                        </p>
-                        <p className="font-semibold">Món đã gọi:</p>
-                        {order.items.map((item) => (
-                            <div
-                                className="flex justify-between"
-                                key={item.itemId}
-                            >
-                                <p>
-                                    {item.quantity} x {item.productName}{' '}
-                                    <span className="font-light text-gray-500">
-                                        ({item.selectedSize} -{' '}
-                                        {item.selectedTemperature === 'ice'
-                                            ? 'Đá'
-                                            : 'Nóng'}
-                                        )
-                                    </span>
-                                </p>
-                                <p className="font-semibold">
-                                    {item.subTotal.toLocaleString()}đ
-                                </p>
-                            </div>
-                        ))}
-                        {order.notes && (
-                            <p>
-                                <span className="font-semibold">Ghi chú:</span>{' '}
-                                {order.notes}
-                            </p>
-                        )}
-                    </div>
-                    <div className="mb-5 mt-5 flex justify-between text-xl font-semibold">
-                        <p>Tổng:</p>
-                        <p>{order.totalPrice.toLocaleString()}đ</p>
-                    </div>
-
-                    {order.status === 'served' && (
-                        <div className="alert alert-info mb-5 text-sm">
-                            <Info />
-                            <span>
-                                Để thanh toán, vui lòng chọn{' '}
-                                <strong>Thanh toán</strong> trong menu
-                            </span>
-                        </div>
-                    )}
-
-                    <div className="flex justify-between">
-                        {order.status === 'pending' && (
-                            <button className="btn btn-error btn-sm w-1/3">
-                                Hủy đơn
-                            </button>
-                        )}
-                        {order.status in statusButtons && (
-                            <button
-                                className="btn btn-success btn-sm ml-auto w-1/3"
-                                onClick={() =>
-                                    handleStatusChange(
-                                        getNextStatus(order.status)
-                                    )
-                                }
-                            >
-                                {statusButtons[order.status]}
-                            </button>
-                        )}
+                    <div className="font-light text-gray-500">
+                        <p>{date[0]}</p>
+                        <p className="hidden">{date[1]}</p>
                     </div>
                 </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button>close</button>
-                </form>
-            </dialog>
-        </div>
+                <div className="text-sm">
+                    <p className="mb-1.5 font-medium">
+                        Món ({order.items.length})
+                    </p>
+                    {order.items.map((item) => (
+                        <div key={item.itemId}>
+                            <p>
+                                {item.quantity} x {item.productName}{' '}
+                                <span className="font-light text-gray-500">
+                                    ({item.selectedSize} -{' '}
+                                    {item.selectedTemperature === 'ice'
+                                        ? 'Đá'
+                                        : 'Nóng'}
+                                    )
+                                </span>
+                            </p>
+                        </div>
+                    ))}
+                </div>
+                <div className="flex justify-between gap-4">
+                    <p className="flex-1 text-lg font-semibold">
+                        {order.totalPrice.toLocaleString()}đ
+                    </p>
+                    <button
+                        className="btn btn-success btn-sm"
+                        onClick={() =>
+                            document
+                                .getElementById(`detail_modal_${order._id}`)
+                                .showModal()
+                        }
+                    >
+                        Chi tiết
+                    </button>
+                </div>
+                <dialog id={`detail_modal_${order._id}`} className="modal">
+                    <div className="modal-box bg-white">
+                        <p className="mb-2.5 text-center">
+                            Chi tiết đơn hàng{' '}
+                            <span className="font-semibold">{orderNumber}</span>
+                        </p>
+                        <div className="flex flex-col gap-1.5">
+                            <p>
+                                <span className="font-semibold">Bàn: </span>
+                                {order.sessionId.tableName}
+                            </p>
+                            <div>
+                                <span className="font-semibold">
+                                    Trạng thái:
+                                </span>{' '}
+                                <div
+                                    className={`badge ${statusColors[order.status]}`}
+                                >
+                                    {statusMap[order.status]}
+                                </div>
+                            </div>
+                            <p>
+                                <span className="font-semibold">
+                                    Thời gian tạo:{' '}
+                                </span>
+                                {date.join(' ')}
+                            </p>
+                            <p className="font-semibold">Món đã gọi:</p>
+                            {order.items.map((item) => (
+                                <div
+                                    className="flex justify-between"
+                                    key={item.itemId}
+                                >
+                                    <p>
+                                        {item.quantity} x {item.productName}{' '}
+                                        <span className="font-light text-gray-500">
+                                            ({item.selectedSize} -{' '}
+                                            {item.selectedTemperature === 'ice'
+                                                ? 'Đá'
+                                                : 'Nóng'}
+                                            )
+                                        </span>
+                                    </p>
+                                    <p className="font-semibold">
+                                        {item.subTotal.toLocaleString()}đ
+                                    </p>
+                                </div>
+                            ))}
+                            {order.notes && (
+                                <p>
+                                    <span className="font-semibold">
+                                        Ghi chú:
+                                    </span>{' '}
+                                    {order.notes}
+                                </p>
+                            )}
+                        </div>
+                        <div className="mb-5 mt-5 flex justify-between text-xl font-semibold">
+                            <p>Tổng:</p>
+                            <p>{order.totalPrice.toLocaleString()}đ</p>
+                        </div>
+
+                        {order.status === 'served' && (
+                            <div className="alert alert-info mb-5 text-sm">
+                                <Info />
+                                <span>
+                                    Để thanh toán, vui lòng chọn{' '}
+                                    <strong>Thanh toán</strong> trong menu
+                                </span>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between">
+                            {order.status === 'pending' && (
+                                <button className="btn btn-error btn-sm w-1/3">
+                                    Hủy đơn
+                                </button>
+                            )}
+                            {order.status in statusButtons && (
+                                <button
+                                    className="btn btn-success btn-sm ml-auto w-1/3"
+                                    onClick={() =>
+                                        handleStatusChange(
+                                            getNextStatus(order.status)
+                                        )
+                                    }
+                                >
+                                    {statusButtons[order.status]}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <form method="dialog" className="modal-backdrop">
+                        <button>close</button>
+                    </form>
+                </dialog>
+            </div>
+        </>
     )
 }
 
