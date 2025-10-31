@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { ChevronLeft, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,16 +12,10 @@ import { getCart } from '../store/client/cartSlice'
 import { createOrder, getOrdersByTable } from '../store/client/orderSlice'
 import { setSession } from '../store/client/sessionSlice'
 
+// ===== COMPONENT =====
 const Cart = () => {
-    const navigate = useNavigate()
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
-    const { tableName } = useParams()
-
-    const [notes, setNotes] = useState('')
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [showInsufficientModal, setShowInsufficientModal] = useState(false)
-    const [unavailableItems, setUnavailableItems] = useState([])
-
     const { items: cartItems, totalPrice } = useSelector(
         (state) => state.clientCart
     )
@@ -30,6 +25,17 @@ const Cart = () => {
     const { loading: orderLoading } = useSelector((state) => state.clientOrder)
     const { products } = useSelector((state) => state.clientProduct)
 
+    // ===== ROUTER =====
+    const navigate = useNavigate()
+    const { tableName } = useParams()
+
+    // ===== LOCAL STATE =====
+    const [notes, setNotes] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showInsufficientModal, setShowInsufficientModal] = useState(false)
+    const [unavailableItems, setUnavailableItems] = useState([])
+
+    // ===== HANDLERS =====
     const handleCreateOrder = async () => {
         if (cartItems.length === 0) {
             alert('Giỏ hàng trống, vui lòng thêm món trước khi gọi món')
@@ -95,6 +101,8 @@ const Cart = () => {
         }
     }
 
+    // ===== EFFECTS =====
+    // Effect: Set session when tableName changes
     useEffect(() => {
         if (tableName && tableName !== storeTableName) {
             const storedClientId = localStorage.getItem('clientId')
@@ -109,17 +117,18 @@ const Cart = () => {
         }
     }, [dispatch, tableName, storeTableName])
 
+    // Effect: Fetch cart and orders on mount
     useEffect(() => {
         if (tableName) {
             dispatch(getCart(tableName))
             dispatch(getOrdersByTable(tableName))
 
             socket.emit('cart:requestLockStatus', { tableName })
-
             socket.emit('cart:requestLatestData', { tableName })
         }
     }, [dispatch, tableName])
 
+    // Effect: Refresh cart on page visibility change
     useEffect(() => {
         if (!tableName) return
 
@@ -145,6 +154,7 @@ const Cart = () => {
         }
     }, [dispatch, tableName])
 
+    // ===== RENDER =====
     return (
         <div className="bg-bg-base flex min-h-screen flex-col">
             <div className="flex justify-between bg-white px-2.5 py-5">
@@ -206,4 +216,5 @@ const Cart = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Cart

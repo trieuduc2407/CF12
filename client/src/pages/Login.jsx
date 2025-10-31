@@ -1,5 +1,6 @@
+// ===== IMPORTS =====
 import { ChevronLeft } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -7,23 +8,30 @@ import socket from '../socket/socket'
 import { setSession } from '../store/client/sessionSlice'
 import { loginUser } from '../store/client/userSlice'
 
+// ===== CONSTANTS =====
 const initialState = {
     name: '',
     phone: '',
 }
 
+// ===== COMPONENT =====
 const Login = () => {
-    const navigate = useNavigate()
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
-    const { tableName } = useParams()
-
     const { clientId: storeClientId, tableName: storeTableName } = useSelector(
         (state) => state.clientSession
     )
 
+    // ===== ROUTER =====
+    const navigate = useNavigate()
+    const { tableName } = useParams()
+
+    // ===== LOCAL STATE =====
     const [formData, setFormData] = useState(initialState)
     const [isFormValid, setIsFormValid] = useState(false)
 
+    // ===== EFFECTS =====
+    // Effect: Set session when tableName matches
     useEffect(() => {
         if (tableName && tableName === storeTableName) {
             dispatch(
@@ -35,6 +43,7 @@ const Login = () => {
         }
     }, [dispatch, tableName, storeTableName, storeClientId])
 
+    // ===== HANDLERS =====
     const handleOnchange = (event) => {
         const { name, value } = event.target
         setFormData((prevState) => ({
@@ -79,6 +88,7 @@ const Login = () => {
         }
     }
 
+    // ===== RENDER =====
     return (
         <div className="mt-5 flex flex-col gap-2.5 px-2.5">
             <button
@@ -131,4 +141,5 @@ const Login = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Login

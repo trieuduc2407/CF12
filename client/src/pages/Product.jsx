@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -12,8 +13,8 @@ import {
     updateCartItem,
 } from '../store/client/cartSlice'
 import { getProductById } from '../store/client/productSlice'
-import { setSession } from '../store/client/sessionSlice'
 
+// ===== CONSTANTS =====
 const initialState = {
     clientId: '',
     itemId: '',
@@ -24,37 +25,29 @@ const initialState = {
     temperature: '',
 }
 
+// ===== COMPONENT =====
 const Product = () => {
-    const navigate = useNavigate()
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
-    const { id: productId, tableName, itemId } = useParams()
-
-    const { clientId: storeClientId, tableName: storeTableName } = useSelector(
+    const { clientId: storeClientId } = useSelector(
         (state) => state.clientSession
     )
     const { items: cartItems } = useSelector((state) => state.clientCart)
 
+    // ===== ROUTER =====
+    const navigate = useNavigate()
+    const { id: productId, tableName, itemId } = useParams()
+
+    // ===== LOCAL STATE =====
     const [product, setProduct] = useState({})
     const [formData, setFormData] = useState(initialState)
     const [isEditMode, setIsEditMode] = useState(false)
     const [hasUpdated, setHasUpdated] = useState(false)
 
+    // ===== DERIVED STATE =====
     const clientId = storeClientId || localStorage.getItem('clientId')
 
-    useEffect(() => {
-        if (tableName && tableName !== storeTableName) {
-            const storedClientId = localStorage.getItem('clientId')
-            if (storedClientId) {
-                dispatch(
-                    setSession({
-                        tableName,
-                        clientId: storedClientId,
-                    })
-                )
-            }
-        }
-    }, [dispatch, tableName, storeTableName])
-
+    // ===== CALLBACKS =====
     const handleOrder = async () => {
         if (isEditMode) {
             await dispatch(
@@ -86,6 +79,8 @@ const Product = () => {
         }
     }
 
+    // ===== EFFECTS =====
+    // Effect: Initialize product and form data (edit mode or new item)
     useEffect(() => {
         if (!clientId || !tableName) return
 
@@ -138,6 +133,7 @@ const Product = () => {
         })
     }, [dispatch, productId, clientId, tableName, itemId, cartItems])
 
+    // Effect: Cleanup - unlock item on unmount if in edit mode
     useEffect(() => {
         return () => {
             if (isEditMode && itemId && !hasUpdated) {
@@ -151,6 +147,7 @@ const Product = () => {
         }
     }, [isEditMode, itemId, hasUpdated, dispatch, tableName, clientId])
 
+    // ===== RENDER =====
     return (
         <div className="m-auto overflow-auto pb-20 xl:mt-10 xl:max-w-6xl 2xl:max-w-7xl">
             <button
@@ -315,4 +312,6 @@ const Product = () => {
         </div>
     )
 }
+
+// ===== EXPORTS =====
 export default Product

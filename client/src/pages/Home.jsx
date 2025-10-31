@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { ShoppingBag } from 'lucide-react'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
@@ -5,23 +6,31 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { setSession } from '../store/client/sessionSlice'
 
+// ===== COMPONENT =====
 const Home = () => {
-    const navigate = useNavigate()
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
+
+    // ===== ROUTER =====
+    const navigate = useNavigate()
     const { tableName } = useParams()
 
+    // ===== DERIVED STATE =====
     const clientId = localStorage.getItem('clientId')
 
+    // ===== EFFECTS =====
     useEffect(() => {
         if (clientId && tableName) {
             dispatch(setSession({ tableName, clientId }))
         }
     }, [clientId, tableName, dispatch])
 
+    // ===== HANDLERS =====
     const handleLogin = () => {
         navigate(`/tables/${tableName}/login`)
     }
 
+    // ===== RENDER =====
     return (
         <>
             <div
@@ -58,4 +67,5 @@ const Home = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Home

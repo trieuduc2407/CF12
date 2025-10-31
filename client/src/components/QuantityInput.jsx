@@ -1,10 +1,13 @@
+// ===== IMPORTS =====
 import { Minus, Plus } from 'lucide-react'
-import React from 'react'
 
+// ===== COMPONENT =====
 const QuantityInput = ({ className, formData, setFormData, maxQuantity }) => {
+    // ===== DERIVED STATE =====
     const max = maxQuantity ?? Infinity
     const isAtMax = formData.quantity >= max
 
+    // ===== RENDER =====
     return (
         <div className={className}>
             <button
@@ -40,4 +43,5 @@ const QuantityInput = ({ className, formData, setFormData, maxQuantity }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default QuantityInput

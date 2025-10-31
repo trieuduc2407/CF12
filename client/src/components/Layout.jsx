@@ -1,8 +1,8 @@
-import React from 'react'
-
+// ===== IMPORTS =====
 import BaseLayout from './BaseLayout'
 import Header from './Header'
 
+// ===== COMPONENT =====
 const Layout = () => {
     return (
         <BaseLayout>
@@ -11,4 +11,5 @@ const Layout = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Layout

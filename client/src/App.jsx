@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+// ===== IMPORTS =====
+import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { Route, Routes, useMatch } from 'react-router-dom'
 
@@ -16,13 +17,18 @@ import { lockItem, unlockItem, updateCart } from './store/client/cartSlice'
 import { addOrder, updateOrder } from './store/client/orderSlice'
 import { updateProductAvailability } from './store/client/productSlice'
 
+// ===== SOCKET MANAGER COMPONENT =====
 const SocketManager = () => {
+    // ===== REFS =====
     const currentTableRef = useRef(null)
-    const clientId = localStorage.getItem('clientId')
 
+    // ===== DERIVED STATE =====
     const tableMatch = useMatch('/tables/:tableName/*')
     const tableName = tableMatch?.params?.tableName || null
+    const clientId = localStorage.getItem('clientId')
 
+    // ===== EFFECTS =====
+    // Effect: Handle socket reconnection
     useEffect(() => {
         const handleReconnect = () => {
             if (currentTableRef.current && clientId) {
@@ -40,6 +46,7 @@ const SocketManager = () => {
         }
     }, [clientId])
 
+    // Effect: Handle table registration and room management
     useEffect(() => {
         if (currentTableRef.current && currentTableRef.current !== tableName) {
             socket.emit('leaveTable', currentTableRef.current)
@@ -49,10 +56,7 @@ const SocketManager = () => {
             currentTableRef.current = tableName
 
             const handleJoinConfirmation = () => {}
-
-            const handleSocketError = (error) => {
-                console.error('Socket error:', error)
-            }
+            const handleSocketError = () => {}
 
             socket.on('joinedTable', handleJoinConfirmation)
             socket.on('error', handleSocketError)
@@ -77,12 +81,17 @@ const SocketManager = () => {
         }
     }, [tableName, clientId])
 
+    // ===== RENDER =====
     return null
 }
 
+// ===== MAIN APP COMPONENT =====
 const App = () => {
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
 
+    // ===== EFFECTS =====
+    // Effect: Setup socket event listeners for cart, order, and product updates
     useEffect(() => {
         socket.on('cart:updated', (data) => {
             dispatch(updateCart(data))
@@ -97,7 +106,6 @@ const App = () => {
         })
 
         socket.on('cart:deleteError', ({ message }) => {
-            console.error('[App] Received cart:deleteError:', message)
             alert(message)
         })
 
@@ -140,6 +148,7 @@ const App = () => {
         }
     }, [dispatch])
 
+    // ===== RENDER =====
     return (
         <SessionProvider>
             <SocketManager />
@@ -165,4 +174,5 @@ const App = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default App

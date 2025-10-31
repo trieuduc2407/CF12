@@ -1,17 +1,29 @@
-import { Clock, Dot, PhoneCall, ReceiptText, Store } from 'lucide-react'
-import { ChevronLeft } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+// ===== IMPORTS =====
+import {
+    ChevronLeft,
+    Clock,
+    Dot,
+    PhoneCall,
+    ReceiptText,
+    Store,
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ===== COMPONENT =====
 const Header = () => {
+    // ===== ROUTER =====
+    const navigate = useNavigate()
+    const { tableName } = useParams()
+
+    // ===== LOCAL STATE =====
     const [openStatus, setOpenStatus] = useState({
         status: ' text-red-300 inactive',
         text: 'Đang đóng cửa',
     })
 
-    const navigate = useNavigate()
-    const { tableName } = useParams()
-
+    // ===== EFFECTS =====
+    // Effect: Check if store is open based on current time
     useEffect(() => {
         const now = new Date()
         const hour = now.getHours()
@@ -28,6 +40,7 @@ const Header = () => {
         }
     }, [])
 
+    // ===== RENDER =====
     return (
         <>
             <div className="flex flex-col rounded-lg bg-white md:flex-row md:p-5">
@@ -83,4 +96,5 @@ const Header = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Header

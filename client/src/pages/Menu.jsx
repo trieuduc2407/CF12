@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { ReceiptText, Search, ShoppingBasket } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -9,6 +10,7 @@ import { getCart } from '../store/client/cartSlice'
 import { getAllProducts } from '../store/client/productSlice'
 import { setSession } from '../store/client/sessionSlice'
 
+// ===== CONSTANTS =====
 const navbarItems = [
     { value: 'new', label: 'Món mới' },
     { value: 'signature', label: 'Đặc biệt' },
@@ -25,11 +27,10 @@ const categoryItems = [
     { value: 'yogurt', label: 'Sữa chua và thức uống khác' },
 ]
 
+// ===== COMPONENT =====
 const Menu = () => {
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
-    const navigate = useNavigate()
-    const { tableName } = useParams() // Đơn giản hóa - useParams luôn có giá trị trong route này
-
     const { products = [] } = useSelector((state) => state.clientProduct)
     const { tableName: storeTableName } = useSelector(
         (state) => state.clientSession
@@ -38,14 +39,22 @@ const Menu = () => {
         (state) => state.clientCart
     )
 
+    // ===== ROUTER =====
+    const navigate = useNavigate()
+    const { tableName } = useParams()
+
+    // ===== LOCAL STATE =====
     const [activeCategory, setActiveCategory] = useState(navbarItems[0].value)
     const [isScrolled, setIsScrolled] = useState(false)
+
+    // ===== DERIVED STATE =====
     const latestProducts = products
         .filter((product) => product.createdAt)
         .slice(-4)
         .reverse()
     const signatureProducts = products.filter((product) => product.signature)
 
+    // ===== CALLBACKS =====
     const handleNavClick = (category) => {
         setActiveCategory(category.value)
         const section = document.getElementById(category.value)
@@ -54,6 +63,8 @@ const Menu = () => {
         }
     }
 
+    // ===== EFFECTS =====
+    // Effect: Set session when tableName changes
     useEffect(() => {
         if (tableName && tableName !== storeTableName) {
             const storedClientId = localStorage.getItem('clientId')
@@ -68,16 +79,19 @@ const Menu = () => {
         }
     }, [dispatch, tableName, storeTableName])
 
+    // Effect: Fetch all products
     useEffect(() => {
         dispatch(getAllProducts())
     }, [dispatch])
 
+    // Effect: Fetch cart for current table
     useEffect(() => {
         if (tableName) {
             dispatch(getCart(tableName))
         }
     }, [dispatch, tableName])
 
+    // Effect: Handle scroll behavior and active category
     useEffect(() => {
         const sectionIds = navbarItems.map((item) => item.value)
         const sections = sectionIds
@@ -125,6 +139,7 @@ const Menu = () => {
         return () => window.removeEventListener('scroll', handleScroll)
     }, [activeCategory])
 
+    // ===== RENDER =====
     return (
         <>
             <div
@@ -333,4 +348,5 @@ const Menu = () => {
     )
 }
 
+// ===== EXPORTS =====
 export default Menu

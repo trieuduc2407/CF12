@@ -1,14 +1,15 @@
-import React from 'react'
-
+// ===== COMPONENT =====
 const InsufficientIngredientsModal = ({
     isOpen,
     onClose,
     unavailableItems,
 }) => {
+    // ===== EARLY RETURN =====
     if (!isOpen || !unavailableItems || unavailableItems.length === 0) {
         return null
     }
 
+    // ===== RENDER =====
     return (
         <dialog
             id="insufficient_ingredients_modal"
@@ -55,4 +56,5 @@ const InsufficientIngredientsModal = ({
     )
 }
 
+// ===== EXPORTS =====
 export default InsufficientIngredientsModal

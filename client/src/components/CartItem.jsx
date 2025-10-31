@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { Lock, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -6,21 +7,29 @@ import { useNavigate, useParams } from 'react-router-dom'
 import socket from '../socket/socket'
 import { lockItem, removeItem } from '../store/client/cartSlice'
 
+// ===== COMPONENT =====
 const CartItem = ({ item }) => {
+    // ===== REDUX STATE =====
     const dispatch = useDispatch()
+    const { clientId } = useSelector((state) => state.clientSession)
+
+    // ===== ROUTER =====
     const navigate = useNavigate()
     const { tableName } = useParams()
 
-    const { clientId } = useSelector((state) => state.clientSession)
+    // ===== LOCAL STATE =====
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    // ===== DERIVED STATE =====
     const isLocked = item.locked || false
     const isLockedByOther = isLocked && item.lockedBy !== clientId
 
-    const [isDeleting, setIsDeleting] = useState(false)
-
+    // ===== EARLY RETURN =====
     if (!item.product || !item.product._id) {
         return null
     }
 
+    // ===== HANDLERS =====
     const handleEdit = () => {
         if (isLockedByOther) {
             return
@@ -67,6 +76,7 @@ const CartItem = ({ item }) => {
         setTimeout(() => setIsDeleting(false), 1000)
     }
 
+    // ===== RENDER =====
     return (
         <div
             className={`flex rounded-lg bg-white p-2.5 ${
@@ -162,4 +172,5 @@ const CartItem = ({ item }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default CartItem

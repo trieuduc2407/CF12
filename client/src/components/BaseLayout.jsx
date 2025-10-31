@@ -1,6 +1,7 @@
-import React from 'react'
+// ===== IMPORTS =====
 import { Outlet } from 'react-router-dom'
 
+// ===== COMPONENT =====
 const BaseLayout = ({ children }) => {
     return (
         <div className="m-auto max-w-7xl">
@@ -10,4 +11,5 @@ const BaseLayout = ({ children }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default BaseLayout

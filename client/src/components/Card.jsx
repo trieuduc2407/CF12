@@ -1,20 +1,28 @@
+// ===== IMPORTS =====
 import { CirclePlus } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
+// ===== COMPONENT =====
 const Card = ({ product }) => {
+    // ===== REDUX STATE =====
     const { isLoading } = useSelector((state) => state.clientProduct)
-    const { tableName } = useParams()
-    const navigate = useNavigate()
 
+    // ===== ROUTER =====
+    const navigate = useNavigate()
+    const { tableName } = useParams()
+
+    // ===== DERIVED STATE =====
     const isAvailable = product.available !== false
     const maxQuantity = product.maxQuantity ?? Infinity
 
+    // ===== HANDLERS =====
     const handleAddToCart = (productId) => {
         if (!isAvailable) return
         navigate(`/tables/${tableName}/product/${productId}`)
     }
 
+    // ===== RENDER =====
     return (
         <div
             className={`card w-full justify-self-center rounded-lg bg-white shadow-sm ${!isAvailable ? 'opacity-60' : 'cursor-pointer'}`}
@@ -71,4 +79,5 @@ const Card = ({ product }) => {
     )
 }
 
+// ===== EXPORTS =====
 export default Card
