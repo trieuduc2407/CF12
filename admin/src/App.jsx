@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import RedirectIfAuth from './components/RedirectIfAuth'
 import RequireAuth from './components/RequireAuth'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
+import Toast from './components/Toast'
 import ChangePassword from './pages/ChangePassword'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
@@ -21,10 +22,25 @@ import { addNewOrder, updateOrderInList } from './store/admin/orderSlice'
 
 const App = () => {
     const dispatch = useDispatch()
+    const [showToast, setShowToast] = useState({
+        isShow: false,
+        type: '',
+        text: '',
+    })
 
     useEffect(() => {
         socket.on('order:new', ({ order, tableName }) => {
             dispatch(addNewOrder(order))
+
+            setShowToast({
+                isShow: true,
+                type: 'success',
+                text: `Đơn mới từ Bàn ${tableName} - ${order.items.length} món - ${order.totalPrice.toLocaleString()}đ`,
+            })
+
+            setTimeout(() => {
+                setShowToast({ isShow: false, type: '', text: '' })
+            }, 5000)
 
             if (Notification.permission === 'granted') {
                 new Notification('Đơn mới!', {
@@ -43,6 +59,16 @@ const App = () => {
         })
 
         socket.on('storage:warning', ({ message }) => {
+            setShowToast({
+                isShow: true,
+                type: 'warning',
+                text: message,
+            })
+
+            setTimeout(() => {
+                setShowToast({ isShow: false, type: '', text: '' })
+            }, 5000)
+
             if (Notification.permission === 'granted') {
                 new Notification('Cảnh báo nguyên liệu!', {
                     body: message,
@@ -63,68 +89,82 @@ const App = () => {
         }
     }, [dispatch])
     return (
-        <Routes>
-            <Route path="/admin">
+        <>
+            <Toast showToast={showToast} />
+            <Routes>
+                <Route path="/admin">
+                    <Route
+                        path="login"
+                        element={
+                            <RedirectIfAuth>
+                                <Login />
+                            </RedirectIfAuth>
+                        }
+                    />
+                    <Route
+                        path="change-password"
+                        element={<ChangePassword />}
+                    />
+                </Route>
                 <Route
-                    path="login"
+                    path="/admin"
                     element={
-                        <RedirectIfAuth>
-                            <Login />
-                        </RedirectIfAuth>
+                        <RequireAuth>
+                            <Layout />
+                        </RequireAuth>
                     }
-                />
-                <Route path="change-password" element={<ChangePassword />} />
-            </Route>
-            <Route
-                path="/admin"
-                element={
-                    <RequireAuth>
-                        <Layout />
-                    </RequireAuth>
-                }
-            >
-                <Route path="dashboard" element={<Dashboard />} />
+                >
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route
+                        path="products"
+                        element={
+                            <RoleProtectedRoute
+                                allowedRoles={['admin', 'staff']}
+                            >
+                                <Products />
+                            </RoleProtectedRoute>
+                        }
+                    />
+                    <Route path="orders" element={<Orders />} />
+                    <Route path="sessions" element={<Sessions />} />
+                    <Route
+                        path="staffs"
+                        element={
+                            <RoleProtectedRoute
+                                allowedRoles={['admin', 'staff']}
+                            >
+                                <Staffs />
+                            </RoleProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="storage"
+                        element={
+                            <RoleProtectedRoute
+                                allowedRoles={['admin', 'staff']}
+                            >
+                                <Storage />
+                            </RoleProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="rooms"
+                        element={
+                            <RoleProtectedRoute
+                                allowedRoles={['admin', 'staff']}
+                            >
+                                <Room />
+                            </RoleProtectedRoute>
+                        }
+                    />
+                </Route>
                 <Route
-                    path="products"
-                    element={
-                        <RoleProtectedRoute allowedRoles={['admin', 'staff']}>
-                            <Products />
-                        </RoleProtectedRoute>
-                    }
+                    path="/"
+                    element={<Navigate to="/admin/dashboard" replace />}
                 />
-                <Route path="orders" element={<Orders />} />
-                <Route path="sessions" element={<Sessions />} />
-                <Route
-                    path="staffs"
-                    element={
-                        <RoleProtectedRoute allowedRoles={['admin', 'staff']}>
-                            <Staffs />
-                        </RoleProtectedRoute>
-                    }
-                />
-                <Route
-                    path="storage"
-                    element={
-                        <RoleProtectedRoute allowedRoles={['admin', 'staff']}>
-                            <Storage />
-                        </RoleProtectedRoute>
-                    }
-                />
-                <Route
-                    path="rooms"
-                    element={
-                        <RoleProtectedRoute allowedRoles={['admin', 'staff']}>
-                            <Room />
-                        </RoleProtectedRoute>
-                    }
-                />
-            </Route>
-            <Route
-                path="/"
-                element={<Navigate to="/admin/dashboard" replace />}
-            />
-            <Route path="*" element={<Notfound />} />
-        </Routes>
+                <Route path="*" element={<Notfound />} />
+            </Routes>
+        </>
     )
 }
 
