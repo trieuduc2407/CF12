@@ -34,7 +34,7 @@ const Home = () => {
     return (
         <>
             <div
-                className="card m-5 flex-row justify-start bg-red-300 py-5 text-3xl"
+                className="card m-5 flex-row justify-start rounded-lg bg-gradient-to-b from-[#7b2d9f] to-[#bc8266] py-5 text-3xl text-white"
                 onClick={() => handleLogin()}
             >
                 <div className="px-5">
@@ -43,12 +43,24 @@ const Home = () => {
                 Nhập số điện thoại để tích điểm
             </div>
             <div className="h-dvh rounded-lg bg-white">
-                <div className="rounded-box flex w-full p-5">
-                    <div className="card bg-base-300 rounded-box grid h-20 grow place-items-center">
+                <div className="rounded-box flex w-full p-5 text-center text-white">
+                    <div
+                        style={{
+                            background:
+                                'radial-gradient(circle at top left, #ffce08, #fe2e00)',
+                        }}
+                        className="card rounded-box grid h-20 grow place-items-center"
+                    >
                         Gọi thanh toán
                     </div>
                     <div className="divider divider-horizontal"></div>
-                    <div className="card rounded-box grid h-20 grow place-items-center bg-blue-500 bg-opacity-50">
+                    <div
+                        style={{
+                            background:
+                                'radial-gradient(circle at center, #ffce08, #fe2e00)',
+                        }}
+                        className="card rounded-box grid h-20 grow place-items-center"
+                    >
                         Gọi nhân viên
                     </div>
                     <div className="divider divider-horizontal"></div>

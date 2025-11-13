@@ -330,11 +330,11 @@ const Menu = () => {
                     )}
                 </div>
             </div>
-            <div className="fixed bottom-0 flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
-                <button className="btn btn-sm flex flex-row rounded-md border-0 bg-white py-5 shadow-none">
+            <div className="fixed bottom-0 flex w-full justify-end bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
+                {/* <button className="btn btn-sm flex flex-row rounded-md border-0 bg-white py-5 shadow-none">
                     <ReceiptText className="text-amber-500" />
                     <p className="font-medium text-black"> Đơn hàng</p>
-                </button>
+                </button> */}
                 <button
                     className="btn btn-sm rounded-md border-0 bg-amber-500 py-5 text-white"
                     onClick={() => navigate(`/tables/${tableName}/cart`)}

@@ -13,8 +13,10 @@ dist-ssr
 *.local
 .env
 docs
+docs-minified
 .idea
 .md
+diagram
 
 # Editor directories and files
 .vscode/*

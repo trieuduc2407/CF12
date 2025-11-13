@@ -3,6 +3,7 @@ import {
     ChevronLeft,
     Clock,
     Dot,
+    HandPlatter,
     PhoneCall,
     ReceiptText,
     Store,
@@ -86,10 +87,16 @@ const Header = () => {
                             Số điện thoại cửa hàng: 0398810012
                         </p>
                     </div>
-                    <button className="absolute right-0 top-0 hidden rounded-lg border-2 border-gray-200 bg-white p-2 text-black md:flex">
+                    <div className="mt-2.5 flex items-center text-gray-500">
+                        <HandPlatter className="h-5 w-5 stroke-2" />
+                        <p className="pl-2.5">
+                            Chúng tôi sẽ phục vụ bạn tại bàn: {tableName.slice(1)}
+                        </p>
+                    </div>
+                    {/* <button className="absolute right-0 top-0 hidden rounded-lg border-2 border-gray-200 bg-white p-2 text-black md:flex">
                         <ReceiptText className="text-amber-500" />
-                        <p className="pl-2.5">Đơn hàng</p>
-                    </button>
+                        <p className="pl-2.5">Đăng nhập</p>
+                    </button> */}
                 </div>
             </div>
         </>
