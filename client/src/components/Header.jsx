@@ -22,6 +22,7 @@ const Header = () => {
         status: ' text-red-300 inactive',
         text: 'Đang đóng cửa',
     })
+    
 
     // ===== EFFECTS =====
     // Effect: Check if store is open based on current time

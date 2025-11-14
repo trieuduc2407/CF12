@@ -1,5 +1,5 @@
 // ===== IMPORTS =====
-import { ChevronLeft, Trash2 } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -157,14 +157,11 @@ const Cart = () => {
     // ===== RENDER =====
     return (
         <div className="bg-bg-base flex min-h-screen flex-col">
-            <div className="flex justify-between bg-white px-2.5 py-5">
+            <div className="flex bg-white px-2.5 py-5">
                 <button onClick={() => navigate(`/tables/${tableName}/menu`)}>
                     <ChevronLeft />
                 </button>
-                <p>Món của bạn</p>
-                <button className="text-red-600">
-                    <Trash2 />
-                </button>
+                <p className="flex-1 text-center">Món của bạn</p>
             </div>
             <div className="mx-5 my-4 flex flex-1 flex-col">
                 <div className="flex flex-1 flex-col gap-2.5">
@@ -177,7 +174,7 @@ const Cart = () => {
                     )}
                 </div>
                 <div className="mt-5 flex flex-col gap-3">
-                    <div className="flex justify-between">
+                    <div className="flex justify-between"> 
                         <p>Tổng tiền</p>
                         <p className="font-semibold">
                             {(totalPrice || 0).toLocaleString()} ₫

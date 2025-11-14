@@ -1,6 +1,6 @@
 // ===== IMPORTS =====
 import { ReceiptText, Search, ShoppingBasket } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -49,6 +49,7 @@ const Menu = () => {
     const [isScrolled, setIsScrolled] = useState(false)
     const [query, setQuery] = useState('')
     const [searchResults, setSearchResults] = useState([])
+    const searchInputRef = useRef(null)
 
     // ===== CUSTOM HOOKS =====
     const debouncedQuery = useDebounce(query, 500)
@@ -159,22 +160,28 @@ const Menu = () => {
     }, [activeCategory])
 
     // ===== RENDER =====
+
     return (
         <>
             <div
                 className={`bg-bg-base flex w-full flex-col gap-2.5 transition-all duration-300 md:hidden ${isScrolled ? 'hidden -translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}
             >
-                <div className="flex w-full justify-center bg-white pb-2.5">
+                <section
+                    id="search-section"
+                    className="flex w-full justify-center bg-white pb-2.5"
+                >
                     <label className="input w-[95%] rounded-lg bg-gray-100">
                         <Search className="text-gray-400" />
                         <input
+                            ref={searchInputRef}
                             id="menu-search"
                             type="search"
                             className="grow"
                             placeholder="Bạn đang cần tìm món gì ?"
+                            onChange={(event) => setQuery(event.target.value)}
                         />
                     </label>
-                </div>
+                </section>
                 <ul className="bg-bg-base mx-2.5 grid grid-cols-3 gap-2">
                     {navbarItems.map((category) => (
                         <li
@@ -193,13 +200,26 @@ const Menu = () => {
             <div
                 className={`bg-bg-base sticky top-0 mt-[var(--safe-top)] transition-all duration-300 md:hidden ${isScrolled ? 'z-50 translate-y-0 opacity-100' : '-z-10 hidden -translate-y-4'}`}
             >
-                <div className="relative bg-white p-1.5">
+                <div
+                    className="relative cursor-pointer bg-white p-1.5"
+                    onClick={() =>
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth',
+                        })
+                    }
+                >
                     <p className="text-center text-gray-700">
                         Cà phê mười hai 21 Bông Lau 6
                     </p>
                     <Search
                         className="absolute right-5 top-2.5 text-gray-400"
                         size={16}
+                        onClick={() =>
+                            setTimeout(() => {
+                                searchInputRef.current?.focus()
+                            }, 300)
+                        }
                     />
                 </div>
                 <div className="bg-bg-base grid grid-cols-3 gap-2 p-2.5">
