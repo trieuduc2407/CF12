@@ -32,6 +32,19 @@ export const getAllProducts = createAsyncThunk(
     }
 )
 
+export const getProductByName = createAsyncThunk(
+    'clientProduct/getProductByName',
+    async (name) => {
+        const response = await axios.get(
+            `${API_URL}/api/client/products/search`,
+            {
+                params: { name },
+            }
+        )
+        return response?.data
+    }
+)
+
 const productSlice = createSlice({
     name: 'clientProduct',
     initialState,

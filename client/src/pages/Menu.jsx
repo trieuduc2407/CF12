@@ -6,8 +6,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import Card from '../components/Card'
 import sortItem from '../helpers/sortItem'
+import { useDebounce } from '../hooks/useDebounce'
 import { getCart } from '../store/client/cartSlice'
-import { getAllProducts } from '../store/client/productSlice'
+import { getAllProducts, getProductByName } from '../store/client/productSlice'
 import { setSession } from '../store/client/sessionSlice'
 
 // ===== CONSTANTS =====
@@ -46,6 +47,11 @@ const Menu = () => {
     // ===== LOCAL STATE =====
     const [activeCategory, setActiveCategory] = useState(navbarItems[0].value)
     const [isScrolled, setIsScrolled] = useState(false)
+    const [query, setQuery] = useState('')
+    const [searchResults, setSearchResults] = useState([])
+
+    // ===== CUSTOM HOOKS =====
+    const debouncedQuery = useDebounce(query, 500)
 
     // ===== DERIVED STATE =====
     const latestProducts = products
@@ -90,6 +96,19 @@ const Menu = () => {
             dispatch(getCart(tableName))
         }
     }, [dispatch, tableName])
+
+    //Effect: Search products
+    useEffect(() => {
+        if (debouncedQuery) {
+            dispatch(getProductByName(debouncedQuery)).then((data) => {
+                if (data?.payload?.success) {
+                    setSearchResults(data.payload.data)
+                }
+            })
+        } else {
+            setSearchResults([])
+        }
+    }, [debouncedQuery, dispatch])
 
     // Effect: Handle scroll behavior and active category
     useEffect(() => {
@@ -222,10 +241,15 @@ const Menu = () => {
                                 type="search"
                                 className="grow"
                                 placeholder="Bạn đang cần tìm món gì ?"
+                                onChange={(event) =>
+                                    setQuery(event.target.value)
+                                }
                             />
                         </label>
                     </div>
-                    <div className="bg-white py-2.5">
+                    <div
+                        className={`${query ? 'hidden' : 'block'} bg-white py-2.5`}
+                    >
                         <section
                             id="new"
                             className="grid min-h-[400px] grid-cols-2 gap-4 rounded-lg bg-gradient-to-b from-[#fff3f3] to-[#ffebc0] p-2.5"
@@ -239,7 +263,9 @@ const Menu = () => {
                             ))}
                         </section>
                     </div>
-                    <div className="bg-white py-2.5">
+                    <div
+                        className={`${query ? 'hidden' : 'block'} bg-white py-2.5`}
+                    >
                         <section
                             id="signature"
                             className="grid min-h-[400px] grid-cols-2 gap-4 rounded-lg bg-gradient-to-b from-[#e6faff] to-[#caedc7] p-2.5"
@@ -254,31 +280,67 @@ const Menu = () => {
                         </section>
                     </div>
                     <div className="flex flex-col divide-y-4 divide-gray-200 border-dashed bg-white pb-20">
-                        {categoryItems.map((category) => (
-                            <section
-                                id={category.value}
-                                className="grid min-h-[400px] grid-cols-2 gap-4 p-2.5"
-                                key={category.value}
-                            >
-                                <p className="col-span-full font-semibold">
-                                    {category.label}
-                                </p>
-                                {products
-                                    .filter(
-                                        (product) =>
-                                            product.category === category.value
-                                    )
-                                    .sort((a, b) =>
-                                        a.name.localeCompare(b.name)
-                                    )
-                                    .map((product) => (
-                                        <Card
-                                            key={product._id}
-                                            product={product}
-                                        />
-                                    ))}
-                            </section>
-                        ))}
+                        {searchResults.length > 0
+                            ? categoryItems
+                                  .filter((category) =>
+                                      searchResults.some(
+                                          (product) =>
+                                              product.category ===
+                                              category.value
+                                      )
+                                  )
+                                  .map((category) => (
+                                      <section
+                                          id={category.value}
+                                          className="grid min-h-[400px] grid-cols-2 gap-4 p-2.5"
+                                          key={category.value}
+                                      >
+                                          <p className="col-span-full font-semibold">
+                                              {category.label}
+                                          </p>
+                                          {searchResults
+                                              .filter(
+                                                  (product) =>
+                                                      product.category ===
+                                                      category.value
+                                              )
+                                              .sort((a, b) =>
+                                                  a.name.localeCompare(b.name)
+                                              )
+                                              .map((product) => (
+                                                  <Card
+                                                      key={product._id}
+                                                      product={product}
+                                                  />
+                                              ))}
+                                      </section>
+                                  ))
+                            : categoryItems.map((category) => (
+                                  <section
+                                      id={category.value}
+                                      className="grid min-h-[400px] grid-cols-2 gap-4 p-2.5"
+                                      key={category.value}
+                                  >
+                                      <p className="col-span-full font-semibold">
+                                          {category.label}
+                                      </p>
+                                      {products
+                                          .filter(
+                                              (product) =>
+                                                  product.category ===
+                                                  category.value
+                                          )
+                                          .sort((a, b) =>
+                                              a.name.localeCompare(b.name)
+                                          )
+                                          .map((product) => (
+                                              <Card
+                                                  key={product._id}
+                                                  product={product}
+                                              />
+                                          ))}
+                                  </section>
+                              ))}
                     </div>
                 </div>
                 <div className="sticky top-0 hidden h-80 flex-col items-center justify-center rounded-lg bg-white md:flex">

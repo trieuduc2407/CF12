@@ -4,6 +4,7 @@ import * as productController from '../../controllers/client/productController.j
 
 const router = express.Router()
 
+router.get('/search', productController.getProductByName)
 router.get('/all', productController.getAllProducts)
 router.get('/:id', productController.getProductById)
 

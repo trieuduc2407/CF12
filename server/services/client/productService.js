@@ -23,3 +23,15 @@ export const getAllProducts = async () => {
     }
 }
 
+export const getProductByName = async (name) => {
+    try {
+        const products = await productModel.find({
+            name: { $regex: name, $options: 'i' },
+        })
+        return products
+    } catch (error) {
+        throw new Error(
+            `Xảy ra lỗi khi lấy sản phẩm theo tên: ${error.message}`
+        )
+    }
+}

@@ -61,7 +61,6 @@ export const getAllProducts = async (req, res) => {
     try {
         const products = await productService.getAllProducts()
 
-        // Enrich products với maxQuantity
         const enrichedProducts = await Promise.all(
             products.map(async (product) => {
                 const maxQuantity = await calculateMaxQuantity(product._id)
@@ -94,3 +93,25 @@ export const getAllProducts = async (req, res) => {
     }
 }
 
+export const getProductByName = async (req, res) => {
+    try {
+        const name = req.query.name
+        if (!name) {
+            return res.json({
+                success: false,
+                message: 'Vui lòng nhập tên sản phẩm',
+            })
+        }
+        const products = await productService.getProductByName(name)
+        return res.json({
+            success: true,
+            data: products,
+        })
+    } catch (error) {
+        console.error('[productController] error:', error)
+        return res.json({
+            success: false,
+            message: error.message || 'Server error',
+        })
+    }
+}
