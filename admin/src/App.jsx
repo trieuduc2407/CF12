@@ -18,6 +18,10 @@ import Sessions from './pages/Sessions'
 import Staffs from './pages/Staffs'
 import Storage from './pages/Storage'
 import socket from './socket/socket'
+import {
+    addNotification,
+    loadNotifications,
+} from './store/admin/notificationSlice'
 import { addNewOrder, updateOrderInList } from './store/admin/orderSlice'
 import { updateProductAvailability } from './store/admin/productSlice'
 
@@ -30,6 +34,12 @@ const App = () => {
     })
 
     useEffect(() => {
+        dispatch(loadNotifications())
+
+        socket.on('staff:callReceived', (data) => {
+            dispatch(addNotification(data))
+        })
+
         socket.on('order:new', ({ order, tableName }) => {
             dispatch(addNewOrder(order))
 
@@ -104,6 +114,7 @@ const App = () => {
         }
 
         return () => {
+            socket.off('staff:callReceived')
             socket.off('order:new')
             socket.off('order:statusChanged')
             socket.off('order:cancelled')

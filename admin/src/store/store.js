@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 
+import notificationSlice from './admin/notificationSlice'
 import orderSlice from './admin/orderSlice'
 import adminProductSlice from './admin/productSlice'
 import adminStaffSlice from './admin/staffSlice'
@@ -15,6 +16,7 @@ const store = configureStore({
         adminProduct: adminProductSlice,
         adminTable: adminTableSlice,
         adminOrder: orderSlice,
+        adminNotification: notificationSlice,
     },
 })
 

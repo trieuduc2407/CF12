@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import { useLogout } from '../hooks/useLogout'
+import NotificationBell from './NotificationBell'
 
 // ===== COMPONENT =====
 const Header = () => {
@@ -25,7 +26,8 @@ const Header = () => {
                 <TextAlignJustify />
             </button>
 
-            <div className="dropdown-end flex flex-1 justify-end">
+            <div className="dropdown-end flex flex-1 items-center justify-end gap-4">
+                <NotificationBell />
                 <button
                     className="mr-2"
                     popoverTarget="popover-changePassword"

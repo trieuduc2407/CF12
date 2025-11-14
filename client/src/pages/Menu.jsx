@@ -1,5 +1,5 @@
 // ===== IMPORTS =====
-import { ReceiptText, Search, ShoppingBasket } from 'lucide-react'
+import { HandPlatter, Search, ShoppingBasket } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Card from '../components/Card'
 import sortItem from '../helpers/sortItem'
 import { useDebounce } from '../hooks/useDebounce'
+import socket from '../socket/socket'
 import { getCart } from '../store/client/cartSlice'
 import { getAllProducts, getProductByName } from '../store/client/productSlice'
 import { setSession } from '../store/client/sessionSlice'
@@ -68,6 +69,11 @@ const Menu = () => {
         if (section) {
             section.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
+    }
+
+    const handleCallStaff = () => {
+        if (!tableName) return
+        socket.emit('staff:call', { tableName })
     }
 
     // ===== EFFECTS =====
@@ -412,11 +418,14 @@ const Menu = () => {
                     )}
                 </div>
             </div>
-            <div className="fixed bottom-0 flex w-full justify-end bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
-                {/* <button className="btn btn-sm flex flex-row rounded-md border-0 bg-white py-5 shadow-none">
-                    <ReceiptText className="text-amber-500" />
-                    <p className="font-medium text-black"> Đơn hàng</p>
-                </button> */}
+            <div className="fixed bottom-0 flex w-full justify-between bg-gradient-to-t from-white to-transparent px-6 py-5 md:hidden">
+                <button
+                    className="btn btn-sm flex flex-row rounded-md border-0 bg-white py-5 shadow-none"
+                    onClick={handleCallStaff}
+                >
+                    <HandPlatter className="text-amber-500" />
+                    <p className="font-medium text-black">Gọi nhân viên</p>
+                </button>
                 <button
                     className="btn btn-sm rounded-md border-0 bg-amber-500 py-5 text-white"
                     onClick={() => navigate(`/tables/${tableName}/cart`)}
