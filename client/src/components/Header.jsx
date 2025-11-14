@@ -9,12 +9,11 @@ import {
     Store,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 // ===== COMPONENT =====
 const Header = () => {
     // ===== ROUTER =====
-    const navigate = useNavigate()
     const { tableName } = useParams()
 
     // ===== LOCAL STATE =====
@@ -22,7 +21,6 @@ const Header = () => {
         status: ' text-red-300 inactive',
         text: 'Đang đóng cửa',
     })
-    
 
     // ===== EFFECTS =====
     // Effect: Check if store is open based on current time
@@ -47,12 +45,6 @@ const Header = () => {
         <>
             <div className="flex flex-col rounded-lg bg-white md:flex-row md:p-5">
                 <div className="relative flex-1 shrink overflow-hidden md:w-2/5">
-                    <button
-                        className="absolute left-2.5 top-2.5 text-white"
-                        onClick={() => navigate(`/tables/${tableName}`)}
-                    >
-                        <ChevronLeft />
-                    </button>
                     <img
                         className="object-cover md:max-lg:max-w-sm lg:h-[270px] lg:w-[480px]"
                         src="/cover_img.png"
@@ -91,7 +83,8 @@ const Header = () => {
                     <div className="mt-2.5 flex items-center text-gray-500">
                         <HandPlatter className="h-5 w-5 stroke-2" />
                         <p className="pl-2.5">
-                            Chúng tôi sẽ phục vụ bạn tại bàn: {tableName.slice(1)}
+                            Chúng tôi sẽ phục vụ bạn tại bàn:{' '}
+                            {tableName.slice(1)}
                         </p>
                     </div>
                     {/* <button className="absolute right-0 top-0 hidden rounded-lg border-2 border-gray-200 bg-white p-2 text-black md:flex">
