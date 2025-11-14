@@ -6,6 +6,7 @@ import { router as adminAuthRoutes } from './routes/admin/adminAuthRoutes.js'
 import adminOrderRoutes from './routes/admin/adminOrderRoutes.js'
 import { router as adminProductRoutes } from './routes/admin/adminProductRoutes.js'
 import { router as adminStaffRoutes } from './routes/admin/adminStaffRoutes.js'
+import adminStatisticsRoutes from './routes/admin/adminStatisticsRoutes.js'
 import { router as adminStorageRoutes } from './routes/admin/adminStorageRoutes.js'
 import { router as adminTableRoutes } from './routes/admin/adminTableRoutes.js'
 import { router as clientCartRoutes } from './routes/client/cartRoutes.js'
@@ -26,6 +27,7 @@ export const createApp = async () => {
     app.use('/api/admin/staff', adminStaffRoutes)
     app.use('/api/admin/products', adminProductRoutes)
     app.use('/api/admin/table', adminTableRoutes)
+    app.use('/api/admin/statistics', adminStatisticsRoutes)
     app.use('/api/admin', adminOrderRoutes)
 
     app.use('/api/client/products', clientProductRoutes)

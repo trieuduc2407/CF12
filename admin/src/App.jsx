@@ -24,6 +24,10 @@ import {
 } from './store/admin/notificationSlice'
 import { addNewOrder, updateOrderInList } from './store/admin/orderSlice'
 import { updateProductAvailability } from './store/admin/productSlice'
+import {
+    incrementTodayStats,
+    invalidateCache,
+} from './store/admin/statisticsSlice'
 
 const App = () => {
     const dispatch = useDispatch()
@@ -59,6 +63,21 @@ const App = () => {
                     icon: '/logo.png',
                 })
             }
+
+            const totalItems = order.items.reduce(
+                (sum, item) => sum + item.quantity,
+                0
+            )
+            dispatch(
+                incrementTodayStats({
+                    revenue: order.totalPrice,
+                    sales: totalItems,
+                })
+            )
+
+            setTimeout(() => {
+                dispatch(invalidateCache())
+            }, 30000)
         })
 
         socket.on('order:statusChanged', ({ order }) => {

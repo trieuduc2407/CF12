@@ -4,6 +4,7 @@ import notificationSlice from './admin/notificationSlice'
 import orderSlice from './admin/orderSlice'
 import adminProductSlice from './admin/productSlice'
 import adminStaffSlice from './admin/staffSlice'
+import statisticsSlice from './admin/statisticsSlice'
 import adminStorageSlice from './admin/storageSlice'
 import adminTableSlice from './admin/tableSlice'
 import authSlice from './auth/authSlice'
@@ -17,6 +18,7 @@ const store = configureStore({
         adminTable: adminTableSlice,
         adminOrder: orderSlice,
         adminNotification: notificationSlice,
+        adminStatistics: statisticsSlice,
     },
 })
 
