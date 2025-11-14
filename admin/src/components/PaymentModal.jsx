@@ -263,11 +263,6 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                             <label className="label">
                                 <span className="label-text font-semibold">
                                     Tên khách hàng
-                                    {!existingUserName && (
-                                        <span className="ml-1 text-xs text-gray-500">
-                                            (tùy chọn)
-                                        </span>
-                                    )}
                                 </span>
                             </label>
                             <input
@@ -276,7 +271,7 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                                 placeholder={
                                     existingUserName
                                         ? existingUserName
-                                        : 'Nhập tên (tùy chọn)'
+                                        : 'Nhập tên'
                                 }
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -440,7 +435,7 @@ const PaymentModal = ({ session, modalId, onPaymentSuccess }) => {
                         <div className="mt-4 flex gap-2">
                             <button
                                 type="button"
-                                className="btn btn-ghost flex-1"
+                                className="btn btn-error flex-1"
                                 onClick={() => {
                                     handleClose()
                                     document.getElementById(modalId)?.close()

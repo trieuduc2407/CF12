@@ -119,7 +119,9 @@ const OrderItem = ({ order }) => {
                 <div className="flex justify-between gap-2">
                     <div className="flex gap-2 md:w-1/3 xl:w-1/4 2xl:w-1/5">
                         <p className="text-lg font-semibold">{orderNumber}</p>
-                        <div className={`badge ${statusColors[order.status]}`}>
+                        <div
+                            className={`badge text-xs md:text-lg ${statusColors[order.status]}`}
+                        >
                             {statusMap[order.status]}
                         </div>
                     </div>
