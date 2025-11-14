@@ -30,7 +30,6 @@ const Dashboard = () => {
     return (
         <div className="space-y-6 p-6">
             <div>
-                <h1 className="text-3xl font-bold">Dashboard</h1>
                 <p className="mt-1 text-gray-600">
                     Thống kê và báo cáo tổng quan
                 </p>

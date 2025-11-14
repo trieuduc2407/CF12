@@ -327,7 +327,7 @@ const Products = () => {
                         </button>
                     </div>
 
-                    <div className="hidden items-center justify-around py-4 md:flex">
+                    <div className="hidden items-center justify-around pb-4 md:flex">
                         <Searchbar
                             searchName="sản phẩm"
                             onChange={onChange}
