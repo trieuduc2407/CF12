@@ -1,17 +1,20 @@
 import { orderModel as Order } from '../../models/orderModel.js'
 
+const VN_TIMEZONE_OFFSET = 7 * 60 * 60 * 1000
+
 export const getOverview = async () => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
+    const nowVN = new Date(Date.now() + VN_TIMEZONE_OFFSET)
+    const todayVN = new Date(nowVN)
+    todayVN.setHours(0, 0, 0, 0)
+
+    const todayUTC = new Date(todayVN.getTime() - VN_TIMEZONE_OFFSET)
+    const tomorrowUTC = new Date(todayUTC)
+    tomorrowUTC.setDate(tomorrowUTC.getDate() + 1)
 
     const todayOrders = await Order.find({
-        createdAt: { $gte: today, $lt: tomorrow },
+        createdAt: { $gte: todayUTC, $lt: tomorrowUTC },
         status: { $in: ['preparing', 'ready', 'served', 'paid'] },
     })
-
-    console.log('[statisticsService] Today orders count:', todayOrders.length)
 
     const todayRevenue = todayOrders.reduce(
         (sum, order) => sum + order.totalPrice,
@@ -24,13 +27,6 @@ export const getOverview = async () => {
         0
     )
 
-    console.log(
-        '[statisticsService] Today revenue:',
-        todayRevenue,
-        'Sales:',
-        todaySales
-    )
-
     return {
         todayRevenue,
         todaySales,
@@ -38,52 +34,61 @@ export const getOverview = async () => {
 }
 
 export const getRevenue = async (period = 'day') => {
-    const now = new Date()
+    const nowVN = new Date(Date.now() + VN_TIMEZONE_OFFSET)
     let startDate
     let groupBy
 
     switch (period) {
         case 'day':
-            startDate = new Date(now)
-            startDate.setHours(0, 0, 0, 0)
+            const todayVN = new Date(nowVN)
+            todayVN.setHours(0, 0, 0, 0)
+            startDate = new Date(todayVN.getTime() - VN_TIMEZONE_OFFSET)
             groupBy = {
-                hour: { $hour: '$createdAt' },
+                hour: { $hour: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
             }
             break
         case 'week':
-            startDate = new Date(now)
-            startDate.setDate(startDate.getDate() - 7)
-            startDate.setHours(0, 0, 0, 0)
+            const weekStartVN = new Date(nowVN)
+            weekStartVN.setDate(weekStartVN.getDate() - 7)
+            weekStartVN.setHours(0, 0, 0, 0)
+            startDate = new Date(weekStartVN.getTime() - VN_TIMEZONE_OFFSET)
             groupBy = {
-                year: { $year: '$createdAt' },
-                month: { $month: '$createdAt' },
-                day: { $dayOfMonth: '$createdAt' },
+                year: { $year: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
+                month: { $month: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
+                day: {
+                    $dayOfMonth: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] },
+                },
             }
             break
         case 'month':
-            startDate = new Date(now)
-            startDate.setDate(startDate.getDate() - 30)
-            startDate.setHours(0, 0, 0, 0)
+            const monthStartVN = new Date(nowVN)
+            monthStartVN.setDate(monthStartVN.getDate() - 30)
+            monthStartVN.setHours(0, 0, 0, 0)
+            startDate = new Date(monthStartVN.getTime() - VN_TIMEZONE_OFFSET)
             groupBy = {
-                year: { $year: '$createdAt' },
-                month: { $month: '$createdAt' },
-                day: { $dayOfMonth: '$createdAt' },
+                year: { $year: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
+                month: { $month: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
+                day: {
+                    $dayOfMonth: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] },
+                },
             }
             break
         case 'year':
-            startDate = new Date(now)
-            startDate.setMonth(startDate.getMonth() - 12)
-            startDate.setHours(0, 0, 0, 0)
+            const yearStartVN = new Date(nowVN)
+            yearStartVN.setMonth(yearStartVN.getMonth() - 12)
+            yearStartVN.setHours(0, 0, 0, 0)
+            startDate = new Date(yearStartVN.getTime() - VN_TIMEZONE_OFFSET)
             groupBy = {
-                year: { $year: '$createdAt' },
-                month: { $month: '$createdAt' },
+                year: { $year: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
+                month: { $month: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
             }
             break
         default:
-            startDate = new Date(now)
-            startDate.setHours(0, 0, 0, 0)
+            const defaultStartVN = new Date(nowVN)
+            defaultStartVN.setHours(0, 0, 0, 0)
+            startDate = new Date(defaultStartVN.getTime() - VN_TIMEZONE_OFFSET)
             groupBy = {
-                hour: { $hour: '$createdAt' },
+                hour: { $hour: { $add: ['$createdAt', VN_TIMEZONE_OFFSET] } },
             }
     }
 
@@ -147,8 +152,6 @@ export const getTopProducts = async (limit = 10) => {
         { $sort: { totalQuantity: -1 } },
         { $limit: limit },
     ])
-
-    console.log('[statisticsService] Top products:', topProducts)
 
     return topProducts.map((item) => ({
         name: item._id,
