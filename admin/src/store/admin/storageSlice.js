@@ -41,7 +41,7 @@ export const searchIngredient = createAsyncThunk(
     async (q) => {
         const axios = (await import('axios')).default
         const response = await axios.get(
-            `${API_URL}/api/admin/storage/search?q=${q}`
+            `${API_URL}/api/admin/storage/search?query=${q}`
         )
         return response?.data
     }
