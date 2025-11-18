@@ -86,12 +86,16 @@ export const addItem = async (tableName, data) => {
             cart.totalPrice += subTotal - existingItem.subTotal
         } else {
             // Add new item
-            const subTotal = calculateItemSubTotal(product, data)
+            const selectedSize = data.size || data.selectedSize
+            const subTotal = calculateItemSubTotal(product, {
+                ...data,
+                selectedSize: selectedSize,
+            })
             cart.items.push({
                 itemId: data.itemId,
                 productId: data.productId,
                 quantity: data.quantity || 1,
-                selectedSize: data.size || data.selectedSize,
+                selectedSize: selectedSize,
                 selectedTemperature:
                     data.temperature || data.selectedTemperature,
                 subTotal,
@@ -158,9 +162,14 @@ export const addItemViaSocket = async ({ tableName, clientId, data }) => {
             )
             cart.totalPrice += subTotal - existingItem.subTotal
         } else {
-            const subTotal = calculateItemSubTotal(product, data)
+            const selectedSize = data.size || data.selectedSize
+            const subTotal = calculateItemSubTotal(product, {
+                ...data,
+                selectedSize: selectedSize,
+            })
             cart.items.push({
                 ...data,
+                selectedSize: selectedSize,
                 subTotal,
                 locked: false,
                 lockedBy: null,

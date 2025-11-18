@@ -9,7 +9,7 @@ const calculateItemSubTotal = (product, item) => {
 
     if (item.selectedSize && product.sizes && product.sizes.length > 0) {
         const sizeObj = product.sizes.find((s) => s.name === item.selectedSize)
-        if (sizeObj && sizeObj.price) {
+        if (sizeObj && sizeObj.price !== undefined && sizeObj.price !== null) {
             price += sizeObj.price
         }
     }
