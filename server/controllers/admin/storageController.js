@@ -106,6 +106,64 @@ export const addIngredient = async (req, res) => {
 }
 
 // ===== UPDATE OPERATIONS =====
+export const importIngredient = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { quantity } = req.body
+
+        if (!id || quantity === null || quantity === undefined) {
+            return res.json({
+                success: false,
+                message: 'Vui lòng điền đầy đủ thông tin',
+            })
+        }
+
+        if (Number(quantity) <= 0) {
+            return res.json({
+                success: false,
+                message: 'Số lượng nhập phải lớn hơn 0',
+            })
+        }
+
+        const result = await storageService.importIngredient(id, quantity)
+        const { storage, changedProducts, importQuantity } = result
+
+        const io = req.app.locals.io
+        if (io) {
+            if (storage.quantity <= storage.threshold) {
+                io.emit('storage:warning', {
+                    ingredient: storage,
+                    message: `Nguyên liệu "${storage.name}" sắp hết (${storage.quantity} ${storage.unit})`,
+                })
+            }
+
+            if (changedProducts.length > 0) {
+                for (const result of changedProducts) {
+                    io.emit('product:availability-changed', {
+                        productId: result.product._id,
+                        productName: result.product.name,
+                        available: result.newAvailable,
+                        maxQuantity: result.maxQuantity,
+                    })
+                }
+            }
+        }
+
+        return res.json({
+            success: true,
+            message: `Nhập thành công ${importQuantity} ${storage.unit} cho "${storage.name}"`,
+            data: storage,
+            affectedProducts: changedProducts.length,
+        })
+    } catch (error) {
+        console.error('[storageController] importIngredient error:', error)
+        return res.json({
+            success: false,
+            message: error.message || 'Server error',
+        })
+    }
+}
+
 export const updateIngredient = async (req, res) => {
     try {
         const { id } = req.params

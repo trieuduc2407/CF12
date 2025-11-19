@@ -55,6 +55,43 @@ export const addIngredient = async (data) => {
 }
 
 // ===== UPDATE OPERATIONS =====
+export const importIngredient = async (id, importQuantity) => {
+    try {
+        const existingIngredient = await storageModel.findById(id)
+        if (!existingIngredient) {
+            throw new Error('Nguyên liệu không tồn tại')
+        }
+
+        const oldQuantity = existingIngredient.quantity
+        const newQuantity = oldQuantity + Number(importQuantity)
+
+        const updatedIngredient = await storageModel.findByIdAndUpdate(
+            id,
+            {
+                quantity: newQuantity,
+                updatedAt: Date.now(),
+            },
+            { new: true }
+        )
+
+        const threshold = updatedIngredient.threshold
+        let changedProducts = []
+
+        if (
+            newQuantity <= threshold ||
+            (oldQuantity <= threshold && newQuantity > threshold)
+        ) {
+            changedProducts = await updateProductsUsingStorage(
+                updatedIngredient._id
+            )
+        }
+
+        return { storage: updatedIngredient, changedProducts, importQuantity }
+    } catch (error) {
+        throw new Error(`Xảy ra lỗi khi nhập hàng: ${error.message}`)
+    }
+}
+
 export const updateIngredient = async (id, data) => {
     try {
         const existingIngredient = await storageModel.findById(id)

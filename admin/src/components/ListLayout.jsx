@@ -11,6 +11,7 @@ const mapList = ['unit', 'role', 'status']
 const ListLayout = ({
     listLabel,
     listItem,
+    handleImport,
     handleUpdate,
     handleDelete,
     labelMap,
@@ -74,15 +75,28 @@ const ListLayout = ({
                                 tabIndex={0}
                                 className="dropdown-content menu rounded-box z-1 w-30 gap-2 bg-white p-2 shadow-sm"
                             >
+                                {handleImport && (
+                                    <li>
+                                        <button
+                                            className="btn btn-success"
+                                            onClick={() => {
+                                                handleImport(item._id)
+                                                document.activeElement.blur()
+                                            }}
+                                        >
+                                            Cập nhật
+                                        </button>
+                                    </li>
+                                )}
                                 <li>
                                     <button
-                                        className="btn btn-success"
+                                        className="btn btn-info"
                                         onClick={() => {
                                             handleUpdate(item._id)
                                             document.activeElement.blur()
                                         }}
                                     >
-                                        Cập nhật
+                                        Chỉnh sửa
                                     </button>
                                 </li>
                                 <li>

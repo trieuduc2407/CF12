@@ -31,6 +31,19 @@ export const updateIngredient = createAsyncThunk(
     crudHelpers.update(ENDPOINT, 'application/json')
 )
 
+export const importIngredient = createAsyncThunk(
+    '/adminStorage/importIngredient',
+    async ({ id, quantity }) => {
+        const axios = (await import('axios')).default
+        const response = await axios.patch(
+            `${API_URL}${ENDPOINT}/import/${id}`,
+            { quantity },
+            { withCredentials: true }
+        )
+        return response?.data
+    }
+)
+
 export const deleteIngredient = createAsyncThunk(
     '/adminStorage/deleteIngredient',
     crudHelpers.delete(ENDPOINT)

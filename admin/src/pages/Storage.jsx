@@ -22,6 +22,7 @@ import {
     deleteIngredient,
     getAllIngredients,
     getIngredient,
+    importIngredient,
     searchIngredient,
     updateIngredient,
 } from '../store/admin/storageSlice'
@@ -56,6 +57,9 @@ const Storage = () => {
 
     // ===== LOCAL STATE =====
     const [currentUpdateId, setCurrentUpdateId] = useState('')
+    const [currentImportId, setCurrentImportId] = useState('')
+    const [currentIngredientName, setCurrentIngredientName] = useState('')
+    const [importQuantity, setImportQuantity] = useState('')
     const [sortBy, setSortBy] = useState('ratio')
     const [sortOrder, setSortOrder] = useState('asc')
     const [query, setQuery] = useState('')
@@ -151,6 +155,14 @@ const Storage = () => {
         })
     }
 
+    const handleImport = (id) => {
+        const ingredient = ingredients.find((item) => item._id === id)
+        setCurrentImportId(id)
+        setCurrentIngredientName(ingredient?.name || '')
+        setImportQuantity('')
+        document.getElementById('import-modal').showModal()
+    }
+
     const handleUpdate = () => {
         handleCrudAction(
             dispatch(updateIngredient({ id: currentUpdateId, formData })),
@@ -163,6 +175,33 @@ const Storage = () => {
                     },
                 ],
                 shouldResetForm: true,
+            }
+        )
+    }
+
+    const handleImportSubmit = () => {
+        if (!importQuantity || Number(importQuantity) <= 0) {
+            showToastMessage('Số lượng nhập phải lớn hơn 0', 'error')
+            return
+        }
+
+        handleCrudAction(
+            dispatch(
+                importIngredient({
+                    id: currentImportId,
+                    quantity: Number(importQuantity),
+                })
+            ),
+            {
+                successMessage: 'Nhập hàng thành công',
+                shouldResetForm: false,
+                shouldCloseDrawer: false,
+                onSuccess: () => {
+                    setCurrentImportId('')
+                    setCurrentIngredientName('')
+                    setImportQuantity('')
+                    document.getElementById('import-modal').close()
+                },
             }
         )
     }
@@ -188,6 +227,54 @@ const Storage = () => {
     return (
         <>
             <Toast showToast={showToast} />
+
+            <dialog id="import-modal" className="modal">
+                <div className="modal-box bg-white">
+                    <p className="text-center text-lg font-bold">Nhập hàng</p>
+                    {currentIngredientName && (
+                        <p className="mt-2 text-center text-sm text-gray-600">
+                            Nguyên liệu:{' '}
+                            <span className="font-semibold">
+                                {currentIngredientName}
+                            </span>
+                        </p>
+                    )}
+                    <div className="form-control">
+                        <label className="label">
+                            <p className="label-text">Số lượng nhập</p>
+                        </label>
+                        <input
+                            type="number"
+                            placeholder="Nhập số lượng..."
+                            className="input input-bordered w-full bg-white"
+                            value={importQuantity}
+                            onChange={(e) => setImportQuantity(e.target.value)}
+                            min="1"
+                        />
+                    </div>
+                    <div className="modal-action">
+                        <form method="dialog">
+                            <button
+                                className="btn btn-error mr-2"
+                                onClick={() => {
+                                    setCurrentImportId('')
+                                    setCurrentIngredientName('')
+                                    setImportQuantity('')
+                                }}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-success"
+                                onClick={handleImportSubmit}
+                            >
+                                Xác nhận
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
 
             <div
                 id="search-bar"
@@ -273,6 +360,7 @@ const Storage = () => {
                             <ListLayout
                                 listLabel={listLabel}
                                 listItem={searchResults}
+                                handleImport={handleImport}
                                 handleUpdate={getIngredientData}
                                 handleDelete={handleDelete}
                                 labelMap={unitMap}
@@ -289,6 +377,7 @@ const Storage = () => {
                         <ListLayout
                             listLabel={listLabel}
                             listItem={sortedIngredients}
+                            handleImport={handleImport}
                             handleUpdate={getIngredientData}
                             handleDelete={handleDelete}
                             labelMap={unitMap}
