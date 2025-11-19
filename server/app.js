@@ -36,5 +36,44 @@ export const createApp = async () => {
     app.use('/api/client/session', clientSessionRoutes)
     app.use('/api/client/user', clientUserRoutes)
 
+    // --- DEBUG: list admin routes and provide an endpoint to inspect them ---
+    // This helps verify route registration in production (temporary)
+    const listAdminRoutes = () => {
+        try {
+            const routes = []
+            if (app._router && app._router.stack) {
+                app._router.stack.forEach((middleware) => {
+                    if (middleware.route) {
+                        // routes registered directly on the app
+                        routes.push({ path: middleware.route.path, methods: middleware.route.methods })
+                    } else if (middleware.name === 'router' && middleware.handle && middleware.handle.stack) {
+                        // router middleware
+                        middleware.handle.stack.forEach((handler) => {
+                            if (handler.route) {
+                                routes.push({ path: handler.route.path, methods: handler.route.methods })
+                            }
+                        })
+                    }
+                })
+            }
+            console.log('[createApp] Registered routes:', routes)
+            return routes
+        } catch (err) {
+            console.error('[createApp] Error listing routes', err)
+            return []
+        }
+    }
+
+    // Endpoint to quickly inspect registered admin routes at runtime
+    app.get('/api/admin/_routes', (req, res) => {
+        const routes = listAdminRoutes()
+        // filter only admin-related paths for readability
+        const adminRoutes = routes.filter(r => r.path && String(r.path).startsWith('/'))
+        return res.json({ success: true, routes: adminRoutes })
+    })
+
+    // print once at startup
+    listAdminRoutes()
+
     return app
 }
