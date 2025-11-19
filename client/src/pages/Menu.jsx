@@ -2,7 +2,7 @@
 import { HandPlatter, Search, ShoppingBasket } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import Card from '../components/Card'
 import sortItem from '../helpers/sortItem'
@@ -43,6 +43,7 @@ const Menu = () => {
 
     // ===== ROUTER =====
     const navigate = useNavigate()
+    const location = useLocation()
     const { tableName } = useParams()
 
     // ===== LOCAL STATE =====
@@ -50,6 +51,11 @@ const Menu = () => {
     const [isScrolled, setIsScrolled] = useState(false)
     const [query, setQuery] = useState('')
     const [searchResults, setSearchResults] = useState([])
+    const [incomingToast, setIncomingToast] = useState({
+        isShow: false,
+        type: '',
+        text: '',
+    })
     const searchInputRef = useRef(null)
 
     // ===== CUSTOM HOOKS =====
@@ -77,6 +83,21 @@ const Menu = () => {
     }
 
     // ===== EFFECTS =====
+    // Effect: Handle incoming toast from navigation state
+    useEffect(() => {
+        const stateToast = location?.state?.toast
+        if (stateToast?.isShow) {
+            setIncomingToast(stateToast)
+
+            const timer = setTimeout(() => {
+                setIncomingToast({ isShow: false, type: '', text: '' })
+                navigate(location.pathname, { replace: true, state: {} })
+            }, 3000)
+
+            return () => clearTimeout(timer)
+        }
+    }, [location?.state?.toast, navigate, location.pathname])
+
     // Effect: Set session when tableName changes
     useEffect(() => {
         if (tableName && tableName !== storeTableName) {
@@ -169,6 +190,15 @@ const Menu = () => {
 
     return (
         <>
+            {incomingToast.isShow && (
+                <div className="animate-in slide-in-from-top-5 fixed right-4 top-4 z-50 duration-300">
+                    <div className="flex items-center gap-3 rounded-lg bg-green-500 px-4 py-3 text-white shadow-lg">
+                        <span className="font-medium">
+                            {incomingToast.text}
+                        </span>
+                    </div>
+                </div>
+            )}
             <div
                 className={`bg-bg-base flex w-full flex-col gap-2.5 transition-all duration-300 md:hidden ${isScrolled ? 'hidden -translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}
             >

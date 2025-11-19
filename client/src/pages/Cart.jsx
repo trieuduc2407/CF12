@@ -50,7 +50,6 @@ const Cart = () => {
             return
         }
 
-        // Validate maxQuantity trước khi submit
         const invalidItems = []
         for (const cartItem of cartItems) {
             const product = products.find((p) => p._id === cartItem.product._id)
@@ -81,12 +80,24 @@ const Cart = () => {
                 })
             ).unwrap()
 
-            alert('Đã gửi yêu cầu gọi món thành công!')
             setNotes('')
+
+            navigate(
+                `/tables/${tableName}/menu`,
+                {
+                    state: {
+                        toast: {
+                            isShow: true,
+                            type: 'success',
+                            text: 'Gửi yêu cầu gọi món thành công!',
+                        },
+                    },
+                },
+                { replace: true }
+            )
 
             await dispatch(getCart(tableName))
         } catch (error) {
-            // Xử lý INSUFFICIENT_INGREDIENTS error từ backend
             if (
                 error.unavailableItems &&
                 Array.isArray(error.unavailableItems)
@@ -156,60 +167,64 @@ const Cart = () => {
 
     // ===== RENDER =====
     return (
-        <div className="bg-bg-base flex min-h-screen flex-col">
-            <div className="flex bg-white px-2.5 py-5">
-                <button onClick={() => navigate(`/tables/${tableName}/menu`)}>
-                    <ChevronLeft />
-                </button>
-                <p className="flex-1 text-center">Món của bạn</p>
-            </div>
-            <div className="mx-5 my-4 flex flex-1 flex-col">
-                <div className="flex flex-1 flex-col gap-2.5">
-                    {cartItems.length > 0 ? (
-                        sortItem(cartItems).map((item) => (
-                            <CartItem key={item.itemId} item={item} />
-                        ))
-                    ) : (
-                        <p>Chưa có món nào trong giỏ</p>
-                    )}
-                </div>
-                <div className="mt-5 flex flex-col gap-3">
-                    <div className="flex justify-between"> 
-                        <p>Tổng tiền</p>
-                        <p className="font-semibold">
-                            {(totalPrice || 0).toLocaleString()} ₫
-                        </p>
-                    </div>
-                    <textarea
-                        className="textarea textarea-bordered w-full"
-                        placeholder="Ghi chú cho đơn hàng (tùy chọn)"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        rows={2}
-                    />
-                </div>
-                <div className="mt-5 flex justify-center">
+        <>
+            <div className="bg-bg-base flex min-h-screen flex-col">
+                <div className="flex bg-white px-2.5 py-5">
                     <button
-                        className="btn btn-primary w-full rounded-lg border-0 text-white"
-                        onClick={handleCreateOrder}
-                        disabled={
-                            isSubmitting ||
-                            orderLoading ||
-                            cartItems.length === 0
-                        }
+                        onClick={() => navigate(`/tables/${tableName}/menu`)}
                     >
-                        {isSubmitting || orderLoading
-                            ? 'Đang gửi...'
-                            : 'Xác nhận gửi yêu cầu gọi món'}
+                        <ChevronLeft />
                     </button>
+                    <p className="flex-1 text-center">Món của bạn</p>
                 </div>
+                <div className="mx-5 my-4 flex flex-1 flex-col">
+                    <div className="flex flex-1 flex-col gap-2.5">
+                        {cartItems.length > 0 ? (
+                            sortItem(cartItems).map((item) => (
+                                <CartItem key={item.itemId} item={item} />
+                            ))
+                        ) : (
+                            <p>Chưa có món nào trong giỏ</p>
+                        )}
+                    </div>
+                    <div className="mt-5 flex flex-col gap-3">
+                        <div className="flex justify-between">
+                            <p>Tổng tiền</p>
+                            <p className="font-semibold">
+                                {(totalPrice || 0).toLocaleString()} ₫
+                            </p>
+                        </div>
+                        <textarea
+                            className="textarea textarea-bordered w-full"
+                            placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            rows={2}
+                        />
+                    </div>
+                    <div className="mt-5 flex justify-center">
+                        <button
+                            className="btn btn-primary w-full rounded-lg border-0 text-white"
+                            onClick={handleCreateOrder}
+                            disabled={
+                                isSubmitting ||
+                                orderLoading ||
+                                cartItems.length === 0
+                            }
+                        >
+                            {isSubmitting || orderLoading
+                                ? 'Đang gửi...'
+                                : 'Xác nhận gửi yêu cầu gọi món'}
+                        </button>
+                    </div>
+                </div>
+                <InsufficientIngredientsModal
+                    isOpen={showInsufficientModal}
+                    onClose={() => setShowInsufficientModal(false)}
+                    unavailableItems={unavailableItems}
+                />
             </div>
-            <InsufficientIngredientsModal
-                isOpen={showInsufficientModal}
-                onClose={() => setShowInsufficientModal(false)}
-                unavailableItems={unavailableItems}
-            />
-        </div>
+        </>
     )
 }
 
