@@ -452,7 +452,5 @@ const Storage = () => {
     )
 }
 
-//hoa ngu nhu cho
-
 // ===== EXPORTS =====
 export default Storage
